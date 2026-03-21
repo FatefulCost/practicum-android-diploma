@@ -13,7 +13,7 @@ data class VacancyDetailDto(
     @SerializedName("employment") val employment: EmploymentDto?,
     @SerializedName("contacts") val contacts: ContactsDto?,
     @SerializedName("employer") val employer: EmployerDto,
-    @SerializedName("area") val area: FilterArea,
+    @SerializedName("area") val area: FilterAreaDto,
     @SerializedName("skills") val skills: List<String>?,
     @SerializedName("url") val url: String?,
     @SerializedName("industry") val industry: FilterIndustryDto?
