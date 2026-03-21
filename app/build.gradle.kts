@@ -21,6 +21,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField(type = "String", name = "API_ACCESS_TOKEN", value = "\"${developProperties.apiAccessToken}\"")
+        buildConfigField(type = "String", name = "BASE_URL", value = "\"https://android-diploma.education-services.ru/\"")
+
     }
 
     buildTypes {
