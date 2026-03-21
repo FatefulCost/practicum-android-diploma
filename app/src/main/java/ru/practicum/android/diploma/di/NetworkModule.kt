@@ -20,6 +20,8 @@ val networkModule = module {
     single { NetworkClient(get()) }
 }
 
+private const val timeToCheck = 30L
+
 private fun provideGson(): Gson {
     return GsonBuilder().setLenient().create()
 }
@@ -35,9 +37,9 @@ private fun provideOkHttpClient(): OkHttpClient {
 
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(timeToCheck, TimeUnit.SECONDS)
+        .readTimeout(timeToCheck, TimeUnit.SECONDS)
+        .writeTimeout(timeToCheck, TimeUnit.SECONDS)
         .build()
 }
 
