@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Practicum-Android-Diploma</string>
+
+    <!-- Bottom Navigation -->
+    <string name="menu_search">Главная</string>
+    <string name="menu_favorites">Избранное</string>
+    <string name="menu_team">Команда</string>
+
 </resources>

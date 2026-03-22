@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/searchFragment"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_main"
+        android:enabled="true" />
+
+    <item
+        android:id="@+id/favoritesFragment"
+        android:title="@string/menu_favorites"
+        android:icon="@drawable/ic_favorites"
+        android:enabled="true" />
+
+    <item
+        android:id="@+id/aboutFragment"
+        android:title="@string/menu_team"
+        android:icon="@drawable/ic_team"
+        android:enabled="true" />
+
+</menu>
