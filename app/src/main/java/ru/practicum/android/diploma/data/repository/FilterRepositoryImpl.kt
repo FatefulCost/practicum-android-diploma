@@ -1,12 +1,12 @@
 package ru.practicum.android.diploma.data.repository
 
+import ru.practicum.android.diploma.data.dto.FilterAreaDto
+import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.data.network.NetworkClient
+import ru.practicum.android.diploma.domain.repository.FilterRepository
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import ru.practicum.android.diploma.data.network.NetworkClient
-import ru.practicum.android.diploma.data.dto.FilterAreaDto
-import ru.practicum.android.diploma.data.dto.FilterIndustryDto
-import ru.practicum.android.diploma.domain.repository.FilterRepository
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
@@ -45,10 +45,12 @@ class FilterRepositoryImpl(
                 name = "Беларусь",
                 parentId = null,
                 areas = listOf(
-                    FilterAreaDto(id = NUMBERFORMAGIC4,
+                    FilterAreaDto(
+                        id = NUMBERFORMAGIC4,
                         name = "Минск",
                         parentId = NUMBERFORMAGIC3,
-                        areas = emptyList())
+                        areas = emptyList()
+                    )
                 )
             )
         )
