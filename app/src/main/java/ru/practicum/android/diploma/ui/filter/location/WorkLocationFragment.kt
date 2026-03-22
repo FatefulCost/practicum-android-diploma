@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentWorkLocationBinding
 
 class WorkLocationFragment : Fragment() {
@@ -39,13 +38,11 @@ class WorkLocationFragment : Fragment() {
         // Заглушка для выбора страны
         binding.layoutCountry.setOnClickListener {
             Toast.makeText(requireContext(), "Выбор страны (будет реализовано позже)", Toast.LENGTH_SHORT).show()
-            // TODO: Реализовать навигацию на выбор страны
         }
 
         // Заглушка для выбора региона
         binding.layoutRegion.setOnClickListener {
             Toast.makeText(requireContext(), "Выбор региона (будет реализовано позже)", Toast.LENGTH_SHORT).show()
-            // TODO: Реализовать навигацию на выбор региона
         }
     }
 

@@ -3,8 +3,11 @@ package ru.practicum.android.diploma.ui.root
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.ActivityRootBinding
 
@@ -18,41 +21,41 @@ class RootActivity : AppCompatActivity() {
         binding = ActivityRootBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        binding.root.post {
+                lifecycleScope.launch {
+            delay(100)
             setupNavigation()
         }
     }
 
     private fun setupNavigation() {
 
-        val navController = try {
-            binding.navHostFragment.findNavController()
-        } catch (e: Exception) {
+        if (!isFinishing && !isDestroyed) {
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+            if (navHostFragment != null && navHostFragment.isAdded) {
+                val navController = binding.navHostFragment.findNavController()
 
-            binding.root.post { setupNavigation() }
-            return
-        }
+                binding.bottomNavigation.setupWithNavController(navController)
 
-
-        binding.bottomNavigation.setupWithNavController(navController)
-
-
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.vacancyDetailFragment,
-                R.id.filterFragment,
-                R.id.workLocationFragment,
-                R.id.countrySelectionFragment,
-                R.id.regionSelectionFragment,
-                R.id.industrySelectionFragment -> {
-
-                    binding.bottomNavigation.visibility = View.GONE
+                navController.addOnDestinationChangedListener { _, destination, _ ->
+                    when (destination.id) {
+                        R.id.vacancyDetailFragment,
+                        R.id.filterFragment,
+                        R.id.workLocationFragment,
+                        R.id.countrySelectionFragment,
+                        R.id.regionSelectionFragment,
+                        R.id.industrySelectionFragment -> {
+                            binding.bottomNavigation.visibility = View.GONE
+                        }
+                        else -> {
+                            binding.bottomNavigation.visibility = View.VISIBLE
+                        }
+                    }
                 }
-                else -> {
+            } else {
 
-                    binding.bottomNavigation.visibility = View.VISIBLE
-                }
+                binding.root.postDelayed({
+                    setupNavigation()
+                }, 100)
             }
         }
     }

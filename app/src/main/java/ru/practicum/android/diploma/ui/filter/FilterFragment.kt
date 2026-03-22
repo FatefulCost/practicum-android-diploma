@@ -26,27 +26,23 @@ class FilterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupUI()
     }
 
     private fun setupUI() {
-
         binding.btnApply.setOnClickListener {
-
             val salary = binding.etSalary.text?.toString() ?: ""
             val hideWithoutSalary = binding.cbHideWithoutSalary.isChecked
 
-            Toast.makeText(
-                requireContext(),
-                "Фильтры применены\nЗарплата: ${if (salary.isNotEmpty()) salary else "не указана"}\nСкрывать без зарплаты: $hideWithoutSalary",
-                Toast.LENGTH_SHORT
-            ).show()
+            val message = buildString {
+                append("Фильтры применены\n")
+                append("Зарплата: ${if (salary.isNotEmpty()) salary else "не указана"}\n")
+                append("Скрывать без зарплаты: $hideWithoutSalary")
+            }
 
-
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
-
 
         binding.btnReset.setOnClickListener {
 
@@ -57,11 +53,9 @@ class FilterFragment : Fragment() {
             Toast.makeText(requireContext(), "Фильтры сброшены", Toast.LENGTH_SHORT).show()
         }
 
-
         binding.layoutWorkLocation.setOnClickListener {
             findNavController().navigate(R.id.action_filterFragment_to_workLocationFragment)
         }
-
 
         binding.layoutIndustry.setOnClickListener {
             findNavController().navigate(R.id.action_filterFragment_to_industrySelectionFragment)

@@ -22,14 +22,12 @@ class IndustrySelectionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         val btnSelect = view.findViewById<android.widget.Button>(R.id.btnSelect)
 
         btnSelect.setOnClickListener {
             Toast.makeText(requireContext(), "Отрасль выбрана", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
-
 
         Toast.makeText(requireContext(), "Список отраслей будет добавлен позже", Toast.LENGTH_SHORT).show()
     }
