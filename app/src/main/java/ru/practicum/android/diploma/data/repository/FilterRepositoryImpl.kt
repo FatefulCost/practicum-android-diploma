@@ -10,7 +10,6 @@ import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 
-
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
 private const val NUMBERFORMAGIC3 = 3
