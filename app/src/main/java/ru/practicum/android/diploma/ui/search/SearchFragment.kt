@@ -11,7 +11,6 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentSearchBinding
 
 class SearchFragment : Fragment() {
-
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
@@ -36,7 +35,8 @@ class SearchFragment : Fragment() {
 
         binding.editTextSearch.setOnEditorActionListener { _, _, _ ->
             val query = binding.editTextSearch.text.toString()
-            if (query.isNotEmpty()) {Toast.makeText(requireContext(), "Поиск: $query", Toast.LENGTH_SHORT).show()
+            if (query.isNotEmpty()) {
+                Toast.makeText(requireContext(), "Поиск: $query", Toast.LENGTH_SHORT).show()
             }
             true
         }

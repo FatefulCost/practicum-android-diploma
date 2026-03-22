@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import ru.practicum.android.diploma.databinding.FragmentFavoritesBinding
 
 class FavoritesFragment : Fragment() {
-
     private var _binding: FragmentFavoritesBinding? = null
     private val binding get() = _binding!!
 

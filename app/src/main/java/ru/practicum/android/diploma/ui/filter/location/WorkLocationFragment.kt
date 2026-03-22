@@ -10,7 +10,6 @@ import androidx.navigation.fragment.findNavController
 import ru.practicum.android.diploma.databinding.FragmentWorkLocationBinding
 
 class WorkLocationFragment : Fragment() {
-
     private var _binding: FragmentWorkLocationBinding? = null
     private val binding get() = _binding!!
 
@@ -25,24 +24,20 @@ class WorkLocationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupUI()
     }
 
     private fun setupUI() {
-
-        binding.btnSelect.setOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        // Заглушка для выбора страны
         binding.layoutCountry.setOnClickListener {
             Toast.makeText(requireContext(), "Выбор страны (будет реализовано позже)", Toast.LENGTH_SHORT).show()
         }
 
-        // Заглушка для выбора региона
         binding.layoutRegion.setOnClickListener {
             Toast.makeText(requireContext(), "Выбор региона (будет реализовано позже)", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnSelect.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
