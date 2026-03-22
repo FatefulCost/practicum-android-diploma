@@ -9,6 +9,7 @@ import ru.practicum.android.diploma.domain.repository.VacancyRepository
 private const val SALARYAMOUTNFROM = 100000
 private const val SALARYAMOUTNFTO = 150000
 private const val NUMBERFORMAGIC1 = 1
+
 // Пока это заглушка — возвращает тестовые данные
 class VacancyRepositoryImpl(
     private val networkClient: NetworkClient,

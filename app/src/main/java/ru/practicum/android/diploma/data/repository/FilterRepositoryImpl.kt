@@ -27,23 +27,34 @@ class FilterRepositoryImpl(
     // Заглушка для регионов
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
         val testAreas = listOf(
-            FilterAreaDto(id = NUMBERFORMAGIC1, name = "Россия", parentId = null, areas = listOf(
-                FilterAreaDto(id = NUMBERFORMAGIC2, name = "Москва", parentId = NUMBERFORMAGIC1, areas = emptyList())
-            )),
-            FilterAreaDto(id = NUMBERFORMAGIC3, name = "Беларусь", parentId = null, areas = listOf(
-                FilterAreaDto(id = NUMBERFORMAGIC4, name = "Минск", parentId = NUMBERFORMAGIC3, areas = emptyList())
-            ))
+            FilterAreaDto(
+                id = NUMBERFORMAGIC1, name = "Россия", parentId = null, areas = listOf(
+                    FilterAreaDto(
+                        id = NUMBERFORMAGIC2,
+                        name = "Москва",
+                        parentId = NUMBERFORMAGIC1,
+                        areas = emptyList()
+                    )
+                )
+            ),
+            FilterAreaDto(
+                id = NUMBERFORMAGIC3, name = "Беларусь", parentId = null, areas = listOf(
+                    FilterAreaDto(id = NUMBERFORMAGIC4, name = "Минск", parentId = NUMBERFORMAGIC3, areas = emptyList())
+                )
+            )
         )
         return Result.success(testAreas)
     }
 
     // Заглушка для отраслей
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
-        return Result.success(listOf(
-            FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-            FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-            FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
-        ))
+        return Result.success(
+            listOf(
+                FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
+                FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
+                FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
+            )
+        )
     }
 
     // Кэширование (через SharedPreferences)
