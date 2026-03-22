@@ -2,13 +2,32 @@ package ru.practicum.android.diploma.data.repository
 
 import ru.practicum.android.diploma.data.database.VacancyDao
 import ru.practicum.android.diploma.data.database.VacancyEntity
+import ru.practicum.android.diploma.data.dto.AddressDto
+import ru.practicum.android.diploma.data.dto.ContactsDto
 import ru.practicum.android.diploma.data.network.NetworkClient
-import ru.practicum.android.diploma.data.dto.*
+import ru.practicum.android.diploma.data.dto.EmployerDto
+import ru.practicum.android.diploma.data.dto.EmploymentDto
+import ru.practicum.android.diploma.data.dto.ExperienceDto
+import ru.practicum.android.diploma.data.dto.FilterAreaDto
+import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.data.dto.SalaryDto
+import ru.practicum.android.diploma.data.dto.ScheduleDto
+import ru.practicum.android.diploma.data.dto.VacancyDetailDto
+import ru.practicum.android.diploma.data.dto.VacancyResponseDto
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 
-private const val SALARYAMOUTNFROM = 100000
-private const val SALARYAMOUTNFTO = 150000
-private const val NUMBERFORMAGIC1 = 1
+private const val SALARY_FROM = 100_000
+private const val SALARY_TO = 150_000
+private const val CURRENCY_RUB = "RUB"
+private const val COMPANY_NAME = "Test Company"
+private const val COMPANY_ID = "1"
+private const val AREA_NAME = "Москва"
+private const val AREA_ID = 1
+private const val VACANCY_ID = "test_1"
+private const val VACANCY_NAME = "Android Developer"
+private const val VACANCY_URL = "https://test.com"
+private const val SKILL_1 = "Kotlin"
+private const val SKILL_2 = "Android"
 
 // Пока это заглушка — возвращает тестовые данные
 class VacancyRepositoryImpl(
@@ -32,30 +51,37 @@ class VacancyRepositoryImpl(
 
         // Создаем тестовую вакансию для отладки
         val testVacancy = VacancyDetailDto(
-            id = "test_1",
-            name = "Android Developer",
+            id = VACANCY_ID,
+            name = VACANCY_NAME,
             description = "Тестовая вакансия",
-            salary = SalaryDto(from = SALARYAMOUTNFROM, to = SALARYAMOUTNFTO, currency = "RUB"),
-            employer = EmployerDto(id = "1", name = "Test Company", logo = null),
-            area = FilterAreaDto(id = NUMBERFORMAGIC1, name = "Москва", parentId = null, areas = emptyList()),
-            skills = listOf("Kotlin", "Android"),
-            url = "https://test.com"
+            salary = SalaryDto(from = SALARY_FROM, to = SALARY_TO, currency = CURRENCY_RUB),
+            employer = EmployerDto(id = COMPANY_ID, name = COMPANY_NAME, logo = null),
+            area = FilterAreaDto(id = AREA_ID, name = AREA_NAME, parentId = null, areas = emptyList()),
+            skills = listOf(SKILL_1, SKILL_2),
+            url = VACANCY_URL
         )
 
-        return Result.success(VacancyResponseDto(NUMBERFORMAGIC1, NUMBERFORMAGIC1, page, listOf(testVacancy)))
+        return Result.success(
+            VacancyResponseDto(
+                found = 1,
+                pages = 1,
+                page = page,
+                vacancies = listOf(testVacancy)
+            )
+        )
     }
 
     // Заглушка для деталей вакансии
     override suspend fun getVacancyDetails(vacancyId: String): Result<VacancyDetailDto> {
         val testVacancy = VacancyDetailDto(
             id = vacancyId,
-            name = "Android Developer",
+            name = VACANCY_NAME,
             description = "Описание вакансии...",
-            salary = SalaryDto(from = SALARYAMOUTNFROM, to = SALARYAMOUTNFTO, currency = "RUB"),
-            employer = EmployerDto(id = "1", name = "Test Company", logo = null),
-            area = FilterAreaDto(id = NUMBERFORMAGIC1, name = "Москва", parentId = null, areas = emptyList()),
-            skills = listOf("Kotlin", "Android", "MVVM"),
-            url = "https://test.com",
+            salary = SalaryDto(from = SALARY_FROM, to = SALARY_TO, currency = CURRENCY_RUB),
+            employer = EmployerDto(id = COMPANY_ID, name = COMPANY_NAME, logo = null),
+            area = FilterAreaDto(id = AREA_ID, name = AREA_NAME, parentId = null, areas = emptyList()),
+            skills = listOf(SKILL_1, SKILL_2, "MVVM"),
+            url = VACANCY_URL,
             experience = ExperienceDto("1", "1-3 года"),
             schedule = ScheduleDto("1", "Полный день"),
             employment = EmploymentDto("1", "Полная занятость"),

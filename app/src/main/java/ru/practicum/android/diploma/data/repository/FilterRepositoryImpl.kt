@@ -28,7 +28,10 @@ class FilterRepositoryImpl(
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
         val testAreas = listOf(
             FilterAreaDto(
-                id = NUMBERFORMAGIC1, name = "Россия", parentId = null, areas = listOf(
+                id = NUMBERFORMAGIC1,
+                name = "Россия",
+                parentId = null,
+                areas = listOf(
                     FilterAreaDto(
                         id = NUMBERFORMAGIC2,
                         name = "Москва",
@@ -38,8 +41,14 @@ class FilterRepositoryImpl(
                 )
             ),
             FilterAreaDto(
-                id = NUMBERFORMAGIC3, name = "Беларусь", parentId = null, areas = listOf(
-                    FilterAreaDto(id = NUMBERFORMAGIC4, name = "Минск", parentId = NUMBERFORMAGIC3, areas = emptyList())
+                id = NUMBERFORMAGIC3,
+                name = "Беларусь",
+                parentId = null,
+                areas = listOf(
+                    FilterAreaDto(id = NUMBERFORMAGIC4,
+                        name = "Минск",
+                        parentId = NUMBERFORMAGIC3,
+                        areas = emptyList())
                 )
             )
         )
