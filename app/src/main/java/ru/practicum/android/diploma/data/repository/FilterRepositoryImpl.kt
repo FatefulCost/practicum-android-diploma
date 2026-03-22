@@ -8,6 +8,11 @@ import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 
+private const val NUMBERFORMAGIC1 = 1
+private const val NUMBERFORMAGIC2 = 2
+private const val NUMBERFORMAGIC3 = 3
+private const val NUMBERFORMAGIC4 = 4
+
 class FilterRepositoryImpl(
     private val networkClient: NetworkClient,
     private val sharedPreferences: SharedPreferences,
@@ -22,11 +27,11 @@ class FilterRepositoryImpl(
     // Заглушка для регионов
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
         val testAreas = listOf(
-            FilterAreaDto(id = 1, name = "Россия", parentId = null, areas = listOf(
-                FilterAreaDto(id = 2, name = "Москва", parentId = 1, areas = emptyList())
+            FilterAreaDto(id = NUMBERFORMAGIC1, name = "Россия", parentId = null, areas = listOf(
+                FilterAreaDto(id = NUMBERFORMAGIC2, name = "Москва", parentId = NUMBERFORMAGIC1, areas = emptyList())
             )),
-            FilterAreaDto(id = 3, name = "Беларусь", parentId = null, areas = listOf(
-                FilterAreaDto(id = 4, name = "Минск", parentId = 3, areas = emptyList())
+            FilterAreaDto(id = NUMBERFORMAGIC3, name = "Беларусь", parentId = null, areas = listOf(
+                FilterAreaDto(id = NUMBERFORMAGIC4, name = "Минск", parentId = NUMBERFORMAGIC3, areas = emptyList())
             ))
         )
         return Result.success(testAreas)
@@ -35,9 +40,9 @@ class FilterRepositoryImpl(
     // Заглушка для отраслей
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
         return Result.success(listOf(
-            FilterIndustryDto(1, "IT"),
-            FilterIndustryDto(2, "Маркетинг"),
-            FilterIndustryDto(3, "Продажи")
+            FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
+            FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
+            FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
         ))
     }
 

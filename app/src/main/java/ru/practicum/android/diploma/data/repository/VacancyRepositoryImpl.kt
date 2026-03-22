@@ -6,6 +6,9 @@ import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.data.dto.*
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 
+private const val SALARYAMOUTNFROM = 100000
+private const val SALARYAMOUTNFTO = 150000
+private const val NUMBERFORMAGIC1 = 1
 // Пока это заглушка — возвращает тестовые данные
 class VacancyRepositoryImpl(
     private val networkClient: NetworkClient,
@@ -31,14 +34,14 @@ class VacancyRepositoryImpl(
             id = "test_1",
             name = "Android Developer",
             description = "Тестовая вакансия",
-            salary = SalaryDto(from = 100000, to = 150000, currency = "RUB"),
+            salary = SalaryDto(from = SALARYAMOUTNFROM, to = SALARYAMOUTNFTO, currency = "RUB"),
             employer = EmployerDto(id = "1", name = "Test Company", logo = null),
-            area = FilterAreaDto(id = 1, name = "Москва", parentId = null, areas = emptyList()),
+            area = FilterAreaDto(id = NUMBERFORMAGIC1, name = "Москва", parentId = null, areas = emptyList()),
             skills = listOf("Kotlin", "Android"),
             url = "https://test.com"
         )
 
-        return Result.success(VacancyResponseDto(1, 1, page, listOf(testVacancy)))
+        return Result.success(VacancyResponseDto(NUMBERFORMAGIC1, NUMBERFORMAGIC1, page, listOf(testVacancy)))
     }
 
     // Заглушка для деталей вакансии
@@ -47,9 +50,9 @@ class VacancyRepositoryImpl(
             id = vacancyId,
             name = "Android Developer",
             description = "Описание вакансии...",
-            salary = SalaryDto(from = 100000, to = 150000, currency = "RUB"),
+            salary = SalaryDto(from = SALARYAMOUTNFROM, to = SALARYAMOUTNFTO, currency = "RUB"),
             employer = EmployerDto(id = "1", name = "Test Company", logo = null),
-            area = FilterAreaDto(id = 1, name = "Москва", parentId = null, areas = emptyList()),
+            area = FilterAreaDto(id = NUMBERFORMAGIC1, name = "Москва", parentId = null, areas = emptyList()),
             skills = listOf("Kotlin", "Android", "MVVM"),
             url = "https://test.com",
             experience = ExperienceDto("1", "1-3 года"),
