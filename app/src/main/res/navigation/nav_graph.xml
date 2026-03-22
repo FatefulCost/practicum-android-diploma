@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/searchFragment">
+
+    <!-- Поиск вакансий (Главная) -->
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="ru.practicum.android.diploma.ui.search.SearchFragment"
+        android:label="@string/menu_search"
+        tools:layout="@layout/fragment_search">
+
+        <action
+            android:id="@+id/action_searchFragment_to_filterFragment"
+            app:destination="@id/filterFragment" />
+
+        <action
+            android:id="@+id/action_searchFragment_to_vacancyDetailFragment"
+            app:destination="@id/vacancyDetailFragment" />
+
+    </fragment>
+
+    <!-- Избранное -->
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="ru.practicum.android.diploma.ui.favorites.FavoritesFragment"
+        android:label="@string/menu_favorites"
+        tools:layout="@layout/fragment_favorites">
+
+        <action
+            android:id="@+id/action_favoritesFragment_to_vacancyDetailFragment"
+            app:destination="@id/vacancyDetailFragment" />
+
+    </fragment>
+
+    <!-- О команде -->
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="ru.practicum.android.diploma.ui.about.AboutFragment"
+        android:label="@string/menu_team"
+        tools:layout="@layout/fragment_about" />
+
+    <!-- Фильтры -->
+    <fragment
+        android:id="@+id/filterFragment"
+        android:name="ru.practicum.android.diploma.ui.filter.FilterFragment"
+        android:label="@string/filter_settings"
+        tools:layout="@layout/fragment_filter">
+
+        <action
+            android:id="@+id/action_filterFragment_to_workLocationFragment"
+            app:destination="@id/workLocationFragment" />
+
+        <action
+            android:id="@+id/action_filterFragment_to_industrySelectionFragment"
+            app:destination="@id/industrySelectionFragment" />
+
+    </fragment>
+
+    <!-- Выбор места работы -->
+    <fragment
+        android:id="@+id/workLocationFragment"
+        android:name="ru.practicum.android.diploma.ui.filter.location.WorkLocationFragment"
+        android:label="@string/select_work_location"
+        tools:layout="@layout/fragment_work_location">
+
+        <action
+            android:id="@+id/action_workLocationFragment_to_countrySelectionFragment"
+            app:destination="@id/countrySelectionFragment" />
+
+        <action
+            android:id="@+id/action_workLocationFragment_to_regionSelectionFragment"
+            app:destination="@id/regionSelectionFragment" />
+
+        <argument
+            android:name="selectedCountryId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+
+        <argument
+            android:name="selectedCountryName"
+            android:defaultValue='""'
+            app:argType="string" />
+
+        <argument
+            android:name="selectedRegionId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+
+        <argument
+            android:name="selectedRegionName"
+            android:defaultValue='""'
+            app:argType="string" />
+
+    </fragment>
+
+    <!-- Выбор страны -->
+    <fragment
+        android:id="@+id/countrySelectionFragment"
+        android:name="ru.practicum.android.diploma.ui.filter.location.CountrySelectionFragment"
+        android:label="@string/select_country"
+        tools:layout="@layout/fragment_country_selection">
+
+        <action
+            android:id="@+id/action_countrySelectionFragment_to_workLocationFragment"
+            app:destination="@id/workLocationFragment"
+            app:popUpTo="@id/workLocationFragment"
+            app:popUpToInclusive="false" />
+
+    </fragment>
+
+    <!-- Выбор региона -->
+    <fragment
+        android:id="@+id/regionSelectionFragment"
+        android:name="ru.practicum.android.diploma.ui.filter.location.RegionSelectionFragment"
+        android:label="@string/select_region"
+        tools:layout="@layout/fragment_region_selection">
+
+        <argument
+            android:name="countryId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+
+        <argument
+            android:name="countryName"
+            android:defaultValue='""'
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_regionSelectionFragment_to_workLocationFragment"
+            app:destination="@id/workLocationFragment"
+            app:popUpTo="@id/workLocationFragment"
+            app:popUpToInclusive="false" />
+
+    </fragment>
+
+    <!-- Выбор отрасли -->
+    <fragment
+        android:id="@+id/industrySelectionFragment"
+        android:name="ru.practicum.android.diploma.ui.filter.industry.IndustrySelectionFragment"
+        android:label="@string/select_industry"
+        tools:layout="@layout/fragment_industry_selection">
+
+        <action
+            android:id="@+id/action_industrySelectionFragment_to_filterFragment"
+            app:destination="@id/filterFragment"
+            app:popUpTo="@id/filterFragment"
+            app:popUpToInclusive="false" />
+
+    </fragment>
+
+    <!-- Детали вакансии -->
+    <fragment
+        android:id="@+id/vacancyDetailFragment"
+        android:name="ru.practicum.android.diploma.ui.vacancy_detail.VacancyDetailFragment"
+        android:label="@string/vacancy_details"
+        tools:layout="@layout/fragment_vacancy_detail">
+
+        <argument
+            android:name="vacancyId"
+            app:argType="integer" />
+
+    </fragment>
+
+</navigation>
