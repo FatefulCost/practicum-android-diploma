@@ -1,4 +1,4 @@
-package ru.practicum.android.diploma.data.dto
+package ru.practicum.android.diploma.di
 
 import android.content.Context
 import org.koin.android.ext.koin.androidContext
