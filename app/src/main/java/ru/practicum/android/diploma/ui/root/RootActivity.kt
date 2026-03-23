@@ -8,13 +8,18 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.ActivityRootBinding
 
 class RootActivity : AppCompatActivity() {
+
     companion object {
         private const val NAVIGATION_SETUP_DELAY_MS = 100L
     }
+
+    // Получаем ViewModel через Koin
+    private val viewModel: RootViewModel by viewModel()
 
     private var _binding: ActivityRootBinding? = null
     private val binding get() = _binding!!
@@ -38,7 +43,9 @@ class RootActivity : AppCompatActivity() {
             val navController = binding.navHostFragment.findNavController()
             binding.bottomNavigation.setupWithNavController(navController)
 
+            // Сохраняем текущий экран в ViewModel
             navController.addOnDestinationChangedListener { _, destination, _ ->
+                viewModel.currentDestinationId = destination.id
                 when (destination.id) {
                     R.id.vacancyDetailFragment,
                     R.id.filterFragment,
