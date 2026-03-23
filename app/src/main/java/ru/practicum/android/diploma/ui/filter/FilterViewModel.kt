@@ -23,6 +23,11 @@ import ru.practicum.android.diploma.util.Resource
  *  Применение фильтров к поиску
  *  Полноценная работа с отраслями и регионами
  */
+private const val NUMBERFORMAGIC1 = 1
+private const val NUMBERFORMAGIC2 = 2
+private const val NUMBERFORMAGIC3 = 3
+private const val NUMBERFORMAGIC4 = 4
+
 class FilterViewModel(
     private val filterRepository: FilterRepository
 ) : ViewModel() {
@@ -51,10 +56,10 @@ class FilterViewModel(
             // Пока просто заглушка
             _industries.value = Resource.Success(
                 listOf(
-                    FilterIndustryDto(1, "IT"),
-                    FilterIndustryDto(2, "Маркетинг"),
-                    FilterIndustryDto(3, "Продажи"),
-                    FilterIndustryDto(4, "Дизайн")
+                    FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
+                    FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
+                    FilterIndustryDto(NUMBERFORMAGIC3, "Продажи"),
+                    FilterIndustryDto(NUMBERFORMAGIC4, "Дизайн")
                 )
             )
         }

@@ -4,13 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-
 //  ViewModel для экрана поиска
 //
 //  Пока просто заглушка
 //  Хранит текст поискового запроса, чтобы не терялся при повороте
 //  Позже добавим логику
-
 class SearchViewModel : ViewModel() {
 
     // Текст поискового запроса (сохраняется при повороте)

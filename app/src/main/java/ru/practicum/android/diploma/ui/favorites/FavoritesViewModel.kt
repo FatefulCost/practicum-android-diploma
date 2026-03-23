@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModel
  *  Добавление/удаление из избранного
  *  Обновление списка
  */
+private const val TIME_TO_DELETE = 2000L
 class FavoritesViewModel : ViewModel() {
 
     // Состояние экрана избранного
@@ -48,7 +49,7 @@ class FavoritesViewModel : ViewModel() {
             if (_favoritesState.value is FavoritesState.Message) {
                 _favoritesState.value = FavoritesState.Empty
             }
-        }, 2000)
+        }, TIME_TO_DELETE)
     }
 
     /**
@@ -63,7 +64,7 @@ class FavoritesViewModel : ViewModel() {
             if (_favoritesState.value is FavoritesState.Message) {
                 _favoritesState.value = FavoritesState.Empty
             }
-        }, 2000)
+        }, TIME_TO_DELETE)
     }
 }
 

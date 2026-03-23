@@ -1,6 +1,5 @@
 package ru.practicum.android.diploma.util
 
-
 // Класс для представления состояния загрузки данных
 // Используется для передачи состояния из ViewModel во Fragment
 
