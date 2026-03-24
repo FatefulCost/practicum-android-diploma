@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Existing colors from template -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
 
-    <!-- Custom colors for the app -->
-    <color name="gray">#AEAFB4</color>
     <color name="blue">#3772E7</color>
-    <color name="light_gray">#FDFDFD</color>
-    <color name="dark_gray">#801A1B22</color>
-    <color name="Red">#f56b6c</color>
-    <color name="White_Day">#FDFDFD</color>
-    <color name="White_Night">#1A1B22</color>
-    <color name="White_Universal">#FDFDFD</color>
-    <color name="Black_Day">#1A1B22</color>
-    <color name="Black_Night">#FDFDFD</color>
-    <color name="Black_Universal">#1A1B22</color>
-    Black Universal
+    <color name="gray">#AEAFB4</color>
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="dividerColor">#AEAFB4</color>
 
-
-    <!-- Bottom Navigation Colors -->
-    <color name="bottom_nav_selected">@color/blue</color>
-    <color name="bottom_nav_unselected">@color/gray</color>
+    <color name="bottom_nav_selected">#3772E7</color>
+    <color name="bottom_nav_unselected">#AEAFB4</color>
 </resources>
