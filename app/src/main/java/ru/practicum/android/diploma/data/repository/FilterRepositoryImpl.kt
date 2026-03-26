@@ -1,6 +1,5 @@
 package ru.practicum.android.diploma.data.repository
 
-import android.content.SharedPreferences
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -9,6 +8,7 @@ import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.domain.repository.FilterRepository
+import android.content.SharedPreferences
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
