@@ -3,80 +3,93 @@ package ru.practicum.android.diploma.ui.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import ru.practicum.android.diploma.data.dto.VacancyDetailDto
+import ru.practicum.android.diploma.domain.repository.VacancyRepository
+import ru.practicum.android.diploma.util.NetworkUtils
 
-//  ViewModel для экрана поиска
-//
-//  Пока просто заглушка
-//  Хранит текст поискового запроса, чтобы не терялся при повороте
-//  Позже добавим логику
-class SearchViewModel : ViewModel() {
+class SearchViewModel(
+    private val vacancyRepository: VacancyRepository,
+    private val networkUtils: NetworkUtils
+) : ViewModel() {
 
-    // Текст поискового запроса (сохраняется при повороте)
-    private val _searchQuery = MutableLiveData("")
-    val searchQuery: LiveData<String> = _searchQuery
-
-    // Состояние поиска (загрузка, результат, ошибка)
-    // Пока просто заглушка, в Epic 1 будет настоящая логика
     private val _searchState = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = _searchState
 
+    private var searchJob: Job? = null
+
+    companion object {
+        private const val DEBOUNCE_DELAY = 500L
+    }
+
     init {
-        // Начальное состояние — пусто
         _searchState.value = SearchState.Empty
     }
 
-    /**
-     * Обновить текст поискового запроса
-     * Вызывается из фрагмента при вводе текста
-     */
-    fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
-
-        // В Epic 1 здесь будет запускаться debounced поиск
-        // Пока просто меняем состояние
-        if (query.isNotBlank()) {
-            _searchState.value = SearchState.HasQuery(query)
-        } else {
+    fun onSearchQueryChanged(query: String) {
+        searchJob?.cancel()
+        
+        if (query.isBlank()) {
             _searchState.value = SearchState.Empty
+            return
+        }
+
+        searchJob = viewModelScope.launch {
+            delay(DEBOUNCE_DELAY)
+            performSearch(query)
         }
     }
 
-    /**
-     * Очистить поисковый запрос
-     */
-    fun clearSearchQuery() {
-        _searchQuery.value = ""
-        _searchState.value = SearchState.Empty
-    }
+    fun performSearch(query: String) {
+        if (query.isBlank()) {
+            _searchState.value = SearchState.Empty
+            return
+        }
 
-    /**
-     * Запустить поиск (заглушка)
-     * В Epic 1 здесь будет реальный поиск через репозиторий
-     */
-    fun performSearch() {
-        val query = _searchQuery.value ?: return
-        if (query.isNotBlank()) {
-            // В Epic 1 здесь будет загрузка из сети
+        if (!networkUtils.isNetworkAvailable()) {
+            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+            return
+        }
+
+        viewModelScope.launch {
             _searchState.value = SearchState.Loading
-            // Пока просто имитируем, что поиск не реализован
-            _searchState.value = SearchState.NotImplemented
+
+            val result = vacancyRepository.searchVacancies(text = query)
+            
+            result.fold(
+                onSuccess = { response ->
+                    val vacancies = response.vacancies
+                    if (vacancies.isEmpty()) {
+                        _searchState.value = SearchState.EmptyResult
+                    } else {
+                        _searchState.value = SearchState.Success(vacancies)
+                    }
+                },
+                onFailure = {
+                    _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
+                }
+            )
         }
+    }
+
+    fun clearSearch() {
+        searchJob?.cancel()
+        _searchState.value = SearchState.Empty
     }
 }
 
-/**
- * Состояния экрана поиска
- */
 sealed class SearchState {
-    // Ничего не введено
     object Empty : SearchState()
-
-    // Есть введенный текст (но поиск не запущен)
-    data class HasQuery(val query: String) : SearchState()
-
-    // Идет загрузка
     object Loading : SearchState()
+    object EmptyResult : SearchState()
+    data class Success(val vacancies: List<VacancyDetailDto>) : SearchState()
+    data class Error(val error: ErrorType) : SearchState()
+}
 
-    // Поиск еще не реализован (для Epic 0)
-    object NotImplemented : SearchState()
+enum class ErrorType {
+    NO_INTERNET,
+    SERVER_ERROR
 }
