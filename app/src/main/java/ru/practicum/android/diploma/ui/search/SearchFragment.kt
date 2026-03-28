@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
-//import androidx.lifecycle.Lifecycle
-//import androidx.lifecycle.ViewModelProvider
-//import androidx.lifecycle.lifecycleScope
-//import androidx.lifecycle.repeatOnLifecycle
+// import androidx.lifecycle.Lifecycle
+// import androidx.lifecycle.ViewModelProvider
+// import androidx.lifecycle.lifecycleScope
+// import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-//import kotlinx.coroutines.launch
+// import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentSearchBinding
