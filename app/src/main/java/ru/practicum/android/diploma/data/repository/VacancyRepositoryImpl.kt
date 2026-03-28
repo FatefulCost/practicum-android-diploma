@@ -35,7 +35,7 @@ class VacancyRepositoryImpl(
     private val vacancyDao: VacancyDao
 ) : VacancyRepository {
 
-    // Заглушка для поиска
+    // реальный запрос
     override suspend fun searchVacancies(
         area: Int?,
         industry: Int?,
@@ -44,30 +44,13 @@ class VacancyRepositoryImpl(
         page: Int,
         onlyWithSalary: Boolean
     ): Result<VacancyResponseDto> {
-        // Если нет поискового запроса — возвращаем пустой результат
-        if (text.isNullOrBlank()) {
-            return Result.success(VacancyResponseDto(0, 0, 0, emptyList()))
-        }
-
-        // Создаем тестовую вакансию для отладки
-        val testVacancy = VacancyDetailDto(
-            id = VACANCY_ID,
-            name = VACANCY_NAME,
-            description = "Тестовая вакансия",
-            salary = SalaryDto(from = SALARY_FROM, to = SALARY_TO, currency = CURRENCY_RUB),
-            employer = EmployerDto(id = COMPANY_ID, name = COMPANY_NAME, logo = null),
-            area = FilterAreaDto(id = AREA_ID, name = AREA_NAME, parentId = null, areas = emptyList()),
-            skills = listOf(SKILL_1, SKILL_2),
-            url = VACANCY_URL
-        )
-
-        return Result.success(
-            VacancyResponseDto(
-                found = 1,
-                pages = 1,
-                page = page,
-                vacancies = listOf(testVacancy)
-            )
+        return networkClient.searchVacancies(
+            area = area,
+            industry = industry,
+            text = text,
+            salary = salary,
+            page = page,
+            onlyWithSalary = onlyWithSalary
         )
     }
 
