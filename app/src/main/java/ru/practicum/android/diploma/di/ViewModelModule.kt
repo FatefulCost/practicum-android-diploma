@@ -9,9 +9,8 @@ import ru.practicum.android.diploma.ui.search.SearchViewModel
 val viewModelModule = module {
     viewModel { RootViewModel() }
 
-    viewModel { SearchViewModel() }
+    viewModel { SearchViewModel(get(), get()) }
 
-    // FavoritesViewModel пока не использует репозиторий, поэтому без параметров
     viewModel { ru.practicum.android.diploma.ui.favorites.FavoritesViewModel() }
 
     viewModel { FilterViewModel(get()) }
