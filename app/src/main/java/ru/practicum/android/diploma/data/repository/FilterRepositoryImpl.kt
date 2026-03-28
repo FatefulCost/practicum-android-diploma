@@ -1,10 +1,8 @@
 package ru.practicum.android.diploma.data.repository
 
 import android.content.SharedPreferences
-
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
