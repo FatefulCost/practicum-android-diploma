@@ -31,7 +31,6 @@ class SearchViewModel(
 
     fun onSearchQueryChanged(query: String) {
         searchJob?.cancel()
-        
         if (query.isBlank()) {
             _searchState.value = SearchState.Empty
             return
@@ -58,7 +57,6 @@ class SearchViewModel(
             _searchState.value = SearchState.Loading
 
             val result = vacancyRepository.searchVacancies(text = query)
-            
             result.fold(
                 onSuccess = { response ->
                     val vacancies = response.vacancies
