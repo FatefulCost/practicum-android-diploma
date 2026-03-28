@@ -1,7 +1,6 @@
 package ru.practicum.android.diploma.ui.vacancy_detail
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
-import ru.practicum.android.diploma.data.dto.SalaryDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.databinding.FragmentVacancyDetailBinding
 import ru.practicum.android.diploma.util.Resource
@@ -20,9 +18,7 @@ class VacancyDetailFragment : Fragment() {
 
     private var _binding: FragmentVacancyDetailBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: VacancyDetailViewModel by viewModel()
-
     private var vacancyId: String = ""
 
     override fun onCreateView(
@@ -36,19 +32,17 @@ class VacancyDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        arguments?.let {
-            vacancyId = it.getString("vacancyId", "")
-        }
-
+        vacancyId = arguments?.getString("vacancyId") ?: ""
         setupToolbar()
         setupObservers()
+        loadVacancyDetails()
+    }
 
+    private fun loadVacancyDetails() {
         if (vacancyId.isNotEmpty()) {
             viewModel.loadVacancyDetails(vacancyId)
         } else {
-            Toast.makeText(requireContext(), getString(R.string.error_vacancy_not_found), Toast.LENGTH_SHORT).show()
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            showError(getString(R.string.error_vacancy_not_found))
         }
     }
 
@@ -75,27 +69,13 @@ class VacancyDetailFragment : Fragment() {
     private fun setupObservers() {
         viewModel.vacancyDetails.observe(viewLifecycleOwner) { resource ->
             when (resource) {
-                is Resource.Loading -> {
-                    showLoading(true)
-                }
-                is Resource.Success -> {
-                    showLoading(false)
-                    resource.data?.let { vacancy ->
-                        displayVacancyDetails(vacancy)
-                    }
-                }
-                is Resource.Error -> {
-                    showLoading(false)
-                    Toast.makeText(requireContext(), resource.message ?: getString(R.string.error_loading_data), Toast.LENGTH_SHORT).show()
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                }
+                is Resource.Loading -> Unit
+                is Resource.Success -> resource.data?.let(::displayVacancyDetails)
+                is Resource.Error -> showError(resource.message ?: getString(R.string.error_loading_data))
             }
         }
 
-        viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
-            updateFavoriteIcon(isFavorite)
-        }
-
+        viewModel.isFavorite.observe(viewLifecycleOwner, ::updateFavoriteIcon)
         viewModel.shareUrl.observe(viewLifecycleOwner) { url ->
             url?.let {
                 shareVacancy(it)
@@ -105,56 +85,21 @@ class VacancyDetailFragment : Fragment() {
     }
 
     private fun displayVacancyDetails(vacancy: VacancyDetailDto) {
-
         binding.tvVacancyTitle.text = vacancy.name
-
-        binding.tvSalary.text = formatSalary(vacancy.salary)
-
+        binding.tvSalary.text = VacancyFormatter.formatSalary(vacancy.salary)
         displayCompanyInfo(vacancy)
-
         displayExperienceAndWorkFormat(vacancy)
-
         displayDescriptionSections(vacancy)
-
         displaySkills(vacancy)
     }
 
     private fun displayCompanyInfo(vacancy: VacancyDetailDto) {
+        binding.tvCompanyName.text = vacancy.employer.name ?: "Компания не указана"
 
-        val companyName = vacancy.employer.name ?: "Компания не указана"
-        binding.tvCompanyName.text = companyName
-
-        val address = vacancy.address
-        val area = vacancy.area
-
-        val addressText = buildString {
-            if (!address?.city.isNullOrEmpty()) {
-                append(address?.city)
-            }
-            if (!address?.street.isNullOrEmpty()) {
-                if (isNotEmpty()) append(", ")
-                append(address?.street)
-            }
-            if (!address?.building.isNullOrEmpty()) {
-                if (isNotEmpty()) append(", ")
-                append(address?.building)
-            }
-        }
-
-        val fullAddressText = if (!address?.fullAddress.isNullOrEmpty()) {
-            address?.fullAddress
-        } else if (addressText.isNotEmpty()) {
-            addressText
-        } else {
-            null
-        }
-
-        val location = fullAddressText ?: area?.name
+        val location = buildLocationString(vacancy.address, vacancy.area?.name)
         binding.tvCompanyLocation.text = location ?: "Локация не указана"
 
-        val logoUrls = vacancy.employer.logoUrls
-        val logoUrl = logoUrls?.logo240 ?: logoUrls?.logo90
-
+        val logoUrl = vacancy.employer.logoUrls?.logo240 ?: vacancy.employer.logoUrls?.logo90
         Glide.with(this)
             .load(logoUrl)
             .placeholder(R.drawable.ic_logo)
@@ -162,147 +107,67 @@ class VacancyDetailFragment : Fragment() {
             .into(binding.ivCompanyLogo)
     }
 
+    private fun buildLocationString(address: ru.practicum.android.diploma.data.dto.AddressDto?, areaName: String?): String? {
+        return address?.fullAddress
+            ?: address?.let { buildString {
+                if (!it.city.isNullOrEmpty()) append(it.city)
+                if (!it.street.isNullOrEmpty()) {
+                    if (isNotEmpty()) append(", ")
+                    append(it.street)
+                }
+                if (!it.building.isNullOrEmpty()) {
+                    if (isNotEmpty()) append(", ")
+                    append(it.building)
+                }
+            }.takeIf { it.isNotEmpty() } }
+            ?: areaName
+    }
+
     private fun displayExperienceAndWorkFormat(vacancy: VacancyDetailDto) {
-        val experience = vacancy.experience?.name
-        val employment = vacancy.employment?.name
-        val schedule = vacancy.schedule?.name
-
-        val workFormatText = buildString {
-            if (!employment.isNullOrEmpty()) {
-                append(employment)
-            }
-            if (!schedule.isNullOrEmpty()) {
-                if (isNotEmpty()) append(", ")
-                append(schedule)
-            }
-        }
-
-        if (!experience.isNullOrEmpty()) {
-            binding.tvExperience.text = experience
-        } else {
-            binding.tvExperience.text = "Не указан"
-        }
-
-        if (workFormatText.isNotEmpty()) {
-            binding.tvWorkFormat.text = workFormatText
-        } else {
-            binding.tvWorkFormat.text = "Не указан"
-        }
-
+        binding.tvExperience.text = vacancy.experience?.name ?: "Не указан"
+        binding.tvWorkFormat.text = buildWorkFormatString(vacancy.employment?.name, vacancy.schedule?.name)
         binding.layoutExperience.visibility = View.VISIBLE
     }
 
-    private fun displayDescriptionSections(vacancy: VacancyDetailDto) {
-        val description = vacancy.description ?: ""
-
-        val responsibilities = extractSection(description, "Обязанности", "Требования")
-        val requirements = extractSection(description, "Требования", "Условия")
-        val conditions = extractSection(description, "Условия", null)
-
-        val hasAnySection = !responsibilities.isNullOrBlank() ||
-            !requirements.isNullOrBlank() ||
-            !conditions.isNullOrBlank()
-
-        binding.tvDescriptionTitle.visibility = if (hasAnySection) View.VISIBLE else View.GONE
-
-        if (!responsibilities.isNullOrBlank()) {
-            binding.layoutResponsibilities.visibility = View.VISIBLE
-            binding.tvResponsibilities.text = responsibilities
-        } else {
-            binding.layoutResponsibilities.visibility = View.GONE
-        }
-
-        if (!requirements.isNullOrBlank()) {
-            binding.layoutRequirements.visibility = View.VISIBLE
-            binding.tvRequirements.text = requirements
-        } else {
-            binding.layoutRequirements.visibility = View.GONE
-        }
-
-        if (!conditions.isNullOrBlank()) {
-            binding.layoutConditions.visibility = View.VISIBLE
-            binding.tvConditions.text = conditions
-        } else {
-            binding.layoutConditions.visibility = View.GONE
-        }
+    private fun buildWorkFormatString(employment: String?, schedule: String?): String {
+        return listOfNotNull(employment, schedule)
+            .joinToString(", ")
+            .ifEmpty { "Не указан" }
     }
 
-    private fun extractSection(text: String, startMarker: String, endMarker: String?): String? {
-        val startIndex = text.indexOf(startMarker)
-        if (startIndex == -1) return null
+    private fun displayDescriptionSections(vacancy: VacancyDetailDto) {
+        val sections = DescriptionParser.parseDescription(vacancy.description)
+        val hasAnySection = sections.responsibilities != null ||
+            sections.requirements != null ||
+            sections.conditions != null
 
-        val contentStart = startIndex + startMarker.length
-        val endIndex = if (endMarker != null) {
-            text.indexOf(endMarker, contentStart)
+        binding.tvDescriptionTitle.visibility = if (hasAnySection) View.VISIBLE else View.GONE
+        showSection(binding.layoutResponsibilities, sections.responsibilities, binding.tvResponsibilities)
+        showSection(binding.layoutRequirements, sections.requirements, binding.tvRequirements)
+        showSection(binding.layoutConditions, sections.conditions, binding.tvConditions)
+    }
+
+    private fun showSection(layout: View, text: String?, textView: android.widget.TextView) {
+        if (!text.isNullOrBlank()) {
+            layout.visibility = View.VISIBLE
+            textView.text = text
         } else {
-            text.length
+            layout.visibility = View.GONE
         }
-
-        if (endIndex == -1) return null
-
-        return text.substring(contentStart, endIndex).trim()
     }
 
     private fun displaySkills(vacancy: VacancyDetailDto) {
         val skills = vacancy.skills
-
         if (skills != null && skills.isNotEmpty()) {
             binding.layoutSkillsTitle.visibility = View.VISIBLE
-            val skillsText = skills.joinToString("\n") { "• $it" }
-            binding.tvSkillsTitle.text = skillsText
+            binding.tvSkillsTitle.text = skills.joinToString("\n") { "• $it" }
         } else {
             binding.layoutSkillsTitle.visibility = View.GONE
         }
     }
 
-    private fun formatSalary(salary: SalaryDto?): String {
-        return when {
-            salary == null -> getString(R.string.salary_not_specified)
-            salary.from != null && salary.to != null -> {
-                "от ${formatNumber(salary.from)} до ${formatNumber(salary.to)} ${salary.currency ?: "₽"}"
-            }
-            salary.from != null -> {
-                "от ${formatNumber(salary.from)} ${salary.currency ?: "₽"}"
-            }
-            salary.to != null -> {
-                "до ${formatNumber(salary.to)} ${salary.currency ?: "₽"}"
-            }
-            else -> getString(R.string.salary_not_specified)
-        }
-    }
-
-    private fun formatNumber(number: Int): String {
-        return number.toString()
-            .reversed()
-            .chunked(3)
-            .joinToString(" ")
-            .reversed()
-    }
-
-    private fun openEmail(email: String) {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:$email")
-        }
-        startActivity(Intent.createChooser(intent, "Отправить письмо"))
-    }
-
-    private fun openPhone(phone: String) {
-        val cleanedPhone = phone.replace(Regex("[^\\d+]"), "")
-        val intent = Intent(Intent.ACTION_DIAL).apply {
-            data = Uri.parse("tel:$cleanedPhone")
-        }
-        startActivity(Intent.createChooser(intent, "Выберите приложение для звонка"))
-    }
-
-    private fun showLoading(show: Boolean) {
-    }
-
     private fun updateFavoriteIcon(isFavorite: Boolean) {
-        val icon = if (isFavorite) {
-            R.drawable.ic_favorites_filled
-        } else {
-            R.drawable.ic_favorites_outline
-        }
+        val icon = if (isFavorite) R.drawable.ic_favorites_filled else R.drawable.ic_favorites_outline
         binding.toolbar.menu.findItem(R.id.action_favorite).icon =
             resources.getDrawable(icon, requireContext().theme)
     }
@@ -313,6 +178,11 @@ class VacancyDetailFragment : Fragment() {
             putExtra(Intent.EXTRA_TEXT, url)
         }
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share)))
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        requireActivity().onBackPressedDispatcher.onBackPressed()
     }
 
     override fun onDestroyView() {
