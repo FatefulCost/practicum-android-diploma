@@ -17,4 +17,5 @@ data class VacancyDetailDto(
     @SerializedName("skills") val skills: List<String>?,
     @SerializedName("url") val url: String?,
     @SerializedName("industry") val industry: FilterIndustryDto? = null
+
 )

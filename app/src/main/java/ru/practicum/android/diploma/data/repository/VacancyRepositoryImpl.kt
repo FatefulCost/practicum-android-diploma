@@ -9,6 +9,7 @@ import ru.practicum.android.diploma.data.dto.EmploymentDto
 import ru.practicum.android.diploma.data.dto.ExperienceDto
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.data.dto.LogoUrlsDto
 import ru.practicum.android.diploma.data.dto.SalaryDto
 import ru.practicum.android.diploma.data.dto.ScheduleDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
@@ -21,11 +22,13 @@ private const val SALARY_TO = 150_000
 private const val CURRENCY_RUB = "RUB"
 private const val COMPANY_NAME = "Test Company"
 private const val COMPANY_ID = "1"
+private const val COMPANY_URL = "https://test-company.com"
+private const val COMPANY_ALTERNATE_URL = "https://test-company.com/hh"
 private const val AREA_NAME = "Москва"
 private const val AREA_ID = 1
 private const val VACANCY_ID = "test_1"
 private const val VACANCY_NAME = "Android Developer"
-private const val VACANCY_URL = "https://test.com"
+private const val VACANCY_URL = "https://test.com/vacancy"
 private const val SKILL_1 = "Kotlin"
 private const val SKILL_2 = "Android"
 
@@ -55,10 +58,22 @@ class VacancyRepositoryImpl(
             name = VACANCY_NAME,
             description = "Тестовая вакансия",
             salary = SalaryDto(from = SALARY_FROM, to = SALARY_TO, currency = CURRENCY_RUB),
-            employer = EmployerDto(id = COMPANY_ID, name = COMPANY_NAME, logo = null),
+            employer = EmployerDto(
+                id = COMPANY_ID,
+                name = COMPANY_NAME,
+                logoUrls = null,
+                url = COMPANY_URL,
+                alternateUrl = COMPANY_ALTERNATE_URL
+            ),
             area = FilterAreaDto(id = AREA_ID, name = AREA_NAME, parentId = null, areas = emptyList()),
             skills = listOf(SKILL_1, SKILL_2),
-            url = VACANCY_URL
+            url = VACANCY_URL,
+            address = null,
+            experience = null,
+            schedule = null,
+            employment = null,
+            contacts = null,
+            industry = null
         )
 
         return Result.success(
@@ -73,21 +88,54 @@ class VacancyRepositoryImpl(
 
     // Заглушка для деталей вакансии
     override suspend fun getVacancyDetails(vacancyId: String): Result<VacancyDetailDto> {
+        // Создаем тестовые логотипы
+        val logoUrls = LogoUrlsDto(
+            logo90 = "https://test.com/logo90.png",
+            logo240 = "https://test.com/logo240.png"
+        )
+
         val testVacancy = VacancyDetailDto(
             id = vacancyId,
             name = VACANCY_NAME,
-            description = "Описание вакансии...",
+            description = "Описание вакансии...\n\n" +
+                "Обязанности:\n" +
+                "• Разработка новых функций приложения\n" +
+                "• Поддержка и оптимизация существующего кода\n" +
+                "• Участие в code review и планировании задач\n\n" +
+                "Требования:\n" +
+                "• Опыт разработки на Kotlin от 3 лет\n" +
+                "• Глубокое знание Android SDK\n" +
+                "• Понимание архитектурных паттернов (MVVM, Clean Architecture)\n\n" +
+                "Условия:\n" +
+                "• Оформление по ТК РФ\n" +
+                "• Гибкий график работы\n" +
+                "• ДМС со стоматологией",
             salary = SalaryDto(from = SALARY_FROM, to = SALARY_TO, currency = CURRENCY_RUB),
-            employer = EmployerDto(id = COMPANY_ID, name = COMPANY_NAME, logo = null),
+            employer = EmployerDto(
+                id = COMPANY_ID,
+                name = COMPANY_NAME,
+                logoUrls = logoUrls,
+                url = COMPANY_URL,
+                alternateUrl = COMPANY_ALTERNATE_URL
+            ),
             area = FilterAreaDto(id = AREA_ID, name = AREA_NAME, parentId = null, areas = emptyList()),
-            skills = listOf(SKILL_1, SKILL_2, "MVVM"),
+            skills = listOf(SKILL_1, SKILL_2, "MVVM", "Coroutines", "Flow", "Retrofit", "Room"),
             url = VACANCY_URL,
-            experience = ExperienceDto("1", "1-3 года"),
-            schedule = ScheduleDto("1", "Полный день"),
-            employment = EmploymentDto("1", "Полная занятость"),
-            address = AddressDto("Москва", "Тверская", "1", "Случайный полный адрес"),
-            contacts = ContactsDto("1", "Иван", "ivan@test.com", listOf("+7 999 123-45-67")),
-            industry = FilterIndustryDto(1, "IT")
+            experience = ExperienceDto(id = "1", name = "от 3 до 6 лет"),
+            schedule = ScheduleDto(id = "1", name = "Полный день"),
+            employment = EmploymentDto(id = "1", name = "Полная занятость"),
+            address = AddressDto(
+                city = "Москва",
+                street = "Тверская",
+                building = "1",
+                fullAddress = "Москва, Тверская улица, 1"),
+            contacts = ContactsDto(
+                id = "1",
+                name = "Иван Иванов",
+                email = "ivan@test.com",
+                phone = listOf("+7 999 123-45-67", "+7 999 765-43-21")
+            ),
+            industry = FilterIndustryDto(id = 1, name = "IT")
         )
         return Result.success(testVacancy)
     }

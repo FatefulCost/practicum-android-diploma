@@ -2,10 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
     <item
         android:id="@+id/action_share"
-        android:title="Поделиться"
+        android:title="@string/share"
         android:icon="@drawable/ic_share"
         app:showAsAction="always" />
 
@@ -13,8 +12,7 @@
         android:id="@+id/action_favorite"
         android:title=""
         android:icon="@drawable/ic_favorites_outline"
-        app:showAsAction="always" />
-
-
+        app:showAsAction="always"
+        />
 
 </menu>
