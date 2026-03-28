@@ -8,6 +8,7 @@ data class VacancyEntity(
     @PrimaryKey
     val id: String,
     val name: String,
+    val description: String? = null,
     val employerName: String,
     val employerLogo: String? = null,
     val salaryFrom: Int? = null,
@@ -17,6 +18,9 @@ data class VacancyEntity(
     val experienceName: String? = null,
     val scheduleName: String? = null,
     val employmentName: String? = null,
+    val contactsEmail: String? = null,
+    val contactsPhone: String? = null,
+    val url: String? = null,
     val isFavorite: Boolean = true,
     val addedTimestamp: Long = System.currentTimeMillis()
 )

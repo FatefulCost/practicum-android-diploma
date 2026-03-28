@@ -1,80 +1,89 @@
-package ru.practicum.android.diploma.ui.search
+package ru.practicum.android.diploma.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.bumptech.glide.request.RequestOptions
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
-import ru.practicum.android.diploma.databinding.ItemVacancyBinding
-import ru.practicum.android.diploma.util.SalaryFormatter
 
-/**
- * Адаптер для отображения списка вакансий
- */
 class VacancyAdapter(
+    private val vacancies: List<VacancyDetailDto>,
     private val onItemClick: (VacancyDetailDto) -> Unit
 ) : RecyclerView.Adapter<VacancyAdapter.VacancyViewHolder>() {
 
-    private var vacancies = listOf<VacancyDetailDto>()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VacancyViewHolder {
-        val binding = ItemVacancyBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return VacancyViewHolder(binding, onItemClick)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_vacancy, parent, false)
+        return VacancyViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: VacancyViewHolder, position: Int) {
         holder.bind(vacancies[position])
     }
 
-    override fun getItemCount() = vacancies.size
+    override fun getItemCount(): Int = vacancies.size
 
-    /**
-     * Обновить список вакансий
-     */
-    fun updateVacancies(newVacancies: List<VacancyDetailDto>) {
-        vacancies = newVacancies
-        notifyDataSetChanged()
-    }
-
-    /**
-     * Добавить вакансии в конец списка (для пагинации)
-     */
-    fun addVacancies(newVacancies: List<VacancyDetailDto>) {
-        val startPosition = vacancies.size
-        vacancies = vacancies + newVacancies
-        notifyItemRangeInserted(startPosition, newVacancies.size)
-    }
-
-    class VacancyViewHolder(
-        private val binding: ItemVacancyBinding,
-        private val onItemClick: (VacancyDetailDto) -> Unit
-    ) : RecyclerView.ViewHolder(binding.root) {
+    inner class VacancyViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
+        private val ivLogo: ImageView = itemView.findViewById(R.id.ivLogo)
+        private val tvVacancyName: TextView = itemView.findViewById(R.id.tvVacancyName)
+        private val tvVacancyRegion: TextView = itemView.findViewById(R.id.tvVacancyRegion)
+        private val tvCompanyName: TextView = itemView.findViewById(R.id.tvCompanyName)
+        private val tvSalary: TextView = itemView.findViewById(R.id.tvSalary)
 
         fun bind(vacancy: VacancyDetailDto) {
-            binding.tvVacancyName.text = vacancy.name
-            binding.tvCompanyName.text = vacancy.employer.name
-            binding.tvSalary.text = SalaryFormatter.format(vacancy.salary)
-            binding.tvVacancyRegion.text = vacancy.area.name
+            // Название вакансии
+            tvVacancyName.text = vacancy.name
 
-            // Загрузка логотипа
-            Glide.with(binding.ivLogo.context)
-                .load(vacancy.employer.logo)
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_foreground)
-                .apply(RequestOptions.bitmapTransform(CircleCrop()))
-                .into(binding.ivLogo)
+            // Регион
+            tvVacancyRegion.text = vacancy.area?.name ?: ""
 
-            // Обработка клика
-            binding.root.setOnClickListener {
+            // Название компании
+            tvCompanyName.text = vacancy.employer.name ?: ""
+
+            // Зарплата
+            tvSalary.text = formatSalary(vacancy.salary)
+
+            // Логотип компании
+            val logoUrls = vacancy.employer.logoUrls
+            val logoUrl = logoUrls?.logo240 ?: logoUrls?.logo90
+
+            Glide.with(itemView.context)
+                .load(logoUrl)
+                .placeholder(R.drawable.ic_logo)
+                .error(R.drawable.ic_logo)
+                .into(ivLogo)
+
+            // Обработчик клика
+            itemView.setOnClickListener {
                 onItemClick(vacancy)
             }
+        }
+
+        private fun formatSalary(salary: ru.practicum.android.diploma.data.dto.SalaryDto?): String {
+            return when {
+                salary == null -> "Зарплата не указана"
+                salary.from != null && salary.to != null -> {
+                    "от ${formatNumber(salary.from)} до ${formatNumber(salary.to)} ${salary.currency ?: "₽"}"
+                }
+                salary.from != null -> {
+                    "от ${formatNumber(salary.from)} ${salary.currency ?: "₽"}"
+                }
+                salary.to != null -> {
+                    "до ${formatNumber(salary.to)} ${salary.currency ?: "₽"}"
+                }
+                else -> "Зарплата не указана"
+            }
+        }
+
+        private fun formatNumber(number: Int): String {
+            return number.toString()
+                .reversed()
+                .chunked(3)
+                .joinToString(" ")
+                .reversed()
         }
     }
 }

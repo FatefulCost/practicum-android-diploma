@@ -2,16 +2,6 @@ package ru.practicum.android.diploma.data.repository
 
 import ru.practicum.android.diploma.data.database.VacancyDao
 import ru.practicum.android.diploma.data.database.VacancyEntity
-import ru.practicum.android.diploma.data.dto.AddressDto
-import ru.practicum.android.diploma.data.dto.ContactsDto
-import ru.practicum.android.diploma.data.dto.EmployerDto
-import ru.practicum.android.diploma.data.dto.EmploymentDto
-import ru.practicum.android.diploma.data.dto.ExperienceDto
-import ru.practicum.android.diploma.data.dto.FilterAreaDto
-import ru.practicum.android.diploma.data.dto.FilterIndustryDto
-import ru.practicum.android.diploma.data.dto.LogoUrlsDto
-import ru.practicum.android.diploma.data.dto.SalaryDto
-import ru.practicum.android.diploma.data.dto.ScheduleDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.data.dto.VacancyResponseDto
 import ru.practicum.android.diploma.data.network.NetworkClient
@@ -49,15 +39,22 @@ class VacancyRepositoryImpl(
     }
 
     override suspend fun addToFavorites(vacancy: VacancyDetailDto) {
+        val logoUrl = vacancy.employer?.logoUrls?.logo240 ?: vacancy.employer?.logoUrls?.logo90
+
         val entity = VacancyEntity(
             id = vacancy.id,
             name = vacancy.name,
             employerName = vacancy.employer?.name ?: "",
-            employerLogo = vacancy.employer?.logo,
+            employerLogo = logoUrl,
             salaryFrom = vacancy.salary?.from,
             salaryTo = vacancy.salary?.to,
             salaryCurrency = vacancy.salary?.currency,
-            areaName = vacancy.area?.name ?: ""
+            areaName = vacancy.area?.name ?: "",
+            experienceName = vacancy.experience?.name,
+            scheduleName = vacancy.schedule?.name,
+            employmentName = vacancy.employment?.name,
+            isFavorite = true,
+            addedTimestamp = System.currentTimeMillis()
         )
         vacancyDao.insert(entity)
     }
