@@ -27,9 +27,11 @@ class VacancyRepositoryImpl(
         return networkClient.getVacancyDetails(vacancyId)
     }
 
-    // Заглушки для избранного
-    override suspend fun getFavoriteVacancies(): List<VacancyEntity> = emptyList()
-    override suspend fun addToFavorites(vacancy: VacancyDetailDto) = Unit
-    override suspend fun removeFromFavorites(vacancyId: String) = Unit
-    override suspend fun isFavorite(vacancyId: String): Boolean = false
+    override suspend fun removeFromFavorites(vacancyId: String) {
+        vacancyDao.delete(vacancyId)
+    }
+
+    override suspend fun isFavorite(vacancyId: String): Boolean {
+        return vacancyDao.isFavorite(vacancyId)
+    }
 }
