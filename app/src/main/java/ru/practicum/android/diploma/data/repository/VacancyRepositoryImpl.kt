@@ -27,6 +27,24 @@ class VacancyRepositoryImpl(
         return networkClient.getVacancyDetails(vacancyId)
     }
 
+    override suspend fun getFavoriteVacancies(): List<VacancyEntity> {
+        return vacancyDao.getAllFavorites()
+    }
+
+    override suspend fun addToFavorites(vacancy: VacancyDetailDto) {
+        val entity = VacancyEntity(
+            id = vacancy.id,
+            name = vacancy.name,
+            employerName = vacancy.employer?.name ?: "",
+            employerLogo = vacancy.employer?.logo,
+            salaryFrom = vacancy.salary?.from,
+            salaryTo = vacancy.salary?.to,
+            salaryCurrency = vacancy.salary?.currency,
+            areaName = vacancy.area?.name ?: ""
+        )
+        vacancyDao.insert(entity)
+    }
+
     override suspend fun removeFromFavorites(vacancyId: String) {
         vacancyDao.delete(vacancyId)
     }
