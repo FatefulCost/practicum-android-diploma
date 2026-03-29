@@ -39,16 +39,20 @@ class VacancyDetailViewModel(
                     checkFavoriteStatus(vacancyId)
                 }
                 .onFailure { error ->
-                    _vacancyState.value = when (error) {
-                        is UnknownHostException,
-                        is SocketTimeoutException -> VacancyDetailState.Error(VacancyDetailErrorType.NO_INTERNET)
-                        is HttpException -> when (error.code()) {
-                            404 -> VacancyDetailState.Error(VacancyDetailErrorType.NOT_FOUND)
-                            else -> VacancyDetailState.Error(VacancyDetailErrorType.SERVER_ERROR)
-                        }
-                        else -> VacancyDetailState.Error(VacancyDetailErrorType.SERVER_ERROR)
-                    }
+                    _vacancyState.value = classifyError(error)
                 }
+        }
+    }
+
+    private fun classifyError(error: Throwable): VacancyDetailState.Error {
+        return when (error) {
+            is UnknownHostException,
+            is SocketTimeoutException -> VacancyDetailState.Error(VacancyDetailErrorType.NO_INTERNET)
+            is HttpException -> when (error.code()) {
+                HTTP_NOT_FOUND -> VacancyDetailState.Error(VacancyDetailErrorType.NOT_FOUND)
+                else -> VacancyDetailState.Error(VacancyDetailErrorType.SERVER_ERROR)
+            }
+            else -> VacancyDetailState.Error(VacancyDetailErrorType.SERVER_ERROR)
         }
     }
 
@@ -90,6 +94,10 @@ class VacancyDetailViewModel(
 
     fun clearNavigationEvent() {
         _navigationEvent.value = null
+    }
+
+    companion object {
+        private const val HTTP_NOT_FOUND = 404
     }
 }
 

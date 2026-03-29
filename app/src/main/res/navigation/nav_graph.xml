@@ -154,7 +154,7 @@
     <!-- Детали вакансии -->
     <fragment
         android:id="@+id/vacancyDetailFragment"
-        android:name="ru.practicum.android.diploma.ui.vacancy_detail.VacancyDetailFragment"
+        android:name="ru.practicum.android.diploma.ui.vacancydetail.VacancyDetailFragment"
         android:label="@string/vacancy_details"
         tools:layout="@layout/fragment_vacancy_detail">
 
