@@ -2,6 +2,7 @@ package ru.practicum.android.diploma.di
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
@@ -35,7 +36,19 @@ private fun provideOkHttpClient(): OkHttpClient {
         }
     }
 
+    // интерцептор для авторизации
+    val authInterceptor = Interceptor { chain ->
+        val originalRequest = chain.request()
+
+        val authorizedRequest = originalRequest.newBuilder()
+            .header("Authorization", "Bearer ${BuildConfig.API_ACCESS_TOKEN}")
+            .build()
+
+        chain.proceed(authorizedRequest)
+    }
+
     return OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
         .addInterceptor(loggingInterceptor)
         .connectTimeout(TIMETOCHECK, TimeUnit.SECONDS)
         .readTimeout(TIMETOCHECK, TimeUnit.SECONDS)

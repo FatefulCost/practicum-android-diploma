@@ -20,14 +20,7 @@ class VacancyRepositoryImpl(
         page: Int,
         onlyWithSalary: Boolean
     ): Result<VacancyResponseDto> {
-        return networkClient.searchVacancies(
-            area = area,
-            industry = industry,
-            text = text,
-            salary = salary,
-            page = page,
-            onlyWithSalary = onlyWithSalary
-        )
+        return networkClient.searchVacancies(area, industry, text, salary, page, onlyWithSalary)
     }
 
     override suspend fun getVacancyDetails(vacancyId: String): Result<VacancyDetailDto> {

@@ -10,6 +10,8 @@
     <string name="search_hint">Поиск вакансий</string>
     <string name="filter">Фильтр</string>
     <string name="nothing_found">Ничего не найдено</string>
+    <string name="try_another_query">Попробуйте изменить поисковый запрос</string>
+    <string name="retry">Повторить</string>
 
     <!-- Filter Screen -->
     <string name="filter_settings">Настройки фильтрации</string>
