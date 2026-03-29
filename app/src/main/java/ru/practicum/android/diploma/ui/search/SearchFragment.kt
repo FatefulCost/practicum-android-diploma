@@ -44,7 +44,7 @@ class SearchFragment : Fragment() {
     private fun setupUI() {
         adapter = VacancyAdapter { vacancy ->
             val bundle = Bundle()
-            bundle.putString("vacancy_id", vacancy.id)
+            bundle.putString("vacancyId", vacancy.id)
             findNavController().navigate(
                 R.id.action_searchFragment_to_vacancyDetailFragment,
                 bundle
