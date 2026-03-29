@@ -21,6 +21,9 @@ class VacancyDetailViewModel(
     private val _isFavorite = MutableLiveData<Boolean>(false)
     val isFavorite: LiveData<Boolean> = _isFavorite
 
+    private val _favoriteErrorEvent = MutableLiveData<FavoriteErrorEvent?>()
+    val favoriteErrorEvent: LiveData<FavoriteErrorEvent?> = _favoriteErrorEvent
+
     private val _navigationEvent = MutableLiveData<NavigationEvent?>()
     val navigationEvent: LiveData<NavigationEvent?> = _navigationEvent
 
@@ -56,24 +59,37 @@ class VacancyDetailViewModel(
         }
     }
 
-    private fun checkFavoriteStatus(vacancyId: String) {
-        viewModelScope.launch {
-            _isFavorite.value = repository.isFavorite(vacancyId)
-        }
+    // suspend, чтобы вызываться в контексте уже запущенной корутины
+    private suspend fun checkFavoriteStatus(vacancyId: String) {
+        _isFavorite.value = repository.isFavorite(vacancyId)
     }
 
     fun toggleFavorite() {
         val vacancy = currentVacancy ?: return
+        val previousState = _isFavorite.value ?: false
+
         viewModelScope.launch {
-            val currentlyFavorite = _isFavorite.value ?: false
-            if (currentlyFavorite) {
-                repository.removeFromFavorites(vacancy.id)
-                _isFavorite.value = false
-            } else {
-                repository.addToFavorites(vacancy)
-                _isFavorite.value = true
+            try {
+                if (previousState) {
+                    repository.removeFromFavorites(vacancy.id)
+                } else {
+                    repository.addToFavorites(vacancy)
+                }
+                _isFavorite.value = !previousState
+            } catch (e: Exception) {
+                // Откатываем состояние при ошибке операции с БД
+                _isFavorite.value = previousState
+                _favoriteErrorEvent.value = if (previousState) {
+                    FavoriteErrorEvent.RemoveError
+                } else {
+                    FavoriteErrorEvent.AddError
+                }
             }
         }
+    }
+
+    fun clearFavoriteErrorEvent() {
+        _favoriteErrorEvent.value = null
     }
 
     fun openShareDialog() {
@@ -117,4 +133,9 @@ sealed class NavigationEvent {
     data class ShareLink(val url: String) : NavigationEvent()
     data class OpenEmail(val email: String) : NavigationEvent()
     data class OpenPhone(val phone: String) : NavigationEvent()
+}
+
+sealed class FavoriteErrorEvent {
+    object AddError : FavoriteErrorEvent()
+    object RemoveError : FavoriteErrorEvent()
 }
