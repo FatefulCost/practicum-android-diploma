@@ -10,6 +10,8 @@
     <string name="search_hint">Поиск вакансий</string>
     <string name="filter">Фильтр</string>
     <string name="nothing_found">Ничего не найдено</string>
+    <string name="try_another_query">Попробуйте изменить поисковый запрос</string>
+    <string name="retry">Повторить</string>
 
     <!-- Filter Screen -->
     <string name="filter_settings">Настройки фильтрации</string>
@@ -69,9 +71,21 @@
     <string name="team_member_3">Разработчик3</string>
     <string name="team_member_4">Разработчик5</string>
 
+    <!-- Favorites Screen -->
+    <string name="favorites_empty">Список избранных вакансий пуст</string>
+    <string name="favorites_error">Не удалось загрузить избранное</string>
+
     <!-- Errors -->
     <string name="error_no_internet">Нет интернета</string>
     <string name="error_loading_data">Ошибка сервера</string>
-    <string name="error_vacancy_not_found">Не удалось получить список вакансий</string>
+    <string name="error_vacancy_not_found">Вакансия не найдена или удалена</string>
+    <string name="error_add_to_favorites">Не удалось добавить в избранное</string>
+    <string name="error_remove_from_favorites">Не удалось удалить из избранного</string>
+
+    <!-- Vacancy Detail -->
+    <string name="contact_person">Контактное лицо</string>
+    <string name="email_label">E-mail</string>
+    <string name="phone_label">Телефон</string>
+    <string name="required_experience">Требуемый опыт</string>
 
 </resources>

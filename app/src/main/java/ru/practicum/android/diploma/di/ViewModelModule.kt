@@ -12,7 +12,7 @@ val viewModelModule = module {
 
     viewModel { SearchViewModel(get(), get()) }
 
-    viewModel { ru.practicum.android.diploma.ui.favorites.FavoritesViewModel() }
+    viewModel { ru.practicum.android.diploma.ui.favorites.FavoritesViewModel(get()) }
 
     viewModel { FilterViewModel(get()) }
 
