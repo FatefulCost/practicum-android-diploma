@@ -13,11 +13,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.snackbar.Snackbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.data.dto.ContactsDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.databinding.FragmentVacancyDetailBinding
+import ru.practicum.android.diploma.ui.detail.FavoriteErrorEvent
 import ru.practicum.android.diploma.ui.detail.NavigationEvent
 import ru.practicum.android.diploma.ui.detail.VacancyDetailErrorType
 import ru.practicum.android.diploma.ui.detail.VacancyDetailState
@@ -64,6 +66,16 @@ class VacancyDetailFragment : Fragment() {
         viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
             val icon = if (isFavorite) R.drawable.ic_favorites_filled else R.drawable.ic_favorites_outline
             binding.toolbar.menu.findItem(R.id.action_favorite)?.setIcon(icon)
+        }
+        viewModel.favoriteErrorEvent.observe(viewLifecycleOwner) { event ->
+            if (event != null) {
+                val message = when (event) {
+                    is FavoriteErrorEvent.AddError -> getString(R.string.error_add_to_favorites)
+                    is FavoriteErrorEvent.RemoveError -> getString(R.string.error_remove_from_favorites)
+                }
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                viewModel.clearFavoriteErrorEvent()
+            }
         }
         viewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
             if (event != null) handleNavigationEvent(event)

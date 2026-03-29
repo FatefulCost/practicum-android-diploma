@@ -72,6 +72,8 @@
     <string name="error_no_internet">Нет интернета</string>
     <string name="error_loading_data">Ошибка сервера</string>
     <string name="error_vacancy_not_found">Вакансия не найдена или удалена</string>
+    <string name="error_add_to_favorites">Не удалось добавить в избранное</string>
+    <string name="error_remove_from_favorites">Не удалось удалить из избранного</string>
 
     <!-- Vacancy Detail -->
     <string name="contact_person">Контактное лицо</string>
