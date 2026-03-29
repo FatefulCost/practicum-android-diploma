@@ -1,5 +1,7 @@
 package ru.practicum.android.diploma.ui.detail
 
+import android.database.sqlite.SQLiteException
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -76,8 +78,8 @@ class VacancyDetailViewModel(
                     repository.addToFavorites(vacancy)
                 }
                 _isFavorite.value = !previousState
-            } catch (e: Exception) {
-                // Откатываем состояние при ошибке операции с БД
+            } catch (e: SQLiteException) {
+                Log.e(TAG, "Failed to toggle favorite for vacancy ${vacancy.id}", e)
                 _isFavorite.value = previousState
                 _favoriteErrorEvent.value = if (previousState) {
                     FavoriteErrorEvent.RemoveError
@@ -114,6 +116,7 @@ class VacancyDetailViewModel(
 
     companion object {
         private const val HTTP_NOT_FOUND = 404
+        private const val TAG = "VacancyDetailViewModel"
     }
 }
 
