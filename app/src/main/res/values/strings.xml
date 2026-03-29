@@ -71,6 +71,12 @@
     <!-- Errors -->
     <string name="error_no_internet">Нет интернета</string>
     <string name="error_loading_data">Ошибка сервера</string>
-    <string name="error_vacancy_not_found">Не удалось получить список вакансий</string>
+    <string name="error_vacancy_not_found">Вакансия не найдена или удалена</string>
+
+    <!-- Vacancy Detail -->
+    <string name="contact_person">Контактное лицо</string>
+    <string name="email_label">E-mail</string>
+    <string name="phone_label">Телефон</string>
+    <string name="required_experience">Требуемый опыт</string>
 
 </resources>
