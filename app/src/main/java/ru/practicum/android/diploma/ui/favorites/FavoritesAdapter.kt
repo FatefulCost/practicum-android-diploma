@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.data.database.VacancyEntity
@@ -39,20 +39,27 @@ class FavoritesAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(vacancy: VacancyEntity) {
-            binding.tvVacancyName.text = vacancy.name
+            val nameWithRegion = if (!vacancy.areaName.isNullOrBlank()) {
+                "${vacancy.name}, ${vacancy.areaName}"
+            } else {
+                vacancy.name
+            }
+            binding.tvVacancyName.text = nameWithRegion
             binding.tvCompanyName.text = vacancy.employerName
-            binding.tvVacancyRegion.text = vacancy.areaName
             binding.tvSalary.text = SalaryFormatter.format(
                 from = vacancy.salaryFrom,
                 to = vacancy.salaryTo,
                 currency = vacancy.salaryCurrency
             )
 
+            val cornerRadiusPx = binding.ivLogo.context.resources
+                .getDimensionPixelSize(R.dimen.logo_corner_radius)
+
             Glide.with(binding.ivLogo.context)
                 .load(vacancy.employerLogo)
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_foreground)
-                .apply(RequestOptions.bitmapTransform(CircleCrop()))
+                .placeholder(R.drawable.ic_placeholder_company)
+                .error(R.drawable.ic_placeholder_company)
+                .apply(RequestOptions.bitmapTransform(RoundedCorners(cornerRadiusPx)))
                 .into(binding.ivLogo)
 
             binding.root.setOnClickListener { onItemClick(vacancy) }
