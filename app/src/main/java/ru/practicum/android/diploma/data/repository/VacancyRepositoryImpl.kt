@@ -35,12 +35,15 @@ class VacancyRepositoryImpl(
         val entity = VacancyEntity(
             id = vacancy.id,
             name = vacancy.name,
-            employerName = vacancy.employer?.name ?: "",
-            employerLogo = vacancy.employer?.logo,
+            employerName = vacancy.employer.name,
+            employerLogo = vacancy.employer.logo,
             salaryFrom = vacancy.salary?.from,
             salaryTo = vacancy.salary?.to,
             salaryCurrency = vacancy.salary?.currency,
-            areaName = vacancy.area?.name ?: ""
+            areaName = vacancy.area.name,
+            experienceName = vacancy.experience?.name,
+            scheduleName = vacancy.schedule?.name,
+            employmentName = vacancy.employment?.name
         )
         vacancyDao.insert(entity)
     }
