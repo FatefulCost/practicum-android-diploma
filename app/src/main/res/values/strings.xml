@@ -69,8 +69,8 @@
     <string name="team_member_4">Разработчик5</string>
 
     <!-- Favorites Screen -->
-    <string name="favorites_empty">Список избранных вакансий пуст</string>
-    <string name="favorites_error">Не удалось загрузить избранное</string>
+    <string name="favorites_empty">Список пуст</string>
+    <string name="favorites_error">Не удалось получить список вакансий</string>
 
     <!-- Errors -->
     <string name="error_no_internet">Нет интернета</string>
