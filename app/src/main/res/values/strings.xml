@@ -68,6 +68,10 @@
     <string name="team_member_3">Разработчик3</string>
     <string name="team_member_4">Разработчик5</string>
 
+    <!-- Favorites Screen -->
+    <string name="favorites_empty">Список избранных вакансий пуст</string>
+    <string name="favorites_error">Не удалось загрузить избранное</string>
+
     <!-- Errors -->
     <string name="error_no_internet">Нет интернета</string>
     <string name="error_loading_data">Ошибка сервера</string>
