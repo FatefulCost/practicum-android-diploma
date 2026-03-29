@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
+import android.util.Log
 
 class SearchViewModel(
     private val vacancyRepository: VacancyRepository,
@@ -23,6 +24,7 @@ class SearchViewModel(
 
     companion object {
         private const val DEBOUNCE_DELAY = 500L
+        private const val TAG = "SearchViewModel"
     }
 
     init {
@@ -55,18 +57,25 @@ class SearchViewModel(
 
         viewModelScope.launch {
             _searchState.value = SearchState.Loading
+            Log.d(TAG, "Поиск: $query")
 
             val result = vacancyRepository.searchVacancies(text = query)
             result.fold(
                 onSuccess = { response ->
-                    val vacancies = response.vacancies
+                    // КРИТИЧЕСКИ ВАЖНО: проверяем на null
+                    val vacancies = response.vacancies ?: emptyList()
+                    Log.d(TAG, "Успех! found: ${response.found}, pages: ${response.pages}, vacancies size: ${vacancies.size}")
+
                     if (vacancies.isEmpty()) {
+                        Log.d(TAG, "Список вакансий пуст")
                         _searchState.value = SearchState.EmptyResult
                     } else {
+                        Log.d(TAG, "Найдено ${vacancies.size} вакансий")
                         _searchState.value = SearchState.Success(vacancies)
                     }
                 },
-                onFailure = {
+                onFailure = { error ->
+                    Log.e(TAG, "Ошибка: ${error.message}", error)
                     _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
                 }
             )

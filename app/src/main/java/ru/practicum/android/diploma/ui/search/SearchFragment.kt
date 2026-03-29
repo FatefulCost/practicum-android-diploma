@@ -6,12 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
-// import androidx.lifecycle.Lifecycle
-// import androidx.lifecycle.ViewModelProvider
-// import androidx.lifecycle.lifecycleScope
-// import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-// import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.LinearLayoutManager
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentSearchBinding
@@ -19,8 +15,8 @@ import ru.practicum.android.diploma.databinding.FragmentSearchBinding
 class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: SearchViewModel by viewModel()
+    private lateinit var adapter: VacancyAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +34,8 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupUI() {
+        setupRecyclerView()
+
         binding.fabFilter.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
         }
@@ -45,19 +43,26 @@ class SearchFragment : Fragment() {
         binding.editTextSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = binding.editTextSearch.text.toString()
-                viewModel.performSearch(query)
+                if (query.isNotBlank()) {
+                    viewModel.performSearch(query)
+                }
                 true
             } else {
                 false
             }
         }
+    }
 
-        binding.editTextSearch.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val query = binding.editTextSearch.text.toString()
-                viewModel.onSearchQueryChanged(query)
+    private fun setupRecyclerView() {
+        adapter = VacancyAdapter(emptyList()) { vacancy ->
+            val bundle = Bundle().apply {
+                putString("vacancyId", vacancy.id)
             }
+            findNavController().navigate(R.id.action_searchFragment_to_vacancyDetailFragment, bundle)
         }
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = adapter
     }
 
     private fun observeState() {
@@ -76,11 +81,12 @@ class SearchFragment : Fragment() {
                 is SearchState.EmptyResult -> {
                     binding.recyclerView.visibility = View.GONE
                     binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.textViewEmpty.text = getString(R.string.nothing_found)
+                    binding.textViewEmpty.text = "Ничего не найдено"
                 }
                 is SearchState.Success -> {
                     binding.recyclerView.visibility = View.VISIBLE
                     binding.textViewEmpty.visibility = View.GONE
+                    adapter.updateData(state.vacancies)
                 }
                 is SearchState.Error -> {
                     binding.recyclerView.visibility = View.GONE

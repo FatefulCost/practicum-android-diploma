@@ -10,23 +10,29 @@ import retrofit2.converter.gson.GsonConverterFactory
 import ru.practicum.android.diploma.BuildConfig
 import ru.practicum.android.diploma.data.network.ApiService
 import ru.practicum.android.diploma.data.network.NetworkClient
+import ru.practicum.android.diploma.data.network.AuthInterceptor
 import java.util.concurrent.TimeUnit
 
 val networkModule = module {
     single { provideGson() }
-    single { provideOkHttpClient() }
+    single { provideAuthInterceptor() }
+    single { provideOkHttpClient(get()) }
     single { provideRetrofit(get(), get()) }
     single { provideApiService(get()) }
     single { NetworkClient(get()) }
 }
 
-private const val TIMETOCHECK = 30L
+private const val TIMEOUT_SECONDS = 30L
 
 private fun provideGson(): Gson {
     return GsonBuilder().setLenient().create()
 }
 
-private fun provideOkHttpClient(): OkHttpClient {
+private fun provideAuthInterceptor(): AuthInterceptor {
+    return AuthInterceptor()
+}
+
+private fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
     val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor.Level.BODY
@@ -37,9 +43,10 @@ private fun provideOkHttpClient(): OkHttpClient {
 
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .connectTimeout(TIMETOCHECK, TimeUnit.SECONDS)
-        .readTimeout(TIMETOCHECK, TimeUnit.SECONDS)
-        .writeTimeout(TIMETOCHECK, TimeUnit.SECONDS)
+        .addInterceptor(authInterceptor)
+        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .build()
 }
 
@@ -54,4 +61,3 @@ private fun provideRetrofit(gson: Gson, client: OkHttpClient): Retrofit {
 private fun provideApiService(retrofit: Retrofit): ApiService {
     return retrofit.create(ApiService::class.java)
 }
-

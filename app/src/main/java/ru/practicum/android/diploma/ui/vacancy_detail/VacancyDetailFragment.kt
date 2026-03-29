@@ -1,7 +1,14 @@
 package ru.practicum.android.diploma.ui.vacancy_detail
 
 import android.content.Intent
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -85,12 +92,20 @@ class VacancyDetailFragment : Fragment() {
     }
 
     private fun displayVacancyDetails(vacancy: VacancyDetailDto) {
+        Log.d("VacancyDetail", "=== DISPLAYING VACANCY ===")
+        Log.d("VacancyDetail", "Name: ${vacancy.name}")
+        Log.d("VacancyDetail", "Employer: ${vacancy.employer.name}")
+        Log.d("VacancyDetail", "Logo URL: ${vacancy.employer.logoUrls?.logo240}")
+        Log.d("VacancyDetail", "Contacts email: ${vacancy.contacts?.email}")
+        Log.d("VacancyDetail", "Contacts phone: ${vacancy.contacts?.phone}")
+
         binding.tvVacancyTitle.text = vacancy.name
         binding.tvSalary.text = VacancyFormatter.formatSalary(vacancy.salary)
         displayCompanyInfo(vacancy)
         displayExperienceAndWorkFormat(vacancy)
         displayDescriptionSections(vacancy)
         displaySkills(vacancy)
+        displayContacts(vacancy)  // ДОБАВЬТЕ ЭТУ СТРОКУ
     }
 
     private fun displayCompanyInfo(vacancy: VacancyDetailDto) {
@@ -100,11 +115,17 @@ class VacancyDetailFragment : Fragment() {
         binding.tvCompanyLocation.text = location ?: "Локация не указана"
 
         val logoUrl = vacancy.employer.logoUrls?.logo240 ?: vacancy.employer.logoUrls?.logo90
-        Glide.with(this)
-            .load(logoUrl)
-            .placeholder(R.drawable.ic_logo)
-            .error(R.drawable.ic_logo)
-            .into(binding.ivCompanyLogo)
+        Log.d("VacancyDetail", "Logo URL: $logoUrl")
+
+        if (!logoUrl.isNullOrBlank()) {
+            Glide.with(this)
+                .load(logoUrl)
+                .placeholder(R.drawable.ic_logo)
+                .error(R.drawable.ic_logo)
+                .into(binding.ivCompanyLogo)
+        } else {
+            binding.ivCompanyLogo.setImageResource(R.drawable.ic_logo)
+        }
     }
 
     private fun buildLocationString(address: ru.practicum.android.diploma.data.dto.AddressDto?, areaName: String?): String? {
@@ -183,6 +204,70 @@ class VacancyDetailFragment : Fragment() {
     private fun showError(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         requireActivity().onBackPressedDispatcher.onBackPressed()
+    }
+
+    private fun displayContacts(vacancy: VacancyDetailDto) {
+        val contacts = vacancy.contacts
+        if (contacts == null) {
+            binding.layoutContacts.visibility = View.GONE
+            return
+        }
+
+        val hasEmail = !contacts.email.isNullOrEmpty()
+        val hasPhone = contacts.phone != null && contacts.phone.isNotEmpty()
+
+        if (!hasEmail && !hasPhone) {
+            binding.layoutContacts.visibility = View.GONE
+            return
+        }
+
+        binding.layoutContacts.visibility = View.VISIBLE
+
+        // Email
+        if (hasEmail) {
+            binding.layoutEmail.visibility = View.VISIBLE
+            binding.tvEmail.text = contacts.email
+            binding.tvEmail.setOnClickListener {
+                openEmail(contacts.email!!)
+            }
+        } else {
+            binding.layoutEmail.visibility = View.GONE
+        }
+
+        // Телефон
+        if (hasPhone) {
+            binding.layoutPhone.visibility = View.VISIBLE
+            val firstPhone = contacts.phone!!.first()
+            binding.tvPhone.text = firstPhone
+            binding.tvPhone.setOnClickListener {
+                openPhone(firstPhone)
+            }
+
+            // Комментарий к телефону (имя контакта)
+            if (!contacts.name.isNullOrEmpty()) {
+                binding.tvPhoneComment.text = contacts.name
+                binding.tvPhoneComment.visibility = View.VISIBLE
+            } else {
+                binding.tvPhoneComment.visibility = View.GONE
+            }
+        } else {
+            binding.layoutPhone.visibility = View.GONE
+        }
+    }
+
+    private fun openEmail(email: String) {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:$email")
+        }
+        startActivity(Intent.createChooser(intent, "Отправить письмо"))
+    }
+
+    private fun openPhone(phone: String) {
+        val cleanedPhone = phone.replace(Regex("[^\\d+]"), "")
+        val intent = Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$cleanedPhone")
+        }
+        startActivity(Intent.createChooser(intent, "Выберите приложение для звонка"))
     }
 
     override fun onDestroyView() {

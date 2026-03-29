@@ -6,13 +6,12 @@
         android:id="@+id/action_share"
         android:title="@string/share"
         android:icon="@drawable/ic_share"
-        app:showAsAction="always" />
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_favorite"
         android:title=""
         android:icon="@drawable/ic_favorites_outline"
-        app:showAsAction="always"
-        />
+        app:showAsAction="always"/>
 
 </menu>
