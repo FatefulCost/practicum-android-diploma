@@ -1,11 +1,6 @@
-package ru.practicum.android.diploma.ui.vacancy_detail
+package ru.practicum.android.diploma.ui.vacancydetail
 
 import android.content.Intent
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log

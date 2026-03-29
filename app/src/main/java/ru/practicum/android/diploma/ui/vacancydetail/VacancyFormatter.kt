@@ -1,4 +1,4 @@
-package ru.practicum.android.diploma.ui.vacancy_detail
+package ru.practicum.android.diploma.ui.vacancydetail
 
 import ru.practicum.android.diploma.data.dto.SalaryDto
 

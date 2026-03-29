@@ -1,4 +1,4 @@
-package ru.practicum.android.diploma.ui.vacancy_detail
+package ru.practicum.android.diploma.ui.vacancydetail
 
 import android.content.Intent
 import android.net.Uri
