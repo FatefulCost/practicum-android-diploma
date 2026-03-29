@@ -30,6 +30,13 @@ class FavoritesViewModel(
             }
         }
     }
+
+    fun removeFromFavorites(vacancyId: String) {
+        viewModelScope.launch {
+            repository.removeFromFavorites(vacancyId)
+            loadFavorites()
+        }
+    }
 }
 
 sealed class FavoritesState {
