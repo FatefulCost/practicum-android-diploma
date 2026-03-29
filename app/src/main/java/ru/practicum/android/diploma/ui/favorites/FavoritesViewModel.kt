@@ -22,11 +22,26 @@ class FavoritesViewModel(
     fun loadFavorites() {
         _favoritesState.value = FavoritesState.Loading
         viewModelScope.launch {
-            val favorites = repository.getFavoriteVacancies()
-            _favoritesState.value = if (favorites.isEmpty()) {
-                FavoritesState.Empty
-            } else {
-                FavoritesState.Content(favorites)
+            try {
+                val favorites = repository.getFavoriteVacancies()
+                _favoritesState.value = if (favorites.isEmpty()) {
+                    FavoritesState.Empty
+                } else {
+                    FavoritesState.Content(favorites)
+                }
+            } catch (e: Exception) {
+                _favoritesState.value = FavoritesState.Error(e.message ?: "Неизвестная ошибка")
+            }
+        }
+    }
+
+    fun removeFromFavorites(vacancyId: String) {
+        viewModelScope.launch {
+            try {
+                repository.removeFromFavorites(vacancyId)
+                loadFavorites()
+            } catch (e: Exception) {
+                _favoritesState.value = FavoritesState.Error(e.message ?: "Неизвестная ошибка")
             }
         }
     }
