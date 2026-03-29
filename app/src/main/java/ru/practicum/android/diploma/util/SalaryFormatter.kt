@@ -22,6 +22,16 @@ object SalaryFormatter {
         }
     }
 
+    fun format(from: Int?, to: Int?, currency: String?): String {
+        val cur = currency ?: ""
+        return when {
+            from != null && to != null -> "от ${formatNumber(from)} до ${formatNumber(to)} $cur"
+            from != null -> "от ${formatNumber(from)} $cur"
+            to != null -> "до ${formatNumber(to)} $cur"
+            else -> "Зарплата не указана"
+        }
+    }
+
     private fun formatNumber(number: Int): String {
         return NumberFormat.getInstance(Locale.getDefault()).format(number)
     }
