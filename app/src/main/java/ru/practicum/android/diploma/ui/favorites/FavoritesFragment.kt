@@ -17,7 +17,7 @@ class FavoritesFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: FavoritesViewModel by viewModel()
-    private lateinit var adapter: FavoritesAdapter
+    private var adapter: FavoritesAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +53,11 @@ class FavoritesFragment : Fragment() {
         }
     }
 
+    private fun clearAdapter() {
+        binding.recyclerView.adapter = null
+        adapter = null
+    }
+
     private fun observeViewModel() {
         viewModel.favoritesState.observe(viewLifecycleOwner) { state ->
             when (state) {
@@ -76,7 +81,7 @@ class FavoritesFragment : Fragment() {
         binding.placeholderEmpty.visibility = View.GONE
         binding.placeholderError.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
-        adapter.updateVacancies(state.vacancies)
+        adapter?.updateVacancies(state.vacancies)
     }
 
     private fun showEmpty() {
@@ -95,6 +100,7 @@ class FavoritesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        clearAdapter()
         _binding = null
     }
 }
