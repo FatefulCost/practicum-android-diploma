@@ -17,15 +17,11 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentSearchBinding
 
 class SearchFragment : Fragment() {
-
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModel()
     private lateinit var adapter: VacancyAdapter
     private var isLoadingMore = false
-
-    private lateinit var adapter: VacancyAdapter
-    private var isLoadingMore = false  // Флаг, чтобы не вызывать loadNextPage несколько раз
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +35,7 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
-        observeViewModel()
+        observeState()
     }
 
     private fun setupUI() {
@@ -102,7 +98,7 @@ class SearchFragment : Fragment() {
         })
     }
 
-    private fun observeViewModel() {
+    private fun observeState() {
         viewModel.searchState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SearchState.Empty -> {
@@ -149,17 +145,6 @@ class SearchFragment : Fragment() {
                 isLoadingMore = false
             }
         }
-        binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
-    }
-
-    private fun hideAllPlaceholders() {
-        binding.tvFoundCount.visibility = View.GONE
-        binding.placeholderEnterQuery.visibility = View.GONE
-        binding.placeholderNotFound.visibility = View.GONE
-        binding.placeholderNoInternet.visibility = View.GONE
-        binding.placeholderError.visibility = View.GONE
-        binding.progressBar.visibility = View.GONE
     }
 
     override fun onDestroyView() {
