@@ -31,7 +31,6 @@ class SearchViewModel(
 
     companion object {
         private const val DEBOUNCE_DELAY = 500L
-        private const val TAG = "SearchViewModel"
     }
 
     init {
@@ -83,21 +82,18 @@ class SearchViewModel(
     }
 
     private fun canPerformSearch(query: String): Boolean {
-        if (query.isBlank()) {
-            _searchState.value = SearchState.Empty
-            return false
+        return when {
+            query.isBlank() -> {
+                _searchState.value = SearchState.Empty
+                false
+            }
+            isLoading -> false
+            !networkUtils.isNetworkAvailable() -> {
+                _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+                false
+            }
+            else -> true
         }
-
-        if (isLoading) {
-            return false
-        }
-
-        if (!networkUtils.isNetworkAvailable()) {
-            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
-            return false
-        }
-
-        return true
     }
 
     private fun handleSearchSuccess(
