@@ -26,6 +26,10 @@ class VacancyAdapter(
         holder.bind(vacancies[position])
     }
 
+    companion object {
+        private const val NUMBER_FORMAT_GROUP_SIZE = 3
+    }
+
     override fun getItemCount(): Int = vacancies.size
 
     fun updateData(newVacancies: List<VacancyDetailDto>) {
@@ -92,10 +96,11 @@ class VacancyAdapter(
             }
         }
 
+
         private fun formatNumber(number: Int): String {
             return number.toString()
                 .reversed()
-                .chunked(3)
+                .chunked(NUMBER_FORMAT_GROUP_SIZE)
                 .joinToString(" ")
                 .reversed()
         }

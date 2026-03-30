@@ -11,7 +11,6 @@ import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.data.dto.VacancyResponseDto
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
-import android.util.Log
 
 class SearchViewModel(
     private val repository: VacancyRepository,
@@ -71,6 +70,7 @@ class SearchViewModel(
         }
 
         if (isLoading) return
+
         isLoading = true
 
         if (!networkUtils.isNetworkAvailable()) {
@@ -79,11 +79,7 @@ class SearchViewModel(
             return
         }
 
-        if (isLoadMore) {
-            _searchState.value = SearchState.LoadingMore
-        } else {
-            _searchState.value = SearchState.Loading
-        }
+        _searchState.value = if (isLoadMore) SearchState.LoadingMore else SearchState.Loading
 
         viewModelScope.launch {
             val result = repository.searchVacancies(text = query, page = page)

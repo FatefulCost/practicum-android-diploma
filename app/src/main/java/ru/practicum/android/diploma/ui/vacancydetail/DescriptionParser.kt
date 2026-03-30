@@ -9,9 +9,8 @@ object DescriptionParser {
         val contentStart = startIndex + startMarker.length
         val endIndex = endMarker?.let { text.indexOf(it, contentStart) } ?: text.length
 
-        if (endIndex == -1) return null
-
-        return text.substring(contentStart, endIndex).trim()
+        return if (endIndex == -1) null
+        else text.substring(contentStart, endIndex).trim().takeIf { it.isNotEmpty() }
     }
 
     fun parseDescription(description: String?): DescriptionSections {

@@ -94,12 +94,12 @@ class VacancyDetailFragment : Fragment() {
     }
 
     private fun displayVacancyDetails(vacancy: VacancyDetailDto) {
-        Log.d("VacancyDetail", "=== DISPLAYING VACANCY ===")
-        Log.d("VacancyDetail", "Name: ${vacancy.name}")
-        Log.d("VacancyDetail", "Employer: ${vacancy.employer.name}")
-        Log.d("VacancyDetail", "Logo URL: ${vacancy.employer.logoUrls?.logo240}")
-        Log.d("VacancyDetail", "Contacts email: ${vacancy.contacts?.email}")
-        Log.d("VacancyDetail", "Contacts phone: ${vacancy.contacts?.phone}")
+        Log.d(LOG_TAG, "=== DISPLAYING VACANCY ===")
+        Log.d(LOG_TAG, "Name: ${vacancy.name}")
+        Log.d(LOG_TAG, "Employer: ${vacancy.employer.name}")
+        Log.d(LOG_TAG, "Logo URL: ${vacancy.employer.logoUrls?.logo240}")
+        Log.d(LOG_TAG, "Contacts email: ${vacancy.contacts?.email}")
+        Log.d(LOG_TAG, "Contacts phone: ${vacancy.contacts?.phone}")
 
         binding.tvVacancyTitle.text = vacancy.name
         binding.tvSalary.text = VacancyFormatter.formatSalary(vacancy.salary)
@@ -107,7 +107,7 @@ class VacancyDetailFragment : Fragment() {
         displayExperienceAndWorkFormat(vacancy)
         displayDescriptionSections(vacancy)
         displaySkills(vacancy)
-        displayContacts(vacancy) 
+        displayContacts(vacancy)
     }
 
     private fun displayCompanyInfo(vacancy: VacancyDetailDto) {
