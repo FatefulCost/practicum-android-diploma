@@ -64,21 +64,7 @@ class SearchViewModel(
     }
 
     fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
-        // Проверка на пустой запрос
-        if (query.isBlank()) {
-            _searchState.value = SearchState.Empty
-            return
-        }
-
-        // Проверка на уже идущую загрузку или отсутствие интернета
-        if (isLoading) {
-            return
-        }
-
-        if (!networkUtils.isNetworkAvailable()) {
-            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
-            return
-        }
+        if (!canPerformSearch(query)) return
 
         isLoading = true
         _searchState.value = if (isLoadMore) SearchState.LoadingMore else SearchState.Loading
@@ -94,6 +80,24 @@ class SearchViewModel(
                 }
             )
         }
+    }
+
+    private fun canPerformSearch(query: String): Boolean {
+        if (query.isBlank()) {
+            _searchState.value = SearchState.Empty
+            return false
+        }
+
+        if (isLoading) {
+            return false
+        }
+
+        if (!networkUtils.isNetworkAvailable()) {
+            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+            return false
+        }
+
+        return true
     }
 
     private fun handleSearchSuccess(
