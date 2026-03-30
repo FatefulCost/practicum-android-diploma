@@ -105,7 +105,9 @@ class SearchFragment : Fragment() {
                 val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
                 val totalItemCount = adapter.itemCount
 
-                if (!isLoadingMore && lastVisiblePosition >= totalItemCount - SCROLL_LOAD_THRESHOLD && totalItemCount > 0) {
+                if (!isLoadingMore &&
+                    lastVisiblePosition >= totalItemCount - SCROLL_LOAD_THRESHOLD &&
+                    totalItemCount > 0) {
                     isLoadingMore = true
                     viewModel.loadNextPage()
                 }

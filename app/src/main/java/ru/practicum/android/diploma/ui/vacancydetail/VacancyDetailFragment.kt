@@ -107,7 +107,7 @@ class VacancyDetailFragment : Fragment() {
         displayExperienceAndWorkFormat(vacancy)
         displayDescriptionSections(vacancy)
         displaySkills(vacancy)
-        displayContacts(vacancy)  // ДОБАВЬТЕ ЭТУ СТРОКУ
+        displayContacts(vacancy) 
     }
 
     private fun displayCompanyInfo(vacancy: VacancyDetailDto) {

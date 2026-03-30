@@ -8,7 +8,6 @@ import ru.practicum.android.diploma.data.dto.VacancyResponseDto
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import android.util.Log
 
 class NetworkClient(
     private val apiService: ApiService
@@ -17,46 +16,35 @@ class NetworkClient(
         private const val TAG = "NetworkClient"
     }
 
-    suspend fun getAreas(): Result<List<FilterAreaDto>> {
+    private suspend fun <T> safeApiCall(
+        action: suspend () -> T,
+        operationName: String
+    ): Result<T> {
         return try {
-            Result.success(apiService.getAreas())
+            Result.success(action())
         } catch (e: HttpException) {
-            Log.e(TAG, "HTTP error in getAreas: ${e.message}", e)
             Result.failure(e)
         } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Timeout error in getAreas: ${e.message}", e)
             Result.failure(e)
         } catch (e: UnknownHostException) {
-            Log.e(TAG, "Unknown host error in getAreas: ${e.message}", e)
             Result.failure(e)
         } catch (e: IOException) {
-            Log.e(TAG, "IO error in getAreas: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.wtf(TAG, "Unexpected error in getAreas", e)
             Result.failure(e)
         }
     }
 
+    suspend fun getAreas(): Result<List<FilterAreaDto>> {
+        return safeApiCall(
+            action = { apiService.getAreas() },
+            operationName = "getAreas"
+        )
+    }
+
     suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
-        return try {
-            Result.success(apiService.getIndustries())
-        } catch (e: HttpException) {
-            Log.e(TAG, "HTTP error in getIndustries: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Timeout error in getIndustries: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: UnknownHostException) {
-            Log.e(TAG, "Unknown host error in getIndustries: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: IOException) {
-            Log.e(TAG, "IO error in getIndustries: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.wtf(TAG, "Unexpected error in getIndustries", e)
-            Result.failure(e)
-        }
+        return safeApiCall(
+            action = { apiService.getIndustries() },
+            operationName = "getIndustries"
+        )
     }
 
     suspend fun searchVacancies(
@@ -67,70 +55,34 @@ class NetworkClient(
         page: Int = 0,
         onlyWithSalary: Boolean = false
     ): Result<VacancyResponseDto> {
-        return try {
-            Log.d(TAG, "=== SEARCH REQUEST ===")
-            Log.d(TAG, "text: $text")
-            Log.d(TAG, "page: $page")
+        return safeApiCall(
+            action = {
+                val response = apiService.searchVacancies(
+                    area = area,
+                    industry = industry,
+                    text = text,
+                    salary = salary,
+                    page = page,
+                    onlyWithSalary = onlyWithSalary
+                )
 
-            val response = apiService.searchVacancies(
-                area = area,
-                industry = industry,
-                text = text,
-                salary = salary,
-                page = page,
-                onlyWithSalary = onlyWithSalary
-            )
+                val vacancies = response.vacancies ?: emptyList()
 
-            val vacancies = response.vacancies ?: emptyList()
-
-            Log.d(TAG, "=== SEARCH RESPONSE ===")
-            Log.d(TAG, "found: ${response.found}")
-            Log.d(TAG, "pages: ${response.pages}")
-            Log.d(TAG, "page: ${response.page}")
-            Log.d(TAG, "vacancies count: ${vacancies.size}")
-
-            if (vacancies.isNotEmpty()) {
-                Log.d(TAG, "First vacancy: ${vacancies.first().name}")
-            }
-
-            val safeResponse = VacancyResponseDto(
-                found = response.found,
-                pages = response.pages,
-                page = response.page,
-                vacancies = vacancies
-            )
-
-            Result.success(safeResponse)
-        } catch (e: HttpException) {
-            Log.e(TAG, "HTTP error: ${e.code()} - ${e.message()}")
-            Result.failure(e)
-        } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Timeout: ${e.message}")
-            Result.failure(e)
-        } catch (e: UnknownHostException) {
-            Log.e(TAG, "Unknown host: ${e.message}")
-            Result.failure(e)
-        } catch (e: IOException) {
-            Log.e(TAG, "IO error: ${e.message}")
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected error: ${e.message}")
-            Result.failure(e)
-        }
+                VacancyResponseDto(
+                    found = response.found,
+                    pages = response.pages,
+                    page = response.page,
+                    vacancies = vacancies
+                )
+            },
+            operationName = "searchVacancies"
+        )
     }
 
     suspend fun getVacancyDetails(vacancyId: String): Result<VacancyDetailDto> {
-        return try {
-            Log.d(TAG, "Getting details for vacancy: $vacancyId")
-            val response = apiService.getVacancyDetails(vacancyId)
-            Log.d(TAG, "Got details for: ${response.name}")
-            Result.success(response)
-        } catch (e: HttpException) {
-            Log.e(TAG, "HTTP error: ${e.code()} - ${e.message()}")
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error: ${e.message}")
-            Result.failure(e)
-        }
+        return safeApiCall(
+            action = { apiService.getVacancyDetails(vacancyId) },
+            operationName = "getVacancyDetails"
+        )
     }
 }

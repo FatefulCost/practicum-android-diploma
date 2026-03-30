@@ -20,5 +20,5 @@ data class VacancyDetailDto(
 
 ) {
     val location: String?
-    get() = area.name
+        get() = area.name
 }

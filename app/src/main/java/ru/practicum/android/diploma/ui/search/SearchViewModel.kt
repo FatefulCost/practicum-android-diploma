@@ -79,12 +79,10 @@ class SearchViewModel(
             return
         }
 
-        if (!isLoadMore) {
-            _searchState.value = SearchState.Loading
-            Log.d(TAG, "Новый поиск: '$query', страница $page")
-        } else {
+        if (isLoadMore) {
             _searchState.value = SearchState.LoadingMore
-            Log.d(TAG, "Дозагрузка следующей страницы: '$query', страница $page")
+        } else {
+            _searchState.value = SearchState.Loading
         }
 
         viewModelScope.launch {
