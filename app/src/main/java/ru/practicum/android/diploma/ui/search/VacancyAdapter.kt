@@ -19,7 +19,7 @@ class VacancyAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VacancyViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_vacancy, parent, false)
-        return VacancyViewHolder(view)
+        return VacancyViewHolder(view, onItemClick)
     }
 
     override fun onBindViewHolder(holder: VacancyViewHolder, position: Int) {
@@ -33,7 +33,11 @@ class VacancyAdapter(
         notifyDataSetChanged()
     }
 
-    inner class VacancyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class VacancyViewHolder(
+        itemView: View,
+        private val onItemClick: (VacancyDetailDto) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
+
         private val ivLogo: ImageView = itemView.findViewById(R.id.ivLogo)
         private val tvVacancyName: TextView = itemView.findViewById(R.id.tvVacancyName)
         private val tvVacancyRegion: TextView = itemView.findViewById(R.id.tvVacancyRegion)
@@ -41,18 +45,36 @@ class VacancyAdapter(
         private val tvSalary: TextView = itemView.findViewById(R.id.tvSalary)
 
         fun bind(vacancy: VacancyDetailDto) {
+            // Заполнение названия вакансии
             tvVacancyName.text = vacancy.name
-            tvVacancyRegion.text = vacancy.area?.name ?: ""
-            tvCompanyName.text = vacancy.employer.name ?: ""
+
+            // Заполнение региона: area.name из FilterAreaDto
+            tvVacancyRegion.text = vacancy.area.name
+
+            // Заполнение компании: employer.name из EmployerDto
+            tvCompanyName.text = vacancy.employer.name
+
+            // Форматирование зарплаты
             tvSalary.text = formatSalary(vacancy.salary)
 
-            val logoUrl = vacancy.employer.logoUrls?.logo240 ?: vacancy.employer.logoUrls?.logo90
-            Glide.with(itemView.context)
-                .load(logoUrl)
-                .placeholder(R.drawable.ic_logo)
-                .error(R.drawable.ic_logo)
-                .into(ivLogo)
+            // Загрузка логотипа компании
+            val logoUrl = vacancy.employer.logoUrls?.logo240
+                ?: vacancy.employer.logoUrls?.logo90
 
+            if (!logoUrl.isNullOrEmpty()) {
+                Glide.with(itemView.context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.ic_logo)
+                    .error(R.drawable.ic_logo)
+                    .into(ivLogo)
+            } else {
+                // Если URL логотипа нет, показываем placeholder
+                Glide.with(itemView.context)
+                    .load(R.drawable.ic_logo)
+                    .into(ivLogo)
+            }
+
+            // Обработчик клика на элемент списка
             itemView.setOnClickListener {
                 onItemClick(vacancy)
             }
