@@ -40,16 +40,12 @@ class VacancyAdapter(
 
         private val ivLogo: ImageView = itemView.findViewById(R.id.ivLogo)
         private val tvVacancyName: TextView = itemView.findViewById(R.id.tvVacancyName)
-        private val tvVacancyRegion: TextView = itemView.findViewById(R.id.tvVacancyRegion)
         private val tvCompanyName: TextView = itemView.findViewById(R.id.tvCompanyName)
         private val tvSalary: TextView = itemView.findViewById(R.id.tvSalary)
 
         fun bind(vacancy: VacancyDetailDto) {
             // Заполнение названия вакансии
             tvVacancyName.text = vacancy.name
-
-            // Заполнение региона: area.name из FilterAreaDto
-            tvVacancyRegion.text = vacancy.area.name
 
             // Заполнение компании: employer.name из EmployerDto
             tvCompanyName.text = vacancy.employer.name
