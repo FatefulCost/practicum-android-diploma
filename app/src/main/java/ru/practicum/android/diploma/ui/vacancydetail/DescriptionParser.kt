@@ -4,13 +4,18 @@ object DescriptionParser {
 
     fun extractSection(text: String, startMarker: String, endMarker: String?): String? {
         val startIndex = text.indexOf(startMarker)
-        if (startIndex == -1) return null
+        if (startIndex == -1) {
+            return null
+        }
 
         val contentStart = startIndex + startMarker.length
         val endIndex = endMarker?.let { text.indexOf(it, contentStart) } ?: text.length
 
-        return if (endIndex == -1) null
-        else text.substring(contentStart, endIndex).trim().takeIf { it.isNotEmpty() }
+        return if (endIndex == -1) {
+            null
+        } else {
+            text.substring(contentStart, endIndex).trim().takeIf { it.isNotEmpty() }
+        }
     }
 
     fun parseDescription(description: String?): DescriptionSections {

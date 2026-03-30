@@ -96,7 +96,6 @@ class VacancyAdapter(
             }
         }
 
-
         private fun formatNumber(number: Int): String {
             return number.toString()
                 .reversed()

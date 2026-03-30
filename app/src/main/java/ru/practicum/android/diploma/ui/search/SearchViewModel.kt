@@ -64,21 +64,23 @@ class SearchViewModel(
     }
 
     fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
+        // Проверка на пустой запрос
         if (query.isBlank()) {
             _searchState.value = SearchState.Empty
             return
         }
 
-        if (isLoading) return
-
-        isLoading = true
-
-        if (!networkUtils.isNetworkAvailable()) {
-            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
-            isLoading = false
+        // Проверка на уже идущую загрузку или отсутствие интернета
+        if (isLoading) {
             return
         }
 
+        if (!networkUtils.isNetworkAvailable()) {
+            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+            return
+        }
+
+        isLoading = true
         _searchState.value = if (isLoadMore) SearchState.LoadingMore else SearchState.Loading
 
         viewModelScope.launch {
@@ -115,20 +117,16 @@ class SearchViewModel(
 
         if (isLoadMore) {
             allVacancies.addAll(newVacancies)
-            _searchState.value = SearchState.Success(
-                vacancies = allVacancies.toList(),
-                totalFound = response.found,
-                isLoadingMore = false
-            )
         } else {
             allVacancies.clear()
             allVacancies.addAll(newVacancies)
-            _searchState.value = SearchState.Success(
-                vacancies = allVacancies.toList(),
-                totalFound = response.found,
-                isLoadingMore = false
-            )
         }
+
+        _searchState.value = SearchState.Success(
+            vacancies = allVacancies.toList(),
+            totalFound = response.found,
+            isLoadingMore = false
+        )
 
         isLoading = false
     }
