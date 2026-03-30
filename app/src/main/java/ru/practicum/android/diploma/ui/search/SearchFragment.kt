@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -18,13 +19,16 @@ import ru.practicum.android.diploma.databinding.FragmentSearchBinding
 
 class SearchFragment : Fragment() {
 
+    companion object {
+        private const val SCROLL_LOAD_THRESHOLD = 3
+        private const val INITIAL_PAGE = 1
+    }
+
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: SearchViewModel by viewModel()
-
     private lateinit var adapter: VacancyAdapter
-    private var isLoadingMore = false  // Флаг, чтобы не вызывать loadNextPage несколько раз
+    private var isLoadingMore = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,42 +42,37 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
-        observeViewModel()
+        observeState()
     }
 
     private fun setupUI() {
-        adapter = VacancyAdapter { vacancy ->
-            val bundle = Bundle()
-            bundle.putString("vacancyId", vacancy.id)
+        setupRecyclerView()
+        setupFabFilter()
+        setupSearchEditText()
+        setupPaginationScrollListener()
+    }
+
+    private fun setupRecyclerView() {
+        adapter = VacancyAdapter(emptyList()) { vacancy ->
+            val bundle = Bundle().apply {
+                putString("vacancyId", vacancy.id)
+            }
             findNavController().navigate(
                 R.id.action_searchFragment_to_vacancyDetailFragment,
                 bundle
             )
         }
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = adapter
+    }
 
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@SearchFragment.adapter
-
-            // скролл-листенер для пагинации
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-
-                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                    val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
-                    val totalItemCount = adapter?.itemCount ?: 0
-
-                    // Если дошли до конца, загружаем следующую страницу
-                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - 3 && totalItemCount > 0) {
-                        isLoadingMore = true
-                        viewModel.loadNextPage()
-                    }
-                }
-            })
+    private fun setupFabFilter() {
+        binding.fabFilter.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
         }
+    }
 
-        // Обработка ввода текста
+    private fun setupSearchEditText() {
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -82,106 +81,100 @@ class SearchFragment : Fragment() {
             }
         })
 
-        // Кнопка фильтра
-        binding.fabFilter.setOnClickListener {
-            findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
+        binding.editTextSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = binding.editTextSearch.text.toString().trim()
+                if (query.isNotBlank()) {
+                    viewModel.performSearch(query, INITIAL_PAGE)
+                } else {
+                    Toast.makeText(requireContext(), R.string.empty_search_query, Toast.LENGTH_SHORT).show()
+                }
+                true
+            } else {
+                false
+            }
         }
     }
 
-    private fun observeViewModel() {
+    private fun setupPaginationScrollListener() {
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
+                val totalItemCount = adapter.itemCount
+
+                if (!isLoadingMore &&
+                    lastVisiblePosition >= totalItemCount - SCROLL_LOAD_THRESHOLD &&
+                    totalItemCount > 0) {
+                    isLoadingMore = true
+                    viewModel.loadNextPage()
+                }
+            }
+        })
+    }
+
+    private fun observeState() {
         viewModel.searchState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SearchState.Empty -> showEmptyState()
                 is SearchState.Loading -> showLoadingState()
-                is SearchState.LoadingMore -> showLoadingMoreState()
-                is SearchState.EmptyResult -> showEmptyResultState()
-                is SearchState.Success -> showContentState(state.vacancies, state.totalFound)
-                is SearchState.LoadMoreError -> showLoadMoreError(state.message)
+                is SearchState.LoadingMore -> showLoadingMore()
+                is SearchState.EmptyResult -> showEmptyResult()
+                is SearchState.Success -> showResults(state.vacancies)
+                is SearchState.LoadMoreError -> showLoadMoreError()
                 is SearchState.Error -> showErrorState(state.error)
             }
-            // Сбрасываем флаг, когда загрузка закончена
-            if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
-                isLoadingMore = false
-            }
+            resetLoadingFlagIfNeeded(state)
         }
     }
 
     private fun showEmptyState() {
-        hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
-        binding.placeholderEnterQuery.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.search_hint)
     }
 
     private fun showLoadingState() {
-        hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
-        binding.progressBar.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
-    }
-
-    // Показываем индикатор загрузки внизу списка
-    private fun showLoadingMoreState() {
-        // TO DO
-        // Нужно показать ProgressBar внизу списка
-    }
-
-    private fun showEmptyResultState() {
-        hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
-        binding.placeholderNotFound.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
-    }
-
-    private fun showContentState(vacancies: List<VacancyDetailDto>, totalFound: Int) {
-        hideAllPlaceholders()
-
-        if (vacancies.isEmpty()) {
-            showEmptyResultState()
-            return
-        }
-
-        binding.tvFoundCount.text = "Найдено: $totalFound вакансий"
-        binding.tvFoundCount.visibility = View.VISIBLE
-
         binding.recyclerView.visibility = View.VISIBLE
-        adapter.updateVacancies(vacancies)
-
-        requireActivity().title = getString(R.string.menu_search)
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.loading)
     }
 
-    // Ошибка при дозагрузке
-    private fun showLoadMoreError(message: String) {
-        Toast.makeText(requireContext(), "Не удалось загрузить следующие вакансии", Toast.LENGTH_SHORT).show()
+    private fun showLoadingMore() {
+        Toast.makeText(requireContext(), getString(R.string.loading_more_vacancies), Toast.LENGTH_SHORT).show()
     }
 
-    private fun showErrorState(errorType: ErrorType) {
-        hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
-        when (errorType) {
-            ErrorType.NO_INTERNET -> {
-                binding.placeholderNoInternet.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), R.string.error_no_internet, Toast.LENGTH_SHORT).show()
-            }
-            ErrorType.SERVER_ERROR -> {
-                binding.placeholderError.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), R.string.error_loading_data, Toast.LENGTH_SHORT).show()
-            }
+    private fun showEmptyResult() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.no_results)
+    }
+
+    private fun showResults(vacancies: List<VacancyDetailDto>) {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.GONE
+        adapter.updateData(vacancies)
+    }
+
+    private fun showLoadMoreError() {
+        Toast.makeText(requireContext(), getString(R.string.load_more_error), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showErrorState(error: ErrorType) {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = when (error) {
+            ErrorType.NO_INTERNET -> getString(R.string.error_no_internet)
+            ErrorType.SERVER_ERROR -> getString(R.string.error_loading_data)
         }
-        binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
-    private fun hideAllPlaceholders() {
-        binding.tvFoundCount.visibility = View.GONE
-        binding.placeholderEnterQuery.visibility = View.GONE
-        binding.placeholderNotFound.visibility = View.GONE
-        binding.placeholderNoInternet.visibility = View.GONE
-        binding.placeholderError.visibility = View.GONE
-        binding.progressBar.visibility = View.GONE
+    private fun resetLoadingFlagIfNeeded(state: SearchState) {
+        if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
+            isLoadingMore = false
+        }
     }
 
     override fun onDestroyView() {

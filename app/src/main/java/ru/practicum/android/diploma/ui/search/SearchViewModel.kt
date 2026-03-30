@@ -19,17 +19,14 @@ class SearchViewModel(
 
     private val _searchState = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = _searchState
-
     private var searchJob: Job? = null
 
-    // Параметры для пагинации
     private var currentQuery = ""
     private var currentPage = 1
     private var totalPages = 0
     private var isLoading = false
     private var isLastPage = false
 
-    // Список всех загруженных вакансий
     private var allVacancies = mutableListOf<VacancyDetailDto>()
 
     companion object {
@@ -47,7 +44,6 @@ class SearchViewModel(
             return
         }
 
-        // При новом запросе сбрасываем пагинацию
         resetPagination()
         currentQuery = query
 
@@ -57,38 +53,20 @@ class SearchViewModel(
         }
     }
 
-    /**
-     * Загрузить следующую страницу (вызывается из фрагмента при скролле)
-     */
     fun loadNextPage() {
         if (isLoading || isLastPage || currentQuery.isBlank()) return
 
         val nextPage = currentPage + 1
-        if (nextPage < totalPages) {
+        if (nextPage <= totalPages) {
             performSearch(currentQuery, nextPage, isLoadMore = true)
         }
     }
 
-    private fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
-        if (query.isBlank()) {
-            _searchState.value = SearchState.Empty
-            return
-        }
+    fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
+        if (!canPerformSearch(query)) return
 
-        if (isLoading) return
         isLoading = true
-
-        if (!networkUtils.isNetworkAvailable()) {
-            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
-            isLoading = false
-            return
-        }
-
-        if (!isLoadMore) {
-            _searchState.value = SearchState.Loading
-        } else {
-            _searchState.value = SearchState.LoadingMore
-        }
+        _searchState.value = if (isLoadMore) SearchState.LoadingMore else SearchState.Loading
 
         viewModelScope.launch {
             val result = repository.searchVacancies(text = query, page = page)
@@ -100,6 +78,21 @@ class SearchViewModel(
                     handleSearchError(exception, isLoadMore)
                 }
             )
+        }
+    }
+
+    private fun canPerformSearch(query: String): Boolean {
+        return when {
+            query.isBlank() -> {
+                _searchState.value = SearchState.Empty
+                false
+            }
+            isLoading -> false
+            !networkUtils.isNetworkAvailable() -> {
+                _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+                false
+            }
+            else -> true
         }
     }
 
@@ -123,23 +116,17 @@ class SearchViewModel(
         }
 
         if (isLoadMore) {
-            // Добавляем новые вакансии к уже существующим
             allVacancies.addAll(newVacancies)
-            _searchState.value = SearchState.Success(
-                vacancies = allVacancies.toList(),
-                totalFound = response.found,
-                isLoadingMore = false
-            )
         } else {
-            // Новая страница, заменяем список
             allVacancies.clear()
             allVacancies.addAll(newVacancies)
-            _searchState.value = SearchState.Success(
-                vacancies = allVacancies.toList(),
-                totalFound = response.found,
-                isLoadingMore = false
-            )
         }
+
+        _searchState.value = SearchState.Success(
+            vacancies = allVacancies.toList(),
+            totalFound = response.found,
+            isLoadingMore = false
+        )
 
         isLoading = false
     }
@@ -148,7 +135,6 @@ class SearchViewModel(
         isLoading = false
 
         if (isLoadMore) {
-            // При ошибке дозагрузки показываем сообщение, но не меняем список
             _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
         } else {
             _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
@@ -175,14 +161,14 @@ class SearchViewModel(
 sealed class SearchState {
     object Empty : SearchState()
     object Loading : SearchState()
-    object LoadingMore : SearchState()        // Дозагрузка
+    object LoadingMore : SearchState()
     object EmptyResult : SearchState()
     data class Success(
         val vacancies: List<VacancyDetailDto>,
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState()  // Ошибка при дозагрузке
+    data class LoadMoreError(val message: String) : SearchState()
     data class Error(val error: ErrorType) : SearchState()
 }
 

@@ -32,18 +32,22 @@ class VacancyRepositoryImpl(
     }
 
     override suspend fun addToFavorites(vacancy: VacancyDetailDto) {
+        val logoUrl = vacancy.employer?.logoUrls?.logo240 ?: vacancy.employer?.logoUrls?.logo90
+
         val entity = VacancyEntity(
             id = vacancy.id,
             name = vacancy.name,
-            employerName = vacancy.employer.name,
-            employerLogo = vacancy.employer.logo,
+            employerName = vacancy.employer?.name ?: "",
+            employerLogo = logoUrl,
             salaryFrom = vacancy.salary?.from,
             salaryTo = vacancy.salary?.to,
             salaryCurrency = vacancy.salary?.currency,
-            areaName = vacancy.area.name,
+            areaName = vacancy.area?.name ?: "",
             experienceName = vacancy.experience?.name,
             scheduleName = vacancy.schedule?.name,
-            employmentName = vacancy.employment?.name
+            employmentName = vacancy.employment?.name,
+            isFavorite = true,
+            addedTimestamp = System.currentTimeMillis()
         )
         vacancyDao.insert(entity)
     }
