@@ -18,4 +18,7 @@ data class VacancyDetailDto(
     @SerializedName("url") val url: String?,
     @SerializedName("industry") val industry: FilterIndustryDto? = null
 
-)
+) {
+    val location: String?
+    get() = area.name
+}

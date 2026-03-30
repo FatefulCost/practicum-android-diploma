@@ -14,9 +14,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
+import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.databinding.FragmentSearchBinding
 
 class SearchFragment : Fragment() {
+
+    companion object {
+        private const val SCROLL_LOAD_THRESHOLD = 3
+        private const val INITIAL_PAGE = 1
+    }
+
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModel()
@@ -39,7 +46,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupUI() {
-        // Инициализация адаптера с пустым списком
+        setupRecyclerView()
+        setupFabFilter()
+        setupSearchEditText()
+        setupPaginationScrollListener()
+    }
+
+    private fun setupRecyclerView() {
         adapter = VacancyAdapter(emptyList()) { vacancy ->
             val bundle = Bundle().apply {
                 putString("vacancyId", vacancy.id)
@@ -49,16 +62,17 @@ class SearchFragment : Fragment() {
                 bundle
             )
         }
-
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
+    }
 
-        // Кнопка фильтра
+    private fun setupFabFilter() {
         binding.fabFilter.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
         }
+    }
 
-        // Обработка ввода текста
+    private fun setupSearchEditText() {
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -67,20 +81,22 @@ class SearchFragment : Fragment() {
             }
         })
 
-        // Поиск по нажатию Enter
         binding.editTextSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val query = binding.editTextSearch.text.toString()
+                val query = binding.editTextSearch.text.toString().trim()
                 if (query.isNotBlank()) {
-                    viewModel.performSearch(query, 1)
+                    viewModel.performSearch(query, INITIAL_PAGE)
+                } else {
+                    Toast.makeText(requireContext(), R.string.empty_search_query, Toast.LENGTH_SHORT).show()
                 }
                 true
             } else {
                 false
             }
         }
+    }
 
-        // Скролл-листенер для пагинации
+    private fun setupPaginationScrollListener() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -89,8 +105,7 @@ class SearchFragment : Fragment() {
                 val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
                 val totalItemCount = adapter.itemCount
 
-                // Если дошли до конца, загружаем следующую страницу
-                if (!isLoadingMore && lastVisiblePosition >= totalItemCount - 3 && totalItemCount > 0) {
+                if (!isLoadingMore && lastVisiblePosition >= totalItemCount - SCROLL_LOAD_THRESHOLD && totalItemCount > 0) {
                     isLoadingMore = true
                     viewModel.loadNextPage()
                 }
@@ -101,49 +116,62 @@ class SearchFragment : Fragment() {
     private fun observeState() {
         viewModel.searchState.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is SearchState.Empty -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.textViewEmpty.text = getString(R.string.search_hint)
-                }
-                is SearchState.Loading -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.textViewEmpty.text = "Загрузка..."
-                }
-                is SearchState.LoadingMore -> {
-                    // Показываем индикатор загрузки следующих страниц
-                    Toast.makeText(requireContext(), "Загрузка следующих вакансий...", Toast.LENGTH_SHORT).show()
-                }
-                is SearchState.EmptyResult -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.textViewEmpty.text = "Ничего не найдено"
-                }
-                is SearchState.Success -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.textViewEmpty.visibility = View.GONE
-                    adapter.updateData(state.vacancies)
-                }
-                is SearchState.LoadMoreError -> {
-                    // Показываем ошибку дозагрузки, но сохраняем текущий список
-                    Toast.makeText(requireContext(), "Не удалось загрузить следующие вакансии", Toast.LENGTH_SHORT).show()
-                    isLoadingMore = false  // Сбрасываем флаг при ошибке дозагрузки
-                }
-                is SearchState.Error -> {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.textViewEmpty.visibility = View.VISIBLE
-                    binding.textViewEmpty.text = when (state.error) {
-                        ErrorType.NO_INTERNET -> getString(R.string.error_no_internet)
-                        ErrorType.SERVER_ERROR -> getString(R.string.error_loading_data)
-                    }
-                }
+                is SearchState.Empty -> showEmptyState()
+                is SearchState.Loading -> showLoadingState()
+                is SearchState.LoadingMore -> showLoadingMore()
+                is SearchState.EmptyResult -> showEmptyResult()
+                is SearchState.Success -> showResults(state.vacancies)
+                is SearchState.LoadMoreError -> showLoadMoreError()
+                is SearchState.Error -> showErrorState(state.error)
             }
+            resetLoadingFlagIfNeeded(state)
+        }
+    }
 
-            // Сбрасываем флаг, когда загрузка закончена
-            if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
-                isLoadingMore = false
-            }
+    private fun showEmptyState() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.search_hint)
+    }
+
+    private fun showLoadingState() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.loading)
+    }
+
+    private fun showLoadingMore() {
+        Toast.makeText(requireContext(), getString(R.string.loading_more_vacancies), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showEmptyResult() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = getString(R.string.no_results)
+    }
+
+    private fun showResults(vacancies: List<VacancyDetailDto>) {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.GONE
+        adapter.updateData(vacancies)
+    }
+
+    private fun showLoadMoreError() {
+        Toast.makeText(requireContext(), getString(R.string.load_more_error), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showErrorState(error: ErrorType) {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.textViewEmpty.visibility = View.VISIBLE
+        binding.textViewEmpty.text = when (error) {
+            ErrorType.NO_INTERNET -> getString(R.string.error_no_internet)
+            ErrorType.SERVER_ERROR -> getString(R.string.error_loading_data)
+        }
+    }
+
+    private fun resetLoadingFlagIfNeeded(state: SearchState) {
+        if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
+            isLoadingMore = false
         }
     }
 

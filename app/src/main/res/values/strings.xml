@@ -61,7 +61,11 @@
     <string name="responsibilities">Обязанности</string>
     <string name="requirements">Требования</string>
     <string name="conditions">Условия</string>
-
+    <string name="loading">Загрузка...</string>
+    <string name="loading_more_vacancies">Загрузка следующих вакансий...</string>
+    <string name="no_results">Ничего не найдено</string>
+    <string name="load_more_error">Не удалось загрузить следующие вакансии</string>
+    <string name="empty_search_query">Введите запрос для поиска</string>
 
     <!-- About Team -->
     <string name="about_team">Команда</string>

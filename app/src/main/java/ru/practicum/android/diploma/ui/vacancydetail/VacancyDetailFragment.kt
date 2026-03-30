@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
+import ru.practicum.android.diploma.data.dto.AddressDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.databinding.FragmentVacancyDetailBinding
 import ru.practicum.android.diploma.util.Resource
@@ -30,6 +31,12 @@ class VacancyDetailFragment : Fragment() {
     ): View {
         _binding = FragmentVacancyDetailBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    companion object {
+        private const val LOG_TAG = "VacancyDetail"
+        private const val LOADING_MESSAGE = "Загрузка..."
+        private const val ERROR_LOADING_MESSAGE = "Не удалось загрузить"
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -123,21 +130,27 @@ class VacancyDetailFragment : Fragment() {
         }
     }
 
-    private fun buildLocationString(address: ru.practicum.android.diploma.data.dto.AddressDto?, areaName: String?): String? {
-        return address?.fullAddress
-            ?: address?.let { buildString {
-                if (!it.city.isNullOrEmpty()) append(it.city)
-                if (!it.street.isNullOrEmpty()) {
-                    if (isNotEmpty()) append(", ")
-                    append(it.street)
-                }
-                if (!it.building.isNullOrEmpty()) {
-                    if (isNotEmpty()) append(", ")
-                    append(it.building)
-                }
-            }.takeIf { it.isNotEmpty() } }
-            ?: areaName
+    private fun buildLocationString(address: AddressDto?, areaName: String?): String? {
+        if (address == null && areaName.isNullOrEmpty()) return null
+
+        val addressParts = buildAddressParts(address)
+        val locationParts = mutableListOf<String>()
+
+        areaName?.let { locationParts.add(it) }
+        locationParts.addAll(addressParts)
+
+        return locationParts.joinToString(", ").takeIfNotEmpty()
     }
+
+    private fun buildAddressParts(address: AddressDto?): List<String> {
+        val parts = mutableListOf<String>()
+        address?.city?.let { parts.add(it) }
+        address?.street?.let { parts.add(it) }
+        address?.building?.let { parts.add("здание $it") }
+        return parts
+    }
+
+    private fun String?.takeIfNotEmpty(): String? = if (this.isNullOrBlank()) null else this
 
     private fun displayExperienceAndWorkFormat(vacancy: VacancyDetailDto) {
         binding.tvExperience.text = vacancy.experience?.name ?: "Не указан"

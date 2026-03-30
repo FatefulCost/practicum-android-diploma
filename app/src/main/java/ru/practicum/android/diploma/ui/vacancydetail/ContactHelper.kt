@@ -4,51 +4,45 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import ru.practicum.android.diploma.data.dto.ContactsDto
 
 object ContactHelper {
 
+    data class ContactViews(
+        val emailView: TextView,
+        val phoneView: TextView,
+        val emailLayout: View,
+        val phoneLayout: View,
+        val phoneCommentView: TextView
+    )
+
     fun setupContacts(
         fragment: Fragment,
         contacts: ContactsDto?,
-        tvEmail: TextView,
-        tvPhone: TextView,
-        layoutEmail: View,
-        layoutPhone: View,
-        tvPhoneComment: TextView
+        views: ContactViews
     ) {
         if (contacts == null) {
-            hideAll(layoutEmail, layoutPhone)
+            hideAll(views.emailLayout, views.phoneLayout)
             return
         }
 
-        val hasEmail = !contacts.email.isNullOrEmpty()
-        val hasPhone = contacts.phone != null && contacts.phone.isNotEmpty()
-
-        if (!hasEmail && !hasPhone) {
-            hideAll(layoutEmail, layoutPhone)
-            return
-        }
-
-        setupEmail(fragment, contacts, tvEmail, layoutEmail, hasEmail)
-        setupPhone(fragment, contacts, tvPhone, layoutPhone, tvPhoneComment, hasPhone)
+        setupEmail(fragment, contacts.email, views.emailView, views.emailLayout)
+        setupPhone(fragment, contacts, views.phoneView, views.phoneLayout, views.phoneCommentView)
     }
 
     private fun setupEmail(
         fragment: Fragment,
-        contacts: ContactsDto,
+        email: String?,
         tvEmail: TextView,
-        layoutEmail: View,
-        hasEmail: Boolean
+        layoutEmail: View
     ) {
-        if (hasEmail) {
+        email?.let { safeEmail ->
             layoutEmail.visibility = View.VISIBLE
-            tvEmail.text = contacts.email
-            tvEmail.setOnClickListener {
-                openEmail(fragment, contacts.email!!)
-            }
-        } else {
+            tvEmail.text = safeEmail
+            tvEmail.setOnClickListener { openEmail(fragment, safeEmail) }
+        } ?: run {
             layoutEmail.visibility = View.GONE
         }
     }
@@ -58,24 +52,20 @@ object ContactHelper {
         contacts: ContactsDto,
         tvPhone: TextView,
         layoutPhone: View,
-        tvPhoneComment: TextView,
-        hasPhone: Boolean
+        tvPhoneComment: TextView
     ) {
-        if (hasPhone) {
+        contacts.phone?.firstOrNull()?.let { firstPhone ->
             layoutPhone.visibility = View.VISIBLE
-            val firstPhone = contacts.phone!!.first()
             tvPhone.text = firstPhone
-            tvPhone.setOnClickListener {
-                openPhone(fragment, firstPhone)
-            }
+            tvPhone.setOnClickListener { openPhone(fragment, firstPhone) }
 
-            if (!contacts.name.isNullOrEmpty()) {
-                tvPhoneComment.text = contacts.name
+            contacts.name?.let { contactName ->
+                tvPhoneComment.text = contactName
                 tvPhoneComment.visibility = View.VISIBLE
-            } else {
+            } ?: run {
                 tvPhoneComment.visibility = View.GONE
             }
-        } else {
+        } ?: run {
             layoutPhone.visibility = View.GONE
         }
     }
@@ -85,17 +75,28 @@ object ContactHelper {
     }
 
     fun openEmail(fragment: Fragment, email: String) {
+        if (email.isBlank()) return
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:$email")
         }
-        fragment.startActivity(Intent.createChooser(intent, "Отправить письмо"))
+        if (intent.resolveActivity(fragment.requireContext().packageManager) != null) {
+            fragment.startActivity(intent)
+        } else {
+            Toast.makeText(fragment.requireContext(), "Нет приложения для отправки писем", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun openPhone(fragment: Fragment, phone: String) {
         val cleanedPhone = phone.replace(Regex("[^\\d+]"), "")
+        if (cleanedPhone.isBlank()) return
+
         val intent = Intent(Intent.ACTION_DIAL).apply {
             data = Uri.parse("tel:$cleanedPhone")
         }
-        fragment.startActivity(Intent.createChooser(intent, "Выберите приложение для звонка"))
+        if (intent.resolveActivity(fragment.requireContext().packageManager) != null) {
+            fragment.startActivity(intent)
+        } else {
+            Toast.makeText(fragment.requireContext(), "Нет приложения для звонков", Toast.LENGTH_SHORT).show()
+        }
     }
 }

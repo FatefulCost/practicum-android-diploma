@@ -20,8 +20,20 @@ class NetworkClient(
     suspend fun getAreas(): Result<List<FilterAreaDto>> {
         return try {
             Result.success(apiService.getAreas())
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error in getAreas: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Timeout error in getAreas: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Unknown host error in getAreas: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error in getAreas: ${e.message}", e)
+            Result.failure(e)
         } catch (e: Exception) {
-            Log.e(TAG, "getAreas error: ${e.message}")
+            Log.wtf(TAG, "Unexpected error in getAreas", e)
             Result.failure(e)
         }
     }
@@ -29,8 +41,20 @@ class NetworkClient(
     suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
         return try {
             Result.success(apiService.getIndustries())
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error in getIndustries: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Timeout error in getIndustries: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Unknown host error in getIndustries: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error in getIndustries: ${e.message}", e)
+            Result.failure(e)
         } catch (e: Exception) {
-            Log.e(TAG, "getIndustries error: ${e.message}")
+            Log.wtf(TAG, "Unexpected error in getIndustries", e)
             Result.failure(e)
         }
     }
