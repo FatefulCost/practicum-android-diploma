@@ -1,5 +1,6 @@
 package ru.practicum.android.diploma.ui.search
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -41,6 +42,7 @@ class SearchFragment : Fragment() {
         observeViewModel()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
         adapter = VacancyAdapter { vacancy ->
             val bundle = Bundle()
@@ -76,11 +78,42 @@ class SearchFragment : Fragment() {
         // Обработка ввода текста
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!s.isNullOrEmpty()) {
+                    // Если есть текст, то показываем крестик, скрываем лупу
+                    binding.editTextSearch.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        0,
+                        0,
+                        R.drawable.close_24px,
+                        0
+                    )
+                } else {
+                    // Если нет текста, то показываем лупу, скрываем крестик
+                    binding.editTextSearch.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        0,
+                        0,
+                        R.drawable.search_24px,
+                        0
+                    )
+                }
+
+            }
             override fun afterTextChanged(s: Editable?) {
                 viewModel.updateSearchQuery(s?.toString() ?: "")
             }
         })
+
+        // Обработка нажатия на иконку справа
+        binding.editTextSearch.setOnTouchListener { _, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP) {
+                val drawableEnd = binding.editTextSearch.compoundDrawablesRelative[2]
+                if (drawableEnd != null && event.rawX >= (binding.editTextSearch.right - binding.editTextSearch.compoundPaddingRight)) {
+                    binding.editTextSearch.text?.clear()
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
 
         // Кнопка фильтра
         binding.fabFilter.setOnClickListener {
@@ -111,7 +144,6 @@ class SearchFragment : Fragment() {
         binding.tvFoundCount.visibility = View.GONE
         binding.placeholderEnterQuery.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun showLoadingState() {
@@ -119,21 +151,19 @@ class SearchFragment : Fragment() {
         binding.tvFoundCount.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     // Показываем индикатор загрузки внизу списка
     private fun showLoadingMoreState() {
-        // TO DO
-        // Нужно показать ProgressBar внизу списка
+        binding.progressBarBottom.visibility = View.VISIBLE
     }
 
     private fun showEmptyResultState() {
         hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
+        binding.tvFoundCount.text = "Таких вакансий нет"
+        binding.tvFoundCount.visibility = View.VISIBLE
         binding.placeholderNotFound.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun showContentState(vacancies: List<VacancyDetailDto>, totalFound: Int) {
@@ -146,11 +176,9 @@ class SearchFragment : Fragment() {
 
         binding.tvFoundCount.text = "Найдено: $totalFound вакансий"
         binding.tvFoundCount.visibility = View.VISIBLE
-
+        binding.progressBarBottom.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         adapter.updateVacancies(vacancies)
-
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     // Ошибка при дозагрузке
@@ -172,7 +200,6 @@ class SearchFragment : Fragment() {
             }
         }
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun hideAllPlaceholders() {

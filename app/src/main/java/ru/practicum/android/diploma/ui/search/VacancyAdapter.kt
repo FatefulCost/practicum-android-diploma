@@ -58,14 +58,10 @@ class VacancyAdapter(
             binding.tvCompanyName.text = vacancy.employer.name
             binding.tvSalary.text = SalaryFormatter.format(vacancy.salary)
 
-            val cornerRadiusPx = binding.ivLogo.context.resources
-                .getDimensionPixelSize(R.dimen.logo_corner_radius)
-
             Glide.with(binding.ivLogo.context)
                 .load(vacancy.employer.logo)
-                .placeholder(R.drawable.ic_placeholder_company)
-                .error(R.drawable.ic_placeholder_company)
-                .apply(RequestOptions.bitmapTransform(RoundedCorners(cornerRadiusPx)))
+                .placeholder(R.drawable.placeholder_32px)
+                .error(R.drawable.placeholder_32px)
                 .into(binding.ivLogo)
 
             binding.root.setOnClickListener {
