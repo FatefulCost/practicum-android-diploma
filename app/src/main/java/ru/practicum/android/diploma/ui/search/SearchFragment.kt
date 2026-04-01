@@ -24,8 +24,19 @@ class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModel()
 
-    private lateinit var adapter: VacancyAdapter
-    private var isLoadingMore = false  // Флаг, чтобы не вызывать loadNextPage несколько раз
+    private val adapter: VacancyAdapter by lazy {
+        VacancyAdapter { vacancy ->
+            val bundle = Bundle()
+            bundle.putString("vacancyId", vacancy.id)
+            findNavController().navigate(
+                R.id.action_searchFragment_to_vacancyDetailFragment,
+                bundle
+            )
+        }
+    }
+
+    private var isLoadingMore = false // Флаг, чтобы не вызывать loadNextPage несколько раз
+    private val LAST_PAGES = 3
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,15 +55,6 @@ class SearchFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
-        adapter = VacancyAdapter { vacancy ->
-            val bundle = Bundle()
-            bundle.putString("vacancyId", vacancy.id)
-            findNavController().navigate(
-                R.id.action_searchFragment_to_vacancyDetailFragment,
-                bundle
-            )
-        }
-
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@SearchFragment.adapter
@@ -67,7 +69,7 @@ class SearchFragment : Fragment() {
                     val totalItemCount = adapter?.itemCount ?: 0
 
                     // Если дошли до конца, загружаем следующую страницу
-                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - 3 && totalItemCount > 0) {
+                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - LAST_PAGES && totalItemCount > 0) {
                         isLoadingMore = true
                         viewModel.loadNextPage()
                     }
@@ -93,11 +95,9 @@ class SearchFragment : Fragment() {
     private fun setupSearchTextListener() {
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 updateSearchIcon(s)
             }
-
             override fun afterTextChanged(s: Editable?) {
                 viewModel.updateSearchQuery(s?.toString() ?: "")
             }
