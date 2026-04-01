@@ -22,4 +22,6 @@
 
     <color name="vacancy_in_search">#1A1B22</color>
     <color name="placeholder_logo_bg">#FDFDFD</color>
+
+    <color name="text_vacancy_detail">#1A1B22</color>
 </resources>
