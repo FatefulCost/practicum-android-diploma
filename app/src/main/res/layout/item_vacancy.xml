@@ -9,12 +9,22 @@
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
 
-    <ImageView
-        android:id="@+id/ivLogo"
+    <FrameLayout
+        android:id="@+id/flLogoContainer"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:scaleType="centerCrop"
-        android:layout_gravity="center_vertical" />
+        android:background="@drawable/bg_logo_placeholder">
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center_vertical"
+            android:padding="4dp"
+            />
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -28,8 +38,8 @@
             android:id="@+id/tvVacancyName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black_day"
-            android:textSize="16sp"
+            android:textColor="@color/vacancy_in_search"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:maxLines="3"
             android:ellipsize="end" />
@@ -39,8 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="@color/gray"
-            android:textSize="14sp"
+            android:textColor="@color/vacancy_in_search"
+            android:textSize="16sp"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -49,8 +59,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="@color/black_day"
-            android:textSize="14sp" />
+            android:textColor="@color/vacancy_in_search"
+            android:textSize="16sp" />
 
     </LinearLayout>
 

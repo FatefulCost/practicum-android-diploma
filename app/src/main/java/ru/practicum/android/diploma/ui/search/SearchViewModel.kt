@@ -33,7 +33,7 @@ class SearchViewModel(
     private var allVacancies = mutableListOf<VacancyDetailDto>()
 
     companion object {
-        private const val DEBOUNCE_DELAY = 500L
+        private const val DEBOUNCE_DELAY = 2000L
     }
 
     init {

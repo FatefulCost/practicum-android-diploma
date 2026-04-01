@@ -1,5 +1,6 @@
 package ru.practicum.android.diploma.ui.search
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -41,6 +42,7 @@ class SearchFragment : Fragment() {
         observeViewModel()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
         adapter = VacancyAdapter { vacancy ->
             val bundle = Bundle()
@@ -73,18 +75,69 @@ class SearchFragment : Fragment() {
             })
         }
 
-        // Обработка ввода текста
-        binding.editTextSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                viewModel.updateSearchQuery(s?.toString() ?: "")
-            }
-        })
+        // Обработка ввода текста и иконок
+        setupSearchTextListener()
+
+        // Обработка нажатия на иконку справа
+        setupClearIconTouchListener()
 
         // Кнопка фильтра
         binding.fabFilter.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
+        }
+    }
+
+    /**
+     * Настройка обработчика ввода текста и смены иконок
+     */
+    private fun setupSearchTextListener() {
+        binding.editTextSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updateSearchIcon(s)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.updateSearchQuery(s?.toString() ?: "")
+            }
+        })
+    }
+
+    /**
+     * Обновляет иконку справа в зависимости от наличия текста
+     */
+    private fun updateSearchIcon(text: CharSequence?) {
+        val iconRes = if (text.isNullOrEmpty()) {
+            R.drawable.search_24px
+        } else {
+            R.drawable.close_24px
+        }
+        binding.editTextSearch.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, iconRes, 0)
+    }
+
+    /**
+     * Настройка обработчика нажатия на иконку справа
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupClearIconTouchListener() {
+        binding.editTextSearch.setOnTouchListener { _, event ->
+            if (event.action == android.view.MotionEvent.ACTION_UP) {
+                handleClearIconClick(event.rawX)
+            }
+            false
+        }
+    }
+
+    /**
+     * Обработка нажатия на иконку очистки
+     */
+    private fun handleClearIconClick(touchX: Float) {
+        val drawableEnd = binding.editTextSearch.compoundDrawablesRelative[2]
+        val rightEdge = binding.editTextSearch.right - binding.editTextSearch.compoundPaddingRight
+
+        if (drawableEnd != null && touchX >= rightEdge) {
+            binding.editTextSearch.text?.clear()
         }
     }
 
@@ -111,7 +164,6 @@ class SearchFragment : Fragment() {
         binding.tvFoundCount.visibility = View.GONE
         binding.placeholderEnterQuery.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun showLoadingState() {
@@ -119,21 +171,19 @@ class SearchFragment : Fragment() {
         binding.tvFoundCount.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     // Показываем индикатор загрузки внизу списка
     private fun showLoadingMoreState() {
-        // TO DO
-        // Нужно показать ProgressBar внизу списка
+        binding.progressBarBottom.visibility = View.VISIBLE
     }
 
     private fun showEmptyResultState() {
         hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
+        binding.tvFoundCount.text = "Таких вакансий нет"
+        binding.tvFoundCount.visibility = View.VISIBLE
         binding.placeholderNotFound.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun showContentState(vacancies: List<VacancyDetailDto>, totalFound: Int) {
@@ -146,11 +196,9 @@ class SearchFragment : Fragment() {
 
         binding.tvFoundCount.text = "Найдено: $totalFound вакансий"
         binding.tvFoundCount.visibility = View.VISIBLE
-
+        binding.progressBarBottom.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         adapter.updateVacancies(vacancies)
-
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     // Ошибка при дозагрузке
@@ -166,13 +214,13 @@ class SearchFragment : Fragment() {
                 binding.placeholderNoInternet.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), R.string.error_no_internet, Toast.LENGTH_SHORT).show()
             }
+
             ErrorType.SERVER_ERROR -> {
                 binding.placeholderError.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), R.string.error_loading_data, Toast.LENGTH_SHORT).show()
             }
         }
         binding.recyclerView.visibility = View.GONE
-        requireActivity().title = getString(R.string.menu_search)
     }
 
     private fun hideAllPlaceholders() {
