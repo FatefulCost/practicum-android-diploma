@@ -36,7 +36,7 @@ class SearchFragment : Fragment() {
     }
 
     private var isLoadingMore = false // Флаг, чтобы не вызывать loadNextPage несколько раз
-    private val LAST_PAGES = 3
+    private val scrollThreshold = 3
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,7 +69,7 @@ class SearchFragment : Fragment() {
                     val totalItemCount = adapter?.itemCount ?: 0
 
                     // Если дошли до конца, загружаем следующую страницу
-                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - LAST_PAGES && totalItemCount > 0) {
+                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - scrollThreshold && totalItemCount > 0) {
                         isLoadingMore = true
                         viewModel.loadNextPage()
                     }
@@ -94,12 +94,15 @@ class SearchFragment : Fragment() {
      */
     private fun setupSearchTextListener() {
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Необходим для реализации интерфейса
+            }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                updateSearchIcon(s)
+                // Необходим для реализации интерфейса
             }
             override fun afterTextChanged(s: Editable?) {
                 viewModel.updateSearchQuery(s?.toString() ?: "")
+                updateSearchIcon(s)
             }
         })
     }
