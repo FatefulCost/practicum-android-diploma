@@ -8,44 +8,25 @@ object VacancyDescriptionFormatter {
     fun formatDescription(description: String?): Spanned? {
         if (description.isNullOrBlank()) return null
 
-        var text = description
+        val lines = description
             .replace("\r\n", "\n")
             .replace("\r", "\n")
+            .split("\n")
 
-        // Разбиваем на строки
-        val lines = text.split("\n")
         val formattedLines = mutableListOf<String>()
         var isFirstHeader = true
 
         for (line in lines) {
             val trimmed = line.trim()
-
             when {
-                // Заголовок (заканчивается на :)
-                trimmed.endsWith(":") && trimmed.length > 1 -> {
-                    if (!isFirstHeader) {
-                        formattedLines.add("<br/>")
-                    }
-                    formattedLines.add("<b>$trimmed</b>")
+                isHeader(trimmed) -> {
+                    addHeader(formattedLines, trimmed, isFirstHeader)
                     isFirstHeader = false
                 }
-
-                // Элемент списка (начинается с - или •)
-                trimmed.startsWith("-") || trimmed.startsWith("•") -> {
-                    val bulletText = trimmed.drop(1).trim()
-                    formattedLines.add("• $bulletText")
+                isBulletItem(trimmed) -> {
+                    addBulletItem(formattedLines, trimmed)
                 }
-
-                trimmed.matches(Regex("^\\d+\\..*")) || trimmed.endsWith(";") -> {
-                    formattedLines.add("• $trimmed")
-                }
-
-                // Пустая строка
-                trimmed.isEmpty() -> {
-                }
-
-                // Обычный текст
-                else -> {
+                trimmed.isNotEmpty() -> {
                     formattedLines.add(trimmed)
                 }
             }
@@ -54,5 +35,44 @@ object VacancyDescriptionFormatter {
         val result = formattedLines.joinToString("<br/>")
         @Suppress("DEPRECATION")
         return Html.fromHtml(result)
+    }
+
+    /**
+     * Проверяет, является ли строка заголовком
+     */
+    private fun isHeader(line: String): Boolean {
+        return line.endsWith(":") && line.length > 1
+    }
+
+    /**
+     * Проверяет, является ли строка элементом списка
+     */
+    private fun isBulletItem(line: String): Boolean {
+        return line.startsWith("-") || line.startsWith("•")
+    }
+
+    /**
+     * Добавляет заголовок в список с отступом сверху
+     */
+    private fun addHeader(
+        formattedLines: MutableList<String>,
+        header: String,
+        isFirstHeader: Boolean
+    ) {
+        if (!isFirstHeader && formattedLines.isNotEmpty()) {
+            formattedLines.add("<br/>")
+        }
+        formattedLines.add("<b>$header</b>")
+    }
+
+    /**
+     * Добавляет элемент списка с маркером
+     */
+    private fun addBulletItem(
+        formattedLines: MutableList<String>,
+        line: String
+    ) {
+        val bulletText = line.drop(1).trim()
+        formattedLines.add("• $bulletText")
     }
 }
