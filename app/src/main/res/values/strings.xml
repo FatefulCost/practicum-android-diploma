@@ -1,3 +1,73 @@
 <resources>
     <string name="app_name">Practicum-Android-Diploma</string>
+
+    <!-- Bottom Navigation -->
+    <string name="menu_search">Главная</string>
+    <string name="menu_favorites">Избранное</string>
+    <string name="menu_team">Команда</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">Поиск вакансий</string>
+    <string name="filter">Фильтр</string>
+
+    <!-- Filter Screen -->
+    <string name="filter_settings">Настройки фильтрации</string>
+    <string name="work_location">Место работы</string>
+    <string name="industry">Отрасль</string>
+    <string name="expected_salary">Ожидаемая зарплата</string>
+    <string name="enter_salary">Введите сумму</string>
+    <string name="hide_without_salary">Не показывать без зарплаты</string>
+    <string name="apply">Применить</string>
+    <string name="reset">Сбросить</string>
+    <string name="select">Выбрать</string>
+    <string name="not_selected">Не выбрано</string>
+
+    <!-- Work Location -->
+    <string name="select_work_location">Выбор места работы</string>
+    <string name="country">Страна</string>
+    <string name="region">Регион</string>
+    <string name="select_region">Выбор региона</string>
+
+    <!-- Country Selection -->
+    <string name="select_country">Выбор страны</string>
+    <string name="russia">Россия</string>
+    <string name="ukraine">Украина</string>
+    <string name="kazakhstan">Казахстан</string>
+    <string name="azerbaijan">Азербайджан</string>
+    <string name="belarus">Беларусь</string>
+    <string name="georgia">Грузия</string>
+    <string name="kyrgyzstan">Кыргызстан</string>
+    <string name="uzbekistan">Узбекистан</string>
+    <string name="other_regions">Другие регионы</string>
+
+    <!-- Industry Selection -->
+    <string name="select_industry">Выбор отрасли</string>
+
+    <!-- Vacancy Details -->
+    <string name="vacancy_details">Вакансия</string>
+    <string name="experience">Требуемый опыт</string>
+    <string name="description">Описание вакансии</string>
+    <string name="share">Поделиться</string>
+    <string name="salary_not_specified">Зарплата не указана</string>
+    <string name="key_skills">Ключевые навыки</string>
+    <string name="contacts">Контакты</string>
+
+
+    <string name="work_format">Формат работы: %s</string>
+    <string name="schedule">График работы: %s</string>
+    <string name="employment">Тип занятости: %s</string>
+
+    <!-- About Team -->
+    <string name="about_team">Команда</string>
+    <string name="developer">Над приложением работали</string>
+    <string name="team_member_1">Разработчик1</string>
+    <string name="team_member_2">Разработчик2</string>
+    <string name="team_member_3">Разработчик3</string>
+    <string name="team_member_4">Разработчик5</string>
+
+    <!-- Errors -->
+    <string name="error_no_internet">Нет интернета</string>
+    <string name="error_loading_data">Ошибка сервера</string>
+    <string name="error_vacancy_not_found">Не удалось получить список вакансий</string>
+
 </resources>

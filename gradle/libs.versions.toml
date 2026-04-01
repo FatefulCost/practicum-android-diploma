@@ -1,5 +1,8 @@
 [versions]
 
+# Networking
+gson = "2.10.1"
+
 # Build constants
 compileSdk = "36"
 java = "VERSION_17"
@@ -30,6 +33,9 @@ core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 
 # UI
 material = { module = "com.google.android.material:material", version.ref = "material" }
+
+# Networking
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 # Testing
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
