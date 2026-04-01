@@ -36,7 +36,9 @@ class SearchFragment : Fragment() {
     }
 
     private var isLoadingMore = false // Флаг, чтобы не вызывать loadNextPage несколько раз
-    private val scrollThreshold = 3
+    companion object {
+        private const val SCROLL_LAST = 3
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,7 +71,7 @@ class SearchFragment : Fragment() {
                     val totalItemCount = adapter?.itemCount ?: 0
 
                     // Если дошли до конца, загружаем следующую страницу
-                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - scrollThreshold && totalItemCount > 0) {
+                    if (!isLoadingMore && lastVisiblePosition >= totalItemCount - SCROLL_LAST && totalItemCount > 0) {
                         isLoadingMore = true
                         viewModel.loadNextPage()
                     }
