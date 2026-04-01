@@ -3,12 +3,12 @@ package ru.practicum.android.diploma.ui.vacancydetail
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -24,6 +24,7 @@ import ru.practicum.android.diploma.ui.detail.NavigationEvent
 import ru.practicum.android.diploma.ui.detail.VacancyDetailErrorType
 import ru.practicum.android.diploma.ui.detail.VacancyDetailState
 import ru.practicum.android.diploma.ui.detail.VacancyDetailViewModel
+import ru.practicum.android.diploma.util.VacancyDescriptionFormatter
 
 class VacancyDetailFragment : Fragment() {
 
@@ -45,6 +46,11 @@ class VacancyDetailFragment : Fragment() {
     }
 
     private fun setupToolbar() {
+        binding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back)
+
+        // цвет иконки
+        val upArrow = binding.toolbar.navigationIcon
+        upArrow?.setTint(ContextCompat.getColor(requireContext(), R.color.title_color))
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.toolbar.setOnMenuItemClickListener { menuItem: MenuItem ->
             when (menuItem.itemId) {
@@ -141,11 +147,11 @@ class VacancyDetailFragment : Fragment() {
         if (!logoUrl.isNullOrEmpty()) {
             Glide.with(this)
                 .load(logoUrl)
-                .placeholder(R.drawable.ic_favorites)
+                .placeholder(R.drawable.placeholder_32px)
                 .transform(RoundedCorners(resources.getDimensionPixelSize(R.dimen.logo_corner_radius)))
                 .into(binding.ivEmployerLogo)
         } else {
-            binding.ivEmployerLogo.setImageResource(R.drawable.ic_favorites)
+            binding.ivEmployerLogo.setImageResource(R.drawable.placeholder_32px)
         }
     }
 
@@ -165,8 +171,8 @@ class VacancyDetailFragment : Fragment() {
     private fun bindDescriptionSection(vacancy: VacancyDetailDto) {
         val description = vacancy.description
         if (!description.isNullOrEmpty()) {
-            @Suppress("DEPRECATION")
-            binding.tvDescription.text = Html.fromHtml(description)
+            val formattedDescription = VacancyDescriptionFormatter.formatDescription(description)
+            binding.tvDescription.text = formattedDescription ?: description
             binding.layoutDescription.visibility = View.VISIBLE
         } else {
             binding.layoutDescription.visibility = View.GONE
