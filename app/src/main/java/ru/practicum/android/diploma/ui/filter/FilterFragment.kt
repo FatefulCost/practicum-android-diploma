@@ -6,13 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
 
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: FilterViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +31,7 @@ class FilterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
+        observeViewModel()
     }
 
     private fun setupUI() {
@@ -46,25 +52,52 @@ class FilterFragment : Fragment() {
         }
     }
 
-    private fun applyFilters() {
-        val salary = binding.etSalary.text?.toString() ?: ""
-        val hideWithoutSalary = binding.cbHideWithoutSalary.isChecked
+    private fun observeViewModel() {
+        viewModel.filterSettings.onEach { settings ->
+            updateUI(settings)
+        }.launchIn(lifecycleScope)
+    }
 
-        val message = buildString {
-            append("Фильтры применены\n")
-            append("Зарплата: ${if (salary.isNotEmpty()) salary else "не указана"}\n")
-            append("Скрывать без зарплаты: $hideWithoutSalary")
+    private fun updateUI(settings: FilterSettings) {
+        // Зарплата
+        settings.salary?.let {
+            binding.etSalary.setText(it.toString())
+        } ?: binding.etSalary.text?.clear()
+
+        // Чекбокс
+        binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
+
+        // Отрасль
+        if (!settings.industryName.isNullOrBlank()) {
+            binding.tvIndustryValue.text = settings.industryName
+        } else {
+            binding.tvIndustryValue.text = getString(R.string.not_selected)
         }
 
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        // Место работы
+        val locationText = buildString {
+            if (!settings.regionName.isNullOrBlank()) {
+                append(settings.regionName)
+            } else if (!settings.countryName.isNullOrBlank()) {
+                append(settings.countryName)
+            }
+        }
+        binding.tvWorkLocationValue.text = if (locationText.isNotEmpty()) locationText else getString(R.string.not_selected)
+    }
+
+    private fun applyFilters() {
+        val salaryText = binding.etSalary.text?.toString()
+        val salary = if (!salaryText.isNullOrBlank()) salaryText.toIntOrNull() else null
+
+        viewModel.updateSalary(salary)
+        viewModel.updateOnlyWithSalary(binding.cbHideWithoutSalary.isChecked)
+
+        Toast.makeText(requireContext(), "Фильтры применены", Toast.LENGTH_SHORT).show()
         findNavController().popBackStack()
     }
 
     private fun resetFilters() {
-        binding.etSalary.text?.clear()
-        binding.cbHideWithoutSalary.isChecked = false
-        binding.tvWorkLocationValue.text = getString(R.string.not_selected)
-        binding.tvIndustryValue.text = getString(R.string.not_selected)
+        viewModel.resetFilters()
         Toast.makeText(requireContext(), "Фильтры сброшены", Toast.LENGTH_SHORT).show()
     }
 

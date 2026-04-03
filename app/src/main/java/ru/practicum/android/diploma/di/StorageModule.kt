@@ -1,12 +1,20 @@
 package ru.practicum.android.diploma.di
 
 import android.content.Context
+import android.content.SharedPreferences
+import com.google.gson.Gson
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val storageModule = module {
-    // нужно для кэширования регионов и отраслей
+    // SharedPreferences
     single {
-        androidContext().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        androidContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     }
+
+    // Gson
+    single { Gson() }
+
+    // FilterStorage
+    single { ru.practicum.android.diploma.data.storage.FilterStorage(androidContext()) }
 }
