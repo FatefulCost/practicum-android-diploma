@@ -5,112 +5,109 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.data.storage.FilterStorage
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
 
-/**
- * ViewModel для экрана фильтров
- *
- *  Пока это простая версия
- *  Хранит настройки фильтра
- *  Умеет сбрасывать настройки
- *  Умеет загружать отрасли (заглушка)
- *
- * В Epic 4 добавим:
- *  Сохранение в SharedPreferences
- *  Применение фильтров к поиску
- *  Полноценная работа с отраслями и регионами
- */
-private const val NUMBERFORMAGIC1 = 1
-private const val NUMBERFORMAGIC2 = 2
-private const val NUMBERFORMAGIC3 = 3
-private const val NUMBERFORMAGIC4 = 4
-
 class FilterViewModel(
-    private val filterRepository: FilterRepository
+    private val filterRepository: FilterRepository,
+    private val filterStorage: FilterStorage
 ) : ViewModel() {
 
-    // Настройки фильтра (сохраняются в памяти, не теряются при повороте)
     private val _filterSettings = MutableStateFlow(FilterSettings())
     val filterSettings: StateFlow<FilterSettings> = _filterSettings.asStateFlow()
 
-    // Список отраслей (загружается из репозитория)
     private val _industries = MutableStateFlow<Resource<List<FilterIndustryDto>>>(Resource.Loading())
     val industries: StateFlow<Resource<List<FilterIndustryDto>>> = _industries.asStateFlow()
 
     init {
+        loadSavedFilters()
         loadIndustries()
     }
 
-    /**
-     * Загрузить список отраслей
-     * В Epic 4 здесь будет реальный запрос через filterRepository.getIndustries()
-     * Пока это заглушка
-     */
+    private fun loadSavedFilters() {
+        val savedSettings = filterStorage.loadFilterSettings()
+        _filterSettings.value = savedSettings
+    }
+
+    private fun saveFilters() {
+        filterStorage.saveFilterSettings(_filterSettings.value)
+    }
+
     private fun loadIndustries() {
         viewModelScope.launch {
-            // В Epic 4 добавим реализацию
-
-            // Пока просто заглушка
-            _industries.value = Resource.Success(
-                listOf(
-                    FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-                    FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-                    FilterIndustryDto(NUMBERFORMAGIC3, "Продажи"),
-                    FilterIndustryDto(NUMBERFORMAGIC4, "Дизайн")
-                )
+            _industries.value = Resource.Loading()
+            val result = filterRepository.getIndustries()
+            result.fold(
+                onSuccess = { industries ->
+                    _industries.value = Resource.Success(industries)
+                },
+                onFailure = { error ->
+                    _industries.value = Resource.Error(error.message ?: "Ошибка загрузки отраслей")
+                }
             )
         }
     }
 
-    /**
-     * Обновить зарплату
-     */
     fun updateSalary(salary: Int?) {
-        _filterSettings.value = _filterSettings.value.copy(salary = salary)
+        _filterSettings.update { it.copy(salary = salary) }
+        saveFilters()
     }
 
-    /**
-     * Обновить чекбокс "Не показывать без зарплаты"
-     */
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
-        _filterSettings.value = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        _filterSettings.update { it.copy(onlyWithSalary = onlyWithSalary) }
+        saveFilters()
     }
 
-    /**
-     * Обновить отрасль
-     */
     fun updateIndustry(industryId: Int?, industryName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
-            industryId = industryId,
-            industryName = industryName
-        )
+        _filterSettings.update {
+            it.copy(
+                industryId = industryId,
+                industryName = industryName
+            )
+        }
+        saveFilters()
     }
 
-    /**
-     * Обновить местоположение
-     */
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
-            countryId = countryId,
-            countryName = countryName,
-            regionId = regionId,
-            regionName = regionName
-        )
+        _filterSettings.update {
+            it.copy(
+                countryId = countryId,
+                countryName = countryName,
+                regionId = regionId,
+                regionName = regionName
+            )
+        }
+        saveFilters()
     }
 
-    /**
-     * Сбросить все настройки фильтра
-     */
     fun resetFilters() {
         _filterSettings.value = FilterSettings()
+        filterStorage.clearFilterSettings()
     }
 
-    /**
-     * Проверить, есть ли активные фильтры
-     */
+    fun getSearchParams(): Map<String, Any> {
+        val settings = _filterSettings.value
+        val params = mutableMapOf<String, Any>()
+
+        settings.salary?.let { params["salary"] = it }
+        if (settings.onlyWithSalary) {
+            params["only_with_salary"] = true
+        }
+        settings.industryId?.let { params["industry"] = it }
+
+        settings.regionId?.let {
+            params["area"] = it
+        } ?: settings.countryId?.let {
+            params["area"] = it
+        }
+
+        return params
+    }
+
     fun hasActiveFilters(): Boolean {
         val settings = _filterSettings.value
         return settings.salary != null ||
@@ -120,17 +117,3 @@ class FilterViewModel(
             settings.regionId != null
     }
 }
-
-/**
- * Класс для хранения настроек фильтрации
- */
-data class FilterSettings(
-    val salary: Int? = null,
-    val onlyWithSalary: Boolean = false,
-    val industryId: Int? = null,
-    val industryName: String? = null,
-    val countryId: Int? = null,
-    val countryName: String? = null,
-    val regionId: Int? = null,
-    val regionName: String? = null
-)

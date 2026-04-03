@@ -7,6 +7,7 @@ import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 
 val repositoryModule = module {
+    // VacancyRepository
     single<VacancyRepository> {
         VacancyRepositoryImpl(
             networkClient = get(),
@@ -14,6 +15,7 @@ val repositoryModule = module {
         )
     }
 
+    // FilterRepository
     single<FilterRepository> {
         FilterRepositoryImpl(
             networkClient = get(),
