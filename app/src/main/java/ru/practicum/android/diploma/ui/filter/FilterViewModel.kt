@@ -28,24 +28,15 @@ class FilterViewModel(
         loadIndustries()
     }
 
-    /**
-     * Загрузить сохраненные настройки из SharedPreferences
-     */
     private fun loadSavedFilters() {
         val savedSettings = filterStorage.loadFilterSettings()
         _filterSettings.value = savedSettings
     }
 
-    /**
-     * Сохранить текущие настройки в SharedPreferences
-     */
     private fun saveFilters() {
         filterStorage.saveFilterSettings(_filterSettings.value)
     }
 
-    /**
-     * Загрузить список отраслей из репозитория
-     */
     private fun loadIndustries() {
         viewModelScope.launch {
             _industries.value = Resource.Loading()
@@ -61,25 +52,16 @@ class FilterViewModel(
         }
     }
 
-    /**
-     * Обновить зарплату
-     */
     fun updateSalary(salary: Int?) {
         _filterSettings.update { it.copy(salary = salary) }
         saveFilters()
     }
 
-    /**
-     * Обновить чекбокс "Не показывать без зарплаты"
-     */
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
         _filterSettings.update { it.copy(onlyWithSalary = onlyWithSalary) }
         saveFilters()
     }
 
-    /**
-     * Обновить отрасль
-     */
     fun updateIndustry(industryId: Int?, industryName: String?) {
         _filterSettings.update {
             it.copy(
@@ -90,9 +72,6 @@ class FilterViewModel(
         saveFilters()
     }
 
-    /**
-     * Обновить местоположение
-     */
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
         _filterSettings.update {
             it.copy(
@@ -105,17 +84,11 @@ class FilterViewModel(
         saveFilters()
     }
 
-    /**
-     * Сбросить все настройки фильтра
-     */
     fun resetFilters() {
-        _filterSettings.value = FilterSettingsHelper.reset()
+        _filterSettings.value = FilterSettings()
         filterStorage.clearFilterSettings()
     }
 
-    /**
-     * Получить параметры для поискового запроса
-     */
     fun getSearchParams(): Map<String, Any> {
         val settings = _filterSettings.value
         val params = mutableMapOf<String, Any>()
@@ -135,10 +108,12 @@ class FilterViewModel(
         return params
     }
 
-    /**
-     * Проверить, есть ли активные фильтры
-     */
     fun hasActiveFilters(): Boolean {
-        return FilterSettingsHelper.hasActiveFilters(_filterSettings.value)
+        val settings = _filterSettings.value
+        return settings.salary != null ||
+            settings.onlyWithSalary ||
+            settings.industryId != null ||
+            settings.countryId != null ||
+            settings.regionId != null
     }
 }
