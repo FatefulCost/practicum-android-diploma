@@ -3,6 +3,7 @@ package ru.practicum.android.diploma.data.storage
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 class FilterStorage(context: Context) {
@@ -24,7 +25,8 @@ class FilterStorage(context: Context) {
         return if (json != null) {
             try {
                 gson.fromJson(json, FilterSettings::class.java)
-            } catch (e: Exception) {
+            } catch (e: JsonSyntaxException) {
+                android.util.Log.e("FilterStorage", "Failed to parse filter settings", e)
                 FilterSettings()
             }
         } else {

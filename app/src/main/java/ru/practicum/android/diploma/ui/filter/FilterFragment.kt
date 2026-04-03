@@ -82,7 +82,13 @@ class FilterFragment : Fragment() {
                 append(settings.countryName)
             }
         }
-        binding.tvWorkLocationValue.text = if (locationText.isNotEmpty()) locationText else getString(R.string.not_selected)
+
+        val locationValue = if (locationText.isNotEmpty()) {
+            locationText
+        } else {
+            getString(R.string.not_selected)
+        }
+        binding.tvWorkLocationValue.text = locationValue
     }
 
     private fun applyFilters() {

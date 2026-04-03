@@ -109,7 +109,7 @@ class FilterViewModel(
      * Сбросить все настройки фильтра
      */
     fun resetFilters() {
-        _filterSettings.value = FilterSettings()
+        _filterSettings.value = FilterSettingsHelper.reset()
         filterStorage.clearFilterSettings()
     }
 
@@ -139,6 +139,6 @@ class FilterViewModel(
      * Проверить, есть ли активные фильтры
      */
     fun hasActiveFilters(): Boolean {
-        return _filterSettings.value.hasActiveFilters()
+        return FilterSettingsHelper.hasActiveFilters(_filterSettings.value)
     }
 }
