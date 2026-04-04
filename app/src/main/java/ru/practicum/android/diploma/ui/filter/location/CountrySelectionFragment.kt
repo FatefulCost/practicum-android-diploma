@@ -20,7 +20,7 @@ import ru.practicum.android.diploma.util.Resource
 class CountrySelectionFragment : Fragment() {
 
     private val workLocationViewModel: WorkLocationViewModel by viewModel()
-    private lateinit var adapter: CountryAdapter
+    private var adapter: CountryAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,8 +44,8 @@ class CountrySelectionFragment : Fragment() {
                 putInt("selectedCountryId", country.id)
                 putString("selectedCountryName", country.name)
             }
-            findNavController().navigateUp()
             parentFragmentManager.setFragmentResult("country_selection", bundle)
+            findNavController().popBackStack()
         }
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
@@ -55,7 +55,7 @@ class CountrySelectionFragment : Fragment() {
         workLocationViewModel.countries.onEach { resource ->
             when (resource) {
                 is Resource.Success -> {
-                    adapter.updateData(resource.data ?: emptyList())
+                    adapter?.updateData(resource.data ?: emptyList())
                 }
                 is Resource.Error -> { }
                 else -> { }

@@ -22,7 +22,7 @@ class RegionSelectionFragment : Fragment() {
 
     private val filterViewModel: FilterViewModel by viewModel()
     private val workLocationViewModel: WorkLocationViewModel by viewModel()
-    private lateinit var adapter: RegionAdapter
+    private var adapter: RegionAdapter? = null
     private var countryId: Int = -1
     private var countryName: String = ""
 
@@ -68,7 +68,7 @@ class RegionSelectionFragment : Fragment() {
         workLocationViewModel.regions.onEach { resource ->
             when (resource) {
                 is Resource.Success -> {
-                    adapter.updateData(resource.data ?: emptyList())
+                    adapter?.updateData(resource.data ?: emptyList())
                 }
                 is Resource.Error -> { }
                 else -> { }
