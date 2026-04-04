@@ -27,6 +27,10 @@ class FilterRepositoryImpl(
         }
 
         // Если кэша нет, делаем реальный запрос к API
+        val cached = getCachedAreas()
+        if (cached != null) {
+            return Result.success(cached)
+        }
         val result = networkClient.getAreas()
         result.onSuccess { areas ->
             cacheAreas(areas)
