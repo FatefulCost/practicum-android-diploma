@@ -45,6 +45,7 @@
 
     <!-- Industry Selection -->
     <string name="select_industry">Выбор отрасли</string>
+    <string name="industry_hint">Введите отрасль</string>
 
     <!-- Vacancy Details -->
     <string name="vacancy_details">Вакансия</string>
