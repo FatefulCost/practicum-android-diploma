@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.storage.FilterStorage
 import ru.practicum.android.diploma.domain.repository.FilterRepository
@@ -50,6 +51,30 @@ class FilterViewModel(
                 }
             )
         }
+    }
+
+    private val _areas = MutableStateFlow<Resource<List<FilterAreaDto>>>(Resource.Loading())
+    val areas: StateFlow<Resource<List<FilterAreaDto>>> = _areas.asStateFlow()
+
+    private fun loadAreas() {
+        viewModelScope.launch {
+            _areas.value = Resource.Loading()
+            val result = filterRepository.getAreas()
+            result.fold(
+                onSuccess = { areas ->
+                    _areas.value = Resource.Success(areas)
+                },
+                onFailure = { error ->
+                    _areas.value = Resource.Error(error.message ?: "Ошибка загрузки регионов")
+                }
+            )
+        }
+    }
+
+    init {
+        loadSavedFilters()
+        loadIndustries()
+        loadAreas()
     }
 
     fun updateSalary(salary: Int?) {

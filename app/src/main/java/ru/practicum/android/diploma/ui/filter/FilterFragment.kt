@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
+import ru.practicum.android.diploma.util.Resource
 
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
@@ -55,6 +56,17 @@ class FilterFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.filterSettings.onEach { settings ->
             updateUI(settings)
+        }.launchIn(lifecycleScope)
+
+        viewModel.industries.onEach { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show()
+                }
+                else -> { }
+            }
         }.launchIn(lifecycleScope)
     }
 
