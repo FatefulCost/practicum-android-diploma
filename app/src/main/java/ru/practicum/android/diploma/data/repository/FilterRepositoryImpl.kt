@@ -6,13 +6,12 @@ import com.google.gson.reflect.TypeToken
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
-import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
 private const val NUMBERFORMAGIC3 = 3
-private const val NUMBERFORMAGIC4 = 4
 
 class FilterRepositoryImpl(
     private val networkClient: NetworkClient,
@@ -24,6 +23,12 @@ class FilterRepositoryImpl(
         private const val KEY_AREAS_CACHE = "cached_areas"
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
         private const val KEY_FILTER_SETTINGS = "filter_settings"
+
+        private const val KEY_COUNTRY_ID = "filter_country_id"
+        private const val KEY_COUNTRY_NAME = "filter_country_name"
+        private const val KEY_REGION_ID = "filter_region_id"
+        private const val KEY_REGION_NAME = "filter_region_name"
+        private const val NO_ID = -1
     }
 
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
@@ -38,7 +43,6 @@ class FilterRepositoryImpl(
         return result
     }
 
-    // Заглушка для отраслей
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
         return Result.success(
             listOf(
@@ -49,7 +53,6 @@ class FilterRepositoryImpl(
         )
     }
 
-    // Кэширование (через SharedPreferences)
     override suspend fun getCachedAreas(): List<FilterAreaDto>? {
         val json = sharedPreferences.getString(KEY_AREAS_CACHE, null)
         return json?.let {
@@ -75,13 +78,38 @@ class FilterRepositoryImpl(
     }
 
     override fun saveFilterSettings(settings: FilterSettings) {
-        sharedPreferences.edit().putString(KEY_FILTER_SETTINGS, gson.toJson(settings)).apply()
+        sharedPreferences.edit()
+            .putString(KEY_FILTER_SETTINGS, gson.toJson(settings))
+            .apply()
     }
 
     override fun getFilterSettings(): FilterSettings? {
-        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null)
-        return json?.let {
-            gson.fromJson(it, FilterSettings::class.java)
-        }
+        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null) ?: return null
+        return gson.fromJson(json, FilterSettings::class.java)
     }
+
+    override fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
+        sharedPreferences.edit()
+            .putInt(KEY_COUNTRY_ID, countryId ?: NO_ID)
+            .putString(KEY_COUNTRY_NAME, countryName)
+            .putInt(KEY_REGION_ID, regionId ?: NO_ID)
+            .putString(KEY_REGION_NAME, regionName)
+            .apply()
+    }
+
+    override fun loadSavedCountryId(): Int? {
+        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedCountryName(): String? =
+        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+
+    override fun loadSavedRegionId(): Int? {
+        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedRegionName(): String? =
+        sharedPreferences.getString(KEY_REGION_NAME, null)
 }

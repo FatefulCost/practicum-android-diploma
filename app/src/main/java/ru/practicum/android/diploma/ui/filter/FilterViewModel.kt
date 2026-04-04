@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
 
@@ -42,6 +43,7 @@ class FilterViewModel(
 
     init {
         loadIndustries()
+        loadSavedLocation()
     }
 
     /**
@@ -90,7 +92,25 @@ class FilterViewModel(
     }
 
     /**
-     * Обновить местоположение
+     * Загрузить сохранённое место работы из SharedPreferences
+     */
+    private fun loadSavedLocation() {
+        val countryId = filterRepository.loadSavedCountryId()
+        val countryName = filterRepository.loadSavedCountryName()
+        val regionId = filterRepository.loadSavedRegionId()
+        val regionName = filterRepository.loadSavedRegionName()
+        if (countryId != null || regionId != null) {
+            _filterSettings.value = _filterSettings.value.copy(
+                countryId = countryId,
+                countryName = countryName,
+                regionId = regionId,
+                regionName = regionName
+            )
+        }
+    }
+
+    /**
+     * Обновить местоположение и сохранить в SharedPreferences
      */
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
         _filterSettings.value = _filterSettings.value.copy(
@@ -99,6 +119,7 @@ class FilterViewModel(
             regionId = regionId,
             regionName = regionName
         )
+        filterRepository.saveLocation(countryId, countryName, regionId, regionName)
     }
 
     /**
@@ -121,16 +142,3 @@ class FilterViewModel(
     }
 }
 
-/**
- * Класс для хранения настроек фильтрации
- */
-data class FilterSettings(
-    val salary: Int? = null,
-    val onlyWithSalary: Boolean = false,
-    val industryId: Int? = null,
-    val industryName: String? = null,
-    val countryId: Int? = null,
-    val countryName: String? = null,
-    val regionId: Int? = null,
-    val regionName: String? = null
-)
