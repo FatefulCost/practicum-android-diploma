@@ -16,6 +16,8 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
 import kotlinx.coroutines.launch
 
+private val NOT_SELECTED: Int = R.string.not_selected
+
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
     private val binding get() = _binding!!
@@ -89,10 +91,10 @@ class FilterFragment : Fragment() {
         binding.tvWorkLocationValue.text = when {
             settings.regionName != null -> settings.regionName
             settings.countryName != null -> settings.countryName
-            else -> getString(R.string.not_selected)
+            else -> getString(NOT_SELECTED)
         }
 
-        binding.tvIndustryValue.text = settings.industryName ?: getString(R.string.not_selected)
+        binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
     }
 
     override fun onDestroyView() {

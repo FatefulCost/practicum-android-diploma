@@ -30,7 +30,7 @@
     <string name="location_selection_coming_soon">Выбор места работы (скоро)</string>
     <string name="region_selection_coming_soon">Выбор региона (скоро)</string>
     <string name="industries_loading_coming_soon">Список отраслей будет добавлен позже</string>
-    <string name="unknown_error">Unknown error</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
 
     <!-- Work Location -->
     <string name="select_work_location">Выбор места работы</string>
