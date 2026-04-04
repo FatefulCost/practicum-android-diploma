@@ -113,6 +113,4 @@ class CountrySelectionFragment : Fragment() {
             }
         }
     }
-
-
 }
