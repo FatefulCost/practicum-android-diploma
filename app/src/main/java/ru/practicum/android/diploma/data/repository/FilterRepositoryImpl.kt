@@ -24,37 +24,16 @@ class FilterRepositoryImpl(
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
     }
 
-    // Заглушка для регионов
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
-        val testAreas = listOf(
-            FilterAreaDto(
-                id = NUMBERFORMAGIC1,
-                name = "Россия",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC2,
-                        name = "Москва",
-                        parentId = NUMBERFORMAGIC1,
-                        areas = emptyList()
-                    )
-                )
-            ),
-            FilterAreaDto(
-                id = NUMBERFORMAGIC3,
-                name = "Беларусь",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC4,
-                        name = "Минск",
-                        parentId = NUMBERFORMAGIC3,
-                        areas = emptyList()
-                    )
-                )
-            )
-        )
-        return Result.success(testAreas)
+        val cached = getCachedAreas()
+        if (cached != null) {
+            return Result.success(cached)
+        }
+        val result = networkClient.getAreas()
+        result.onSuccess { areas ->
+            cacheAreas(areas)
+        }
+        return result
     }
 
     // Заглушка для отраслей
