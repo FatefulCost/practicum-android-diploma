@@ -4,14 +4,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentWorkLocationBinding
+import ru.practicum.android.diploma.ui.filter.FilterViewModel
 
 class WorkLocationFragment : Fragment() {
     private var _binding: FragmentWorkLocationBinding? = null
     private val binding get() = _binding!!
+    private val filterViewModel: FilterViewModel by viewModel()
+
+    private var selectedCountryId: Int? = null
+    private var selectedCountryName: String? = null
+    private var selectedRegionId: Int? = null
+    private var selectedRegionName: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,21 +35,114 @@ class WorkLocationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        parentFragmentManager.setFragmentResultListener("country_selection", viewLifecycleOwner) { _, bundle ->
+            val countryId = bundle.getInt("selectedCountryId", -1)
+            val countryName = bundle.getString("selectedCountryName")
+            if (countryId != -1) {
+                selectedCountryId = countryId
+                selectedCountryName = countryName
+                selectedRegionId = null
+                selectedRegionName = null
+                updateDisplay()
+            }
+        }
+
+        parentFragmentManager.setFragmentResultListener("region_selection", viewLifecycleOwner) { _, bundle ->
+            val regionId = bundle.getInt("selectedRegionId", -1)
+            val regionName = bundle.getString("selectedRegionName")
+            if (regionId != -1) {
+                selectedRegionId = regionId
+                selectedRegionName = regionName
+                updateDisplay()
+            }
+        }
+
+        loadSavedLocation()
         setupUI()
+        observeFilters()
+    }
+
+    private fun loadSavedLocation() {
+        val settings = filterViewModel.filterSettings.value
+        if (selectedCountryId == null) {
+            selectedCountryId = settings.countryId
+            selectedCountryName = settings.countryName
+        }
+        if (selectedRegionId == null) {
+            selectedRegionId = settings.regionId
+            selectedRegionName = settings.regionName
+        }
     }
 
     private fun setupUI() {
         binding.layoutCountry.setOnClickListener {
-            Toast.makeText(requireContext(), "Выбор страны (будет реализовано позже)", Toast.LENGTH_SHORT).show()
+            navigateToCountrySelection()
         }
 
         binding.layoutRegion.setOnClickListener {
-            Toast.makeText(requireContext(), "Выбор региона (будет реализовано позже)", Toast.LENGTH_SHORT).show()
+            if (selectedCountryId != null && selectedCountryId != -1) {
+                navigateToRegionSelection()
+            } else {
+                binding.tvRegionValue.text = "Сначала выберите страну"
+            }
         }
 
         binding.btnSelect.setOnClickListener {
-            findNavController().popBackStack()
+            saveLocationAndReturn()
         }
+    }
+
+    private fun observeFilters() {
+        filterViewModel.filterSettings.onEach { settings ->
+            if (selectedCountryId == null) {
+                selectedCountryId = settings.countryId
+                selectedCountryName = settings.countryName
+            }
+            if (selectedRegionId == null) {
+                selectedRegionId = settings.regionId
+                selectedRegionName = settings.regionName
+            }
+            updateDisplay()
+        }.launchIn(lifecycleScope)
+    }
+
+    private fun updateDisplay() {
+        if (!selectedCountryName.isNullOrBlank() && selectedCountryId != -1) {
+            binding.tvCountryValue.text = selectedCountryName
+        } else {
+            binding.tvCountryValue.text = getString(R.string.not_selected)
+        }
+
+        if (!selectedRegionName.isNullOrBlank() && selectedRegionId != -1) {
+            binding.tvRegionValue.text = selectedRegionName
+        } else {
+            binding.tvRegionValue.text = getString(R.string.not_selected)
+        }
+    }
+
+    private fun navigateToCountrySelection() {
+        val action = ru.practicum.android.diploma.R.id.action_workLocationFragment_to_countrySelectionFragment
+        findNavController().navigate(action)
+    }
+
+    private fun navigateToRegionSelection() {
+        val bundle = Bundle().apply {
+            putInt("countryId", selectedCountryId ?: -1)
+            putString("countryName", selectedCountryName ?: "")
+        }
+        val action = ru.practicum.android.diploma.R.id.action_workLocationFragment_to_regionSelectionFragment
+        findNavController().navigate(action, bundle)
+    }
+
+    private fun saveLocationAndReturn() {
+        filterViewModel.updateLocation(
+            countryId = selectedCountryId,
+            countryName = selectedCountryName,
+            regionId = selectedRegionId,
+            regionName = selectedRegionName
+        )
+        findNavController().popBackStack()
     }
 
     override fun onDestroyView() {

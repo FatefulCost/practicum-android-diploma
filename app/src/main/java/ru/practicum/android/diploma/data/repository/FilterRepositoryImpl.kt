@@ -8,11 +8,6 @@ import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 
-private const val NUMBERFORMAGIC1 = 1
-private const val NUMBERFORMAGIC2 = 2
-private const val NUMBERFORMAGIC3 = 3
-private const val NUMBERFORMAGIC4 = 4
-
 class FilterRepositoryImpl(
     private val networkClient: NetworkClient,
     private val sharedPreferences: SharedPreferences,
@@ -24,51 +19,36 @@ class FilterRepositoryImpl(
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
     }
 
-    // Заглушка для регионов
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
-        val testAreas = listOf(
-            FilterAreaDto(
-                id = NUMBERFORMAGIC1,
-                name = "Россия",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC2,
-                        name = "Москва",
-                        parentId = NUMBERFORMAGIC1,
-                        areas = emptyList()
-                    )
-                )
-            ),
-            FilterAreaDto(
-                id = NUMBERFORMAGIC3,
-                name = "Беларусь",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC4,
-                        name = "Минск",
-                        parentId = NUMBERFORMAGIC3,
-                        areas = emptyList()
-                    )
-                )
-            )
-        )
-        return Result.success(testAreas)
+        // Сначала пробуем получить из кэша
+        val cachedAreas = getCachedAreas()
+        if (cachedAreas != null && cachedAreas.isNotEmpty()) {
+            return Result.success(cachedAreas)
+        }
+
+        // Если кэша нет, делаем реальный запрос к API
+        val result = networkClient.getAreas()
+        result.onSuccess { areas ->
+            cacheAreas(areas)
+        }
+        return result
     }
 
-    // Заглушка для отраслей
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
-        return Result.success(
-            listOf(
-                FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-                FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-                FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
-            )
-        )
+        // Сначала пробуем получить из кэша
+        val cachedIndustries = getCachedIndustries()
+        if (cachedIndustries != null && cachedIndustries.isNotEmpty()) {
+            return Result.success(cachedIndustries)
+        }
+
+        // Если кэша нет, делаем реальный запрос к API
+        val result = networkClient.getIndustries()
+        result.onSuccess { industries ->
+            cacheIndustries(industries)
+        }
+        return result
     }
 
-    // Кэширование (через SharedPreferences)
     override suspend fun getCachedAreas(): List<FilterAreaDto>? {
         val json = sharedPreferences.getString(KEY_AREAS_CACHE, null)
         return json?.let {

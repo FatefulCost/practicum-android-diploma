@@ -13,7 +13,7 @@ import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
 
 class SearchViewModel(
-    private val repository: VacancyRepository,
+    private val vacancyRepository: VacancyRepository,
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
@@ -91,7 +91,7 @@ class SearchViewModel(
         }
 
         viewModelScope.launch {
-            val result = repository.searchVacancies(text = query, page = page)
+            val result = vacancyRepository.searchVacancies(text = query, page = page)
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)
