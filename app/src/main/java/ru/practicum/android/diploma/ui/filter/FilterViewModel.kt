@@ -13,20 +13,12 @@ import ru.practicum.android.diploma.util.Resource
 /**
  * ViewModel для экрана фильтров
  *
- *  Пока это простая версия
- *  Хранит настройки фильтра
- *  Умеет сбрасывать настройки
- *  Умеет загружать отрасли (заглушка)
- *
- * В Epic 4 добавим:
- *  Сохранение в SharedPreferences
- *  Применение фильтров к поиску
- *  Полноценная работа с отраслями и регионами
+ * Хранит настройки фильтра
+ * Умеет сбрасывать настройки
+ * Умеет загружать отрасли и регионы
+ * Сохраняет настройки в SharedPreferences
+ * Применяет фильтры к поиску
  */
-private const val NUMBERFORMAGIC1 = 1
-private const val NUMBERFORMAGIC2 = 2
-private const val NUMBERFORMAGIC3 = 3
-private const val NUMBERFORMAGIC4 = 4
 
 class FilterViewModel(
     private val filterRepository: FilterRepository
@@ -41,26 +33,26 @@ class FilterViewModel(
     val industries: StateFlow<Resource<List<FilterIndustryDto>>> = _industries.asStateFlow()
 
     init {
+        loadSavedSettings()
         loadIndustries()
+    }
+
+    private fun loadSavedSettings() {
+        filterRepository.getFilterSettings()?.let { settings ->
+            _filterSettings.value = settings
+        }
     }
 
     /**
      * Загрузить список отраслей
-     * В Epic 4 здесь будет реальный запрос через filterRepository.getIndustries()
-     * Пока это заглушка
      */
     private fun loadIndustries() {
         viewModelScope.launch {
-            // В Epic 4 добавим реализацию
-
-            // Пока просто заглушка
-            _industries.value = Resource.Success(
-                listOf(
-                    FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-                    FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-                    FilterIndustryDto(NUMBERFORMAGIC3, "Продажи"),
-                    FilterIndustryDto(NUMBERFORMAGIC4, "Дизайн")
-                )
+            _industries.value = Resource.Loading()
+            val result = filterRepository.getIndustries()
+            _industries.value = result.fold(
+                onSuccess = { Resource.Success(it) },
+                onFailure = { Resource.Error(it.message ?: "Error loading industries") }
             )
         }
     }
@@ -106,6 +98,14 @@ class FilterViewModel(
      */
     fun resetFilters() {
         _filterSettings.value = FilterSettings()
+        filterRepository.saveFilterSettings(FilterSettings())
+    }
+
+    /**
+     * Сохранить настройки в SharedPreferences
+     */
+    fun saveSettings() {
+        filterRepository.saveFilterSettings(_filterSettings.value)
     }
 
     /**

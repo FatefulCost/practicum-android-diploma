@@ -2,8 +2,15 @@ package ru.practicum.android.diploma.domain.repository
 
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 interface FilterRepository {
+
+    // Сохранить настройки фильтра
+    fun saveFilterSettings(settings: FilterSettings)
+
+    // Получить сохраненные настройки фильтра
+    fun getFilterSettings(): FilterSettings?
 
     // Получить регионы из сети
     suspend fun getAreas(): Result<List<FilterAreaDto>>

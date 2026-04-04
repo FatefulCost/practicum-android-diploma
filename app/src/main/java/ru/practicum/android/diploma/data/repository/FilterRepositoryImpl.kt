@@ -7,6 +7,7 @@ import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.domain.repository.FilterRepository
+import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
@@ -22,6 +23,37 @@ class FilterRepositoryImpl(
     companion object {
         private const val KEY_AREAS_CACHE = "cached_areas"
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
+        private const val KEY_FILTER_SETTINGS = "filter_settings"
+    }
+
+    override fun saveFilterSettings(settings: FilterSettings) {
+        sharedPreferences.edit()
+            .putInt(KEY_FILTER_SETTINGS + "_salary", settings.salary ?: -1)
+            .putBoolean(KEY_FILTER_SETTINGS + "_onlyWithSalary", settings.onlyWithSalary)
+            .putInt(KEY_FILTER_SETTINGS + "_industryId", settings.industryId ?: -1)
+            .putString(KEY_FILTER_SETTINGS + "_industryName", settings.industryName)
+            .putInt(KEY_FILTER_SETTINGS + "_countryId", settings.countryId ?: -1)
+            .putString(KEY_FILTER_SETTINGS + "_countryName", settings.countryName)
+            .putInt(KEY_FILTER_SETTINGS + "_regionId", settings.regionId ?: -1)
+            .putString(KEY_FILTER_SETTINGS + "_regionName", settings.regionName)
+            .apply()
+    }
+
+    override fun getFilterSettings(): FilterSettings? {
+        val salary = sharedPreferences.getInt(KEY_FILTER_SETTINGS + "_salary", -1)
+        if (salary == -1 && !sharedPreferences.contains(KEY_FILTER_SETTINGS + "_salary")) {
+            return null
+        }
+        return FilterSettings(
+            salary = if (salary == -1) null else salary,
+            onlyWithSalary = sharedPreferences.getBoolean(KEY_FILTER_SETTINGS + "_onlyWithSalary", false),
+            industryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + "_industryId", -1).takeIf { it != -1 },
+            industryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + "_industryName", null),
+            countryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + "_countryId", -1).takeIf { it != -1 },
+            countryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + "_countryName", null),
+            regionId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + "_regionId", -1).takeIf { it != -1 },
+            regionName = sharedPreferences.getString(KEY_FILTER_SETTINGS + "_regionName", null)
+        )
     }
 
     // Заглушка для регионов
