@@ -9,16 +9,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.data.dto.VacancyResponseDto
+import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
 
 class SearchViewModel(
     private val repository: VacancyRepository,
-    private val networkUtils: NetworkUtils
+    private val networkUtils: NetworkUtils,
+    private val filterRepository: FilterRepository
 ) : ViewModel() {
 
     private val _searchState = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = _searchState
+
+    private val _hasActiveFilters = MutableLiveData<Boolean>()
+    val hasActiveFilters: LiveData<Boolean> = _hasActiveFilters
 
     private var searchJob: Job? = null
 
@@ -38,6 +43,21 @@ class SearchViewModel(
 
     init {
         _searchState.value = SearchState.Empty
+        checkActiveFilters()
+    }
+
+    private fun checkActiveFilters() {
+        viewModelScope.launch {
+            val settings = filterRepository.getFilterSettings()
+            val hasFilters = settings != null && (
+                settings.salary != null ||
+                settings.onlyWithSalary ||
+                settings.industryId != null ||
+                settings.countryId != null ||
+                settings.regionId != null
+            )
+            _hasActiveFilters.value = hasFilters
+        }
     }
 
     fun updateSearchQuery(query: String) {
@@ -160,6 +180,10 @@ class SearchViewModel(
         resetPagination()
         allVacancies.clear()
         _searchState.value = SearchState.Empty
+    }
+
+    fun refreshActiveFilters() {
+        checkActiveFilters()
     }
 
     private fun resetPagination() {

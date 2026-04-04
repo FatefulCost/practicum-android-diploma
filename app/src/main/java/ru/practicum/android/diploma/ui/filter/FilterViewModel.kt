@@ -42,6 +42,22 @@ class FilterViewModel(
 
     init {
         loadIndustries()
+        loadSavedFilters()
+    }
+
+    private fun loadSavedFilters() {
+        viewModelScope.launch {
+            val savedSettings = filterRepository.getFilterSettings()
+            if (savedSettings != null) {
+                _filterSettings.value = savedSettings
+            }
+        }
+    }
+
+    private fun saveFilters() {
+        viewModelScope.launch {
+            filterRepository.saveFilterSettings(_filterSettings.value)
+        }
     }
 
     /**
@@ -70,6 +86,35 @@ class FilterViewModel(
      */
     fun updateSalary(salary: Int?) {
         _filterSettings.value = _filterSettings.value.copy(salary = salary)
+        saveFilters()
+    }
+
+    fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
+        _filterSettings.value = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        saveFilters()
+    }
+
+    fun updateIndustry(industryId: Int?, industryName: String?) {
+        _filterSettings.value = _filterSettings.value.copy(
+            industryId = industryId,
+            industryName = industryName
+        )
+        saveFilters()
+    }
+
+    fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
+        _filterSettings.value = _filterSettings.value.copy(
+            countryId = countryId,
+            countryName = countryName,
+            regionId = regionId,
+            regionName = regionName
+        )
+        saveFilters()
+    }
+
+    fun resetFilters() {
+        _filterSettings.value = FilterSettings()
+        saveFilters()
     }
 
     /**

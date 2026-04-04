@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +41,11 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshActiveFilters()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -152,11 +158,29 @@ class SearchFragment : Fragment() {
                 is SearchState.LoadMoreError -> showLoadMoreError(state.message)
                 is SearchState.Error -> showErrorState(state.error)
             }
-            // Сбрасываем флаг, когда загрузка закончена
             if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
                 isLoadingMore = false
             }
         }
+
+        viewModel.hasActiveFilters.observe(viewLifecycleOwner) { hasActiveFilters ->
+            updateFilterButton(hasActiveFilters)
+        }
+    }
+
+    private fun updateFilterButton(hasActiveFilters: Boolean) {
+        val iconRes = if (hasActiveFilters) {
+            R.drawable.ic_filter_active
+        } else {
+            R.drawable.ic_filter
+        }
+        val tintColor = if (hasActiveFilters) {
+            ContextCompat.getColor(requireContext(), R.color.filter_icon_active)
+        } else {
+            ContextCompat.getColor(requireContext(), R.color.filter_icon)
+        }
+        binding.fabFilter.setImageResource(iconRes)
+        binding.fabFilter.setColorFilter(tintColor)
     }
 
     private fun showEmptyState() {
