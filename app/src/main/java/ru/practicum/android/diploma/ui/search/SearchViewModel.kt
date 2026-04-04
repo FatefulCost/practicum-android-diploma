@@ -98,6 +98,7 @@ class SearchViewModel(
             val result = repository.searchVacancies(
                 text = query,
                 page = page,
+                area = filterRepository.loadSavedRegionId(),
                 salary = filterSettings?.salary,
                 industry = filterSettings?.industryId,
                 onlyWithSalary = filterSettings?.onlyWithSalary ?: false
