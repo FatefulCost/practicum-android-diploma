@@ -2,6 +2,7 @@ package ru.practicum.android.diploma.domain.repository
 
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
+import ru.practicum.android.diploma.domain.model.FilterSettings
 
 interface FilterRepository {
 
@@ -20,7 +21,6 @@ interface FilterRepository {
     // Сохранение/загрузка настроек фильтра
     fun saveFilterSettings(settings: FilterSettings)
     fun getFilterSettings(): FilterSettings?
-
 
     // Сохранение выбранного места работы (страна и регион)
     fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?)
