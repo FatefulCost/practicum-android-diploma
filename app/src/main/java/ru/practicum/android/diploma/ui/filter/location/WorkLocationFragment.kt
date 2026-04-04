@@ -69,7 +69,8 @@ class WorkLocationFragment : Fragment() {
         }
 
         binding.layoutRegion.setOnClickListener {
-            findNavController().navigate(R.id.action_workLocationFragment_to_regionSelectionFragment)
+            val args = Bundle().apply { putInt("countryId", selectedCountryId) }
+            findNavController().navigate(R.id.action_workLocationFragment_to_regionSelectionFragment, args)
         }
 
         binding.btnSelect.setOnClickListener {
