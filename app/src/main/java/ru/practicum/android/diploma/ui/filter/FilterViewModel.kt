@@ -118,42 +118,6 @@ class FilterViewModel(
     }
 
     /**
-     * Обновить чекбокс "Не показывать без зарплаты"
-     */
-    fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
-        _filterSettings.value = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
-    }
-
-    /**
-     * Обновить отрасль
-     */
-    fun updateIndustry(industryId: Int?, industryName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
-            industryId = industryId,
-            industryName = industryName
-        )
-    }
-
-    /**
-     * Обновить местоположение
-     */
-    fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
-            countryId = countryId,
-            countryName = countryName,
-            regionId = regionId,
-            regionName = regionName
-        )
-    }
-
-    /**
-     * Сбросить все настройки фильтра
-     */
-    fun resetFilters() {
-        _filterSettings.value = FilterSettings()
-    }
-
-    /**
      * Проверить, есть ли активные фильтры
      */
     fun hasActiveFilters(): Boolean {
