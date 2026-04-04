@@ -20,7 +20,7 @@ class CountrySelectionFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: CountrySelectionViewModel by viewModel()
-    private lateinit var adapter: CountryAdapter
+    private var adapter: CountryAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,6 +67,13 @@ class CountrySelectionFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        binding.recyclerView.adapter = null
+        adapter = null
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -90,7 +97,7 @@ class CountrySelectionFragment : Fragment() {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.layoutError.visibility = View.GONE
                 binding.layoutEmpty.visibility = View.GONE
-                adapter.submitList(state.countries)
+                adapter?.submitList(state.countries)
             }
             is CountrySelectionState.Empty -> {
                 binding.progressBar.visibility = View.GONE
@@ -107,8 +114,5 @@ class CountrySelectionFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+
 }
