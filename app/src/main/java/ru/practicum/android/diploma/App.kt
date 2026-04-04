@@ -7,6 +7,7 @@ import org.koin.core.context.startKoin
 import ru.practicum.android.diploma.di.databaseModule
 import ru.practicum.android.diploma.di.networkModule
 import ru.practicum.android.diploma.di.repositoryModule
+import ru.practicum.android.diploma.di.storageModule
 import ru.practicum.android.diploma.di.utilModule
 import ru.practicum.android.diploma.di.viewModelModule
 
@@ -21,6 +22,7 @@ class App : Application() {
                 networkModule,
                 databaseModule,
                 repositoryModule,
+                storageModule,
                 viewModelModule,
                 utilModule
             )
