@@ -7,6 +7,7 @@ import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
 import ru.practicum.android.diploma.domain.repository.FilterRepository
+import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
@@ -22,6 +23,7 @@ class FilterRepositoryImpl(
     companion object {
         private const val KEY_AREAS_CACHE = "cached_areas"
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
+        private const val KEY_FILTER_SETTINGS = "filter_settings"
     }
 
     // Заглушка для регионов
@@ -91,5 +93,16 @@ class FilterRepositoryImpl(
 
     override suspend fun cacheIndustries(industries: List<FilterIndustryDto>) {
         sharedPreferences.edit().putString(KEY_INDUSTRIES_CACHE, gson.toJson(industries)).apply()
+    }
+
+    override fun saveFilterSettings(settings: FilterSettings) {
+        sharedPreferences.edit().putString(KEY_FILTER_SETTINGS, gson.toJson(settings)).apply()
+    }
+
+    override fun getFilterSettings(): FilterSettings? {
+        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null)
+        return json?.let {
+            gson.fromJson(it, FilterSettings::class.java)
+        }
     }
 }
