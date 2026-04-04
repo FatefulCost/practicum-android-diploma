@@ -63,7 +63,6 @@ class CountrySelectionFragment : Fragment() {
             }
         }.launchIn(lifecycleScope)
     }
-
     inner class CountryAdapter(
         private var countries: List<FilterAreaDto>,
         private val onItemClick: (FilterAreaDto) -> Unit
