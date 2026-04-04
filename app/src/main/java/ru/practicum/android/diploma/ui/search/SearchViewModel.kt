@@ -9,11 +9,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.data.dto.VacancyResponseDto
+import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
 
 class SearchViewModel(
     private val repository: VacancyRepository,
+    private val filterRepository: FilterRepository,
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
@@ -84,6 +86,8 @@ class SearchViewModel(
             return
         }
 
+        val filterSettings = filterRepository.getFilterSettings()
+
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
@@ -91,7 +95,13 @@ class SearchViewModel(
         }
 
         viewModelScope.launch {
-            val result = repository.searchVacancies(text = query, page = page)
+            val result = repository.searchVacancies(
+                text = query,
+                page = page,
+                salary = filterSettings?.salary,
+                industry = filterSettings?.industryId,
+                onlyWithSalary = filterSettings?.onlyWithSalary ?: false
+            )
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)
