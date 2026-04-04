@@ -15,12 +15,10 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
-import ru.practicum.android.diploma.ui.filter.FilterViewModel
 import ru.practicum.android.diploma.util.Resource
 
 class RegionSelectionFragment : Fragment() {
 
-    private val filterViewModel: FilterViewModel by viewModel()
     private val workLocationViewModel: WorkLocationViewModel by viewModel()
     private var adapter: RegionAdapter? = null
     private var countryId: Int = -1

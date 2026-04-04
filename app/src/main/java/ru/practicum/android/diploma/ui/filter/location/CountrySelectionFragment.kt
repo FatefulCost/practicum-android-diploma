@@ -55,7 +55,8 @@ class CountrySelectionFragment : Fragment() {
         workLocationViewModel.countries.onEach { resource ->
             when (resource) {
                 is Resource.Success -> {
-                    adapter?.updateData(resource.data ?: emptyList())
+                    val countries = resource.data?.filter { it.parentId == null } ?: emptyList()
+                    adapter?.updateData(countries)
                 }
                 is Resource.Error -> { }
                 else -> { }

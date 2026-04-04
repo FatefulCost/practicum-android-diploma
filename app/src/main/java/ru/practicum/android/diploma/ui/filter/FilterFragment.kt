@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
-import ru.practicum.android.diploma.util.Resource
 
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
@@ -31,8 +30,39 @@ class FilterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        parentFragmentManager.setFragmentResultListener("work_location", viewLifecycleOwner) { _, bundle ->
+            val countryId = bundle.getInt("countryId", -1)
+            val countryName = bundle.getString("countryName")
+            val regionId = bundle.getInt("regionId", -1)
+            val regionName = bundle.getString("regionName")
+
+            viewModel.updateLocation(
+                countryId = if (countryId != -1) countryId else null,
+                countryName = countryName,
+                regionId = if (regionId != -1) regionId else null,
+                regionName = regionName
+            )
+        }
+
         setupUI()
         observeViewModel()
+        loadSavedFilters()
+    }
+
+    private fun loadSavedFilters() {
+        val settings = viewModel.filterSettings.value
+        settings.salary?.let {
+            binding.etSalary.setText(it.toString())
+        }
+        binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
+        updateWorkLocationDisplay(settings.countryName, settings.regionName)
+
+        if (!settings.industryName.isNullOrBlank()) {
+            binding.tvIndustryValue.text = settings.industryName
+        } else {
+            binding.tvIndustryValue.text = getString(R.string.not_selected)
+        }
     }
 
     private fun setupUI() {
@@ -45,62 +75,45 @@ class FilterFragment : Fragment() {
         }
 
         binding.layoutWorkLocation.setOnClickListener {
-            findNavController().navigate(R.id.action_filterFragment_to_workLocationFragment)
+            navigateToWorkLocation()
         }
 
         binding.layoutIndustry.setOnClickListener {
-            findNavController().navigate(R.id.action_filterFragment_to_industrySelectionFragment)
+            navigateToIndustrySelection()
         }
     }
 
     private fun observeViewModel() {
         viewModel.filterSettings.onEach { settings ->
-            updateUI(settings)
-        }.launchIn(lifecycleScope)
+            updateWorkLocationDisplay(settings.countryName, settings.regionName)
 
-        viewModel.industries.onEach { resource ->
-            when (resource) {
-                is Resource.Success -> {
-                }
-                is Resource.Error -> {
-                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show()
-                }
-                else -> { }
+            if (!settings.industryName.isNullOrBlank()) {
+                binding.tvIndustryValue.text = settings.industryName
+            } else {
+                binding.tvIndustryValue.text = getString(R.string.not_selected)
             }
         }.launchIn(lifecycleScope)
     }
 
-    private fun updateUI(settings: FilterSettings) {
-        // Зарплата
-        settings.salary?.let {
-            binding.etSalary.setText(it.toString())
-        } ?: binding.etSalary.text?.clear()
-
-        // Чекбокс
-        binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
-
-        // Отрасль
-        if (!settings.industryName.isNullOrBlank()) {
-            binding.tvIndustryValue.text = settings.industryName
-        } else {
-            binding.tvIndustryValue.text = getString(R.string.not_selected)
-        }
-
-        // Место работы
+    private fun updateWorkLocationDisplay(countryName: String?, regionName: String?) {
         val locationText = buildString {
-            if (!settings.regionName.isNullOrBlank()) {
-                append(settings.regionName)
-            } else if (!settings.countryName.isNullOrBlank()) {
-                append(settings.countryName)
+            if (!regionName.isNullOrBlank()) {
+                append(regionName)
+            } else if (!countryName.isNullOrBlank()) {
+                append(countryName)
             }
         }
+        binding.tvWorkLocationValue.text = if (locationText.isNotEmpty()) locationText else getString(R.string.not_selected)
+    }
 
-        val locationValue = if (locationText.isNotEmpty()) {
-            locationText
-        } else {
-            getString(R.string.not_selected)
-        }
-        binding.tvWorkLocationValue.text = locationValue
+    private fun navigateToWorkLocation() {
+        val action = R.id.action_filterFragment_to_workLocationFragment
+        findNavController().navigate(action)
+    }
+
+    private fun navigateToIndustrySelection() {
+        val action = R.id.action_filterFragment_to_industrySelectionFragment
+        findNavController().navigate(action)
     }
 
     private fun applyFilters() {
@@ -115,6 +128,8 @@ class FilterFragment : Fragment() {
     }
 
     private fun resetFilters() {
+        binding.etSalary.text?.clear()
+        binding.cbHideWithoutSalary.isChecked = false
         viewModel.resetFilters()
         Toast.makeText(requireContext(), "Фильтры сброшены", Toast.LENGTH_SHORT).show()
     }

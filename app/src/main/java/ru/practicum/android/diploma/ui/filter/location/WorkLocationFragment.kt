@@ -61,18 +61,15 @@ class WorkLocationFragment : Fragment() {
         loadSavedLocation()
         setupUI()
         observeFilters()
+        updateDisplay()
     }
 
     private fun loadSavedLocation() {
         val settings = filterViewModel.filterSettings.value
-        if (selectedCountryId == null) {
-            selectedCountryId = settings.countryId
-            selectedCountryName = settings.countryName
-        }
-        if (selectedRegionId == null) {
-            selectedRegionId = settings.regionId
-            selectedRegionName = settings.regionName
-        }
+        selectedCountryId = settings.countryId
+        selectedCountryName = settings.countryName
+        selectedRegionId = settings.regionId
+        selectedRegionName = settings.regionName
     }
 
     private fun setupUI() {
@@ -95,26 +92,22 @@ class WorkLocationFragment : Fragment() {
 
     private fun observeFilters() {
         filterViewModel.filterSettings.onEach { settings ->
-            if (selectedCountryId == null) {
-                selectedCountryId = settings.countryId
-                selectedCountryName = settings.countryName
-            }
-            if (selectedRegionId == null) {
-                selectedRegionId = settings.regionId
-                selectedRegionName = settings.regionName
-            }
+            selectedCountryId = settings.countryId
+            selectedCountryName = settings.countryName
+            selectedRegionId = settings.regionId
+            selectedRegionName = settings.regionName
             updateDisplay()
         }.launchIn(lifecycleScope)
     }
 
     private fun updateDisplay() {
-        if (!selectedCountryName.isNullOrBlank() && selectedCountryId != -1) {
+        if (!selectedCountryName.isNullOrBlank() && selectedCountryId != null && selectedCountryId != -1) {
             binding.tvCountryValue.text = selectedCountryName
         } else {
             binding.tvCountryValue.text = getString(R.string.not_selected)
         }
 
-        if (!selectedRegionName.isNullOrBlank() && selectedRegionId != -1) {
+        if (!selectedRegionName.isNullOrBlank() && selectedRegionId != null && selectedRegionId != -1) {
             binding.tvRegionValue.text = selectedRegionName
         } else {
             binding.tvRegionValue.text = getString(R.string.not_selected)
@@ -136,12 +129,13 @@ class WorkLocationFragment : Fragment() {
     }
 
     private fun saveLocationAndReturn() {
-        filterViewModel.updateLocation(
-            countryId = selectedCountryId,
-            countryName = selectedCountryName,
-            regionId = selectedRegionId,
-            regionName = selectedRegionName
-        )
+        val bundle = Bundle().apply {
+            putInt("countryId", selectedCountryId ?: -1)
+            putString("countryName", selectedCountryName)
+            putInt("regionId", selectedRegionId ?: -1)
+            putString("regionName", selectedRegionName)
+        }
+        parentFragmentManager.setFragmentResult("work_location", bundle)
         findNavController().popBackStack()
     }
 

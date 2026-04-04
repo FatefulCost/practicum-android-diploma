@@ -114,6 +114,10 @@ class FilterViewModel(
         filterStorage.clearFilterSettings()
     }
 
+    fun refreshFilters() {
+        _filterSettings.value = _filterSettings.value
+    }
+
     fun getSearchParams(): Map<String, Any> {
         val settings = _filterSettings.value
         val params = mutableMapOf<String, Any>()
