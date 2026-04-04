@@ -104,6 +104,8 @@ class SearchViewModel(
             return
         }
 
+        val filterSettings = filterRepository.getFilterSettings()
+
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
@@ -111,7 +113,13 @@ class SearchViewModel(
         }
 
         viewModelScope.launch {
-            val result = repository.searchVacancies(text = query, page = page)
+            val result = repository.searchVacancies(
+                text = query,
+                page = page,
+                salary = filterSettings?.salary,
+                industry = filterSettings?.industryId,
+                onlyWithSalary = filterSettings?.onlyWithSalary ?: false
+            )
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)

@@ -33,6 +33,12 @@
 
     <!-- Country Selection -->
     <string name="select_country">Выбор страны</string>
+    <string name="empty_countries_list">Список стран пуст</string>
+
+    <!-- Region Selection -->
+    <string name="region_search_hint">Введите регион</string>
+    <string name="region_not_found">Такого региона нет</string>
+    <string name="region_list_error">Не удалось получить список</string>
     <string name="russia">Россия</string>
     <string name="ukraine">Украина</string>
     <string name="kazakhstan">Казахстан</string>
