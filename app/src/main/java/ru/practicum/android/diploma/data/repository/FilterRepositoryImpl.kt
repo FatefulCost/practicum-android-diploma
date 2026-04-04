@@ -22,6 +22,7 @@ class FilterRepositoryImpl(
     companion object {
         private const val KEY_AREAS_CACHE = "cached_areas"
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
+        private const val KEY_FILTER_SETTINGS = "filter_settings"
 
         private const val KEY_COUNTRY_ID = "filter_country_id"
         private const val KEY_COUNTRY_NAME = "filter_country_name"
@@ -77,29 +78,4 @@ class FilterRepositoryImpl(
     override suspend fun cacheIndustries(industries: List<FilterIndustryDto>) {
         sharedPreferences.edit().putString(KEY_INDUSTRIES_CACHE, gson.toJson(industries)).apply()
     }
-
-    override fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        sharedPreferences.edit()
-            .putInt(KEY_COUNTRY_ID, countryId ?: NO_ID)
-            .putString(KEY_COUNTRY_NAME, countryName)
-            .putInt(KEY_REGION_ID, regionId ?: NO_ID)
-            .putString(KEY_REGION_NAME, regionName)
-            .apply()
-    }
-
-    override fun loadSavedCountryId(): Int? {
-        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
-        return if (id == NO_ID) null else id
-    }
-
-    override fun loadSavedCountryName(): String? =
-        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
-
-    override fun loadSavedRegionId(): Int? {
-        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
-        return if (id == NO_ID) null else id
-    }
-
-    override fun loadSavedRegionName(): String? =
-        sharedPreferences.getString(KEY_REGION_NAME, null)
 }
