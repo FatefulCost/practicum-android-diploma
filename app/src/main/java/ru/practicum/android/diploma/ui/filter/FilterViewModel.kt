@@ -10,9 +10,9 @@ import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.storage.FilterStorage
-import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
+import android.util.Log
 
 class FilterViewModel(
     private val filterRepository: FilterRepository,
@@ -32,15 +32,16 @@ class FilterViewModel(
         loadSavedFilters()
         loadIndustries()
         loadAreas()
-        loadSavedLocation()
     }
 
     private fun loadSavedFilters() {
         val savedSettings = filterStorage.loadFilterSettings()
+        Log.d("FilterViewModel", "loadSavedFilters: $savedSettings")
         _filterSettings.value = savedSettings
     }
 
     private fun saveFilters() {
+        Log.d("FilterViewModel", "saveFilters: ${_filterSettings.value}")
         filterStorage.saveFilterSettings(_filterSettings.value)
     }
 
@@ -59,47 +60,39 @@ class FilterViewModel(
         }
     }
 
-    private fun loadAreas() {
+    fun loadAreas() {
         viewModelScope.launch {
+            Log.d("FilterViewModel", "loadAreas - START")
             _areas.value = Resource.Loading()
             val result = filterRepository.getAreas()
+            Log.d("FilterViewModel", "loadAreas - result: $result")
             result.fold(
                 onSuccess = { areas ->
+                    Log.d("FilterViewModel", "loadAreas - SUCCESS, count: ${areas.size}")
                     _areas.value = Resource.Success(areas)
                 },
                 onFailure = { error ->
+                    Log.e("FilterViewModel", "loadAreas - ERROR: ${error.message}")
                     _areas.value = Resource.Error(error.message ?: "Ошибка загрузки регионов")
                 }
             )
         }
     }
 
-    private fun loadSavedLocation() {
-        val countryId = filterRepository.loadSavedCountryId()
-        val countryName = filterRepository.loadSavedCountryName()
-        val regionId = filterRepository.loadSavedRegionId()
-        val regionName = filterRepository.loadSavedRegionName()
-        if (countryId != null || regionId != null) {
-            _filterSettings.value = _filterSettings.value.copy(
-                countryId = countryId,
-                countryName = countryName,
-                regionId = regionId,
-                regionName = regionName
-            )
-        }
-    }
-
     fun updateSalary(salary: Int?) {
+        Log.d("FilterViewModel", "updateSalary: $salary")
         _filterSettings.update { it.copy(salary = salary) }
         saveFilters()
     }
 
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
+        Log.d("FilterViewModel", "updateOnlyWithSalary: $onlyWithSalary")
         _filterSettings.update { it.copy(onlyWithSalary = onlyWithSalary) }
         saveFilters()
     }
 
     fun updateIndustry(industryId: Int?, industryName: String?) {
+        Log.d("FilterViewModel", "updateIndustry: id=$industryId, name=$industryName")
         _filterSettings.update {
             it.copy(
                 industryId = industryId,
@@ -110,20 +103,22 @@ class FilterViewModel(
     }
 
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
-            countryId = countryId,
-            countryName = countryName,
-            regionId = regionId,
-            regionName = regionName
-        )
-        filterRepository.saveLocation(countryId, countryName, regionId, regionName)
+        Log.d("FilterViewModel", "updateLocation: countryId=$countryId, countryName=$countryName, regionId=$regionId, regionName=$regionName")
+        _filterSettings.update {
+            it.copy(
+                countryId = countryId,
+                countryName = countryName,
+                regionId = regionId,
+                regionName = regionName
+            )
+        }
         saveFilters()
     }
 
     fun resetFilters() {
+        Log.d("FilterViewModel", "resetFilters")
         _filterSettings.value = FilterSettings()
         filterStorage.clearFilterSettings()
-        filterRepository.saveLocation(null, null, null, null)
     }
 
     fun refreshFilters() {

@@ -1,8 +1,9 @@
+// domain/repository/FilterRepository.kt
 package ru.practicum.android.diploma.domain.repository
 
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
-import ru.practicum.android.diploma.domain.model.FilterSettings
+import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 interface FilterRepository {
 
@@ -18,11 +19,11 @@ interface FilterRepository {
     suspend fun getCachedIndustries(): List<FilterIndustryDto>?
     suspend fun cacheIndustries(industries: List<FilterIndustryDto>)
 
-    // Сохранение/загрузка настроек фильтра
+    // Сохранение и загрузка настроек фильтра
     fun saveFilterSettings(settings: FilterSettings)
     fun getFilterSettings(): FilterSettings?
 
-    // Сохранение выбранного места работы (страна и регион)
+    // Сохранение и загрузка местоположения
     fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?)
     fun loadSavedCountryId(): Int?
     fun loadSavedCountryName(): String?

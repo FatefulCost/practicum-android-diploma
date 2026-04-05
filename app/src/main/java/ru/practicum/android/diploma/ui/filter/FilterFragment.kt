@@ -1,6 +1,7 @@
 package ru.practicum.android.diploma.ui.filter
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +53,8 @@ class FilterFragment : Fragment() {
 
     private fun loadSavedFilters() {
         val settings = viewModel.filterSettings.value
+        Log.d("FilterFragment", "Loading saved filters: $settings")
+
         settings.salary?.let {
             binding.etSalary.setText(it.toString())
         }
@@ -85,6 +88,7 @@ class FilterFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.filterSettings.onEach { settings ->
+            Log.d("FilterFragment", "Settings updated: $settings")
             updateWorkLocationDisplay(settings.countryName, settings.regionName)
 
             if (!settings.industryName.isNullOrBlank()) {
@@ -122,6 +126,9 @@ class FilterFragment : Fragment() {
 
         viewModel.updateSalary(salary)
         viewModel.updateOnlyWithSalary(binding.cbHideWithoutSalary.isChecked)
+
+        Log.d("FilterFragment", "Applying filters - Salary: $salary, OnlyWithSalary: ${binding.cbHideWithoutSalary.isChecked}")
+        Log.d("FilterFragment", "Current settings after apply: ${viewModel.filterSettings.value}")
 
         Toast.makeText(requireContext(), "Фильтры применены", Toast.LENGTH_SHORT).show()
         findNavController().popBackStack()

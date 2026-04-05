@@ -5,12 +5,9 @@ package ru.practicum.android.diploma.util
 
 sealed class Resource<T>(
     val data: T? = null,
-    val message: String? = null
+    val message: String = ""  // Изменяем String? на String с значением по умолчанию
 ) {
-
     class Success<T>(data: T) : Resource<T>(data = data)
-
-    class Error<T>(message: String, data: T? = null) : Resource<T>(message = message, data = data)
-
     class Loading<T> : Resource<T>()
+    class Error<T>(message: String) : Resource<T>(message = message)  // Здесь message: String
 }

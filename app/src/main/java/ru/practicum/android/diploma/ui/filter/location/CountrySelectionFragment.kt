@@ -15,27 +15,15 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
+import ru.practicum.android.diploma.ui.filter.FilterViewModel
 import ru.practicum.android.diploma.util.Resource
+import android.util.Log
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 
 class CountrySelectionFragment : Fragment() {
 
-    private val workLocationViewModel: WorkLocationViewModel by viewModel()
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import ru.practicum.android.diploma.databinding.FragmentCountrySelectionBinding
-
-class CountrySelectionFragment : Fragment() {
-
-    private var _binding: FragmentCountrySelectionBinding? = null
-    private val binding get() = _binding!!
-
-    private val viewModel: CountrySelectionViewModel by viewModel()
+    private val filterViewModel: FilterViewModel by viewModel()
     private var adapter: CountryAdapter? = null
 
     override fun onCreateView(
@@ -44,20 +32,49 @@ class CountrySelectionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.fragment_country_selection, container, false)
-        _binding = FragmentCountrySelectionBinding.inflate(inflater, container, false)
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupToolbar(view)
         setupRecyclerView(view)
+        setupRetryButton(view)
         observeCountries()
-        workLocationViewModel.loadCountries()
+
+        // Если данные уже загружены, показываем их
+        val currentAreas = filterViewModel.areas.value
+        if (currentAreas is Resource.Success) {
+            val countries = currentAreas.data?.filter { it.parentId == null } ?: emptyList()
+            updateUI(Resource.Success(countries))
+        } else if (currentAreas is Resource.Error) {
+            updateUI(Resource.Error(currentAreas.message))
+        } else if (currentAreas is Resource.Loading) {
+            updateUI(Resource.Loading())
+        }
+    }
+
+    private fun setupToolbar(view: View) {
+        val toolbar = view.findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setupRetryButton(view: View) {
+        val btnRetry = view.findViewById<android.widget.Button>(R.id.btnRetry)
+        btnRetry.setOnClickListener {
+            // Повторно загружаем данные
+            filterViewModel.loadAreas() // Добавьте этот метод в FilterViewModel
+            updateUI(Resource.Loading())
+        }
     }
 
     private fun setupRecyclerView(view: View) {
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+
         adapter = CountryAdapter(emptyList()) { country ->
+            Log.d("CountrySelection", "Selected country: ${country.name}")
             val bundle = Bundle().apply {
                 putInt("selectedCountryId", country.id)
                 putString("selectedCountryName", country.name)
@@ -65,21 +82,71 @@ class CountrySelectionFragment : Fragment() {
             parentFragmentManager.setFragmentResult("country_selection", bundle)
             findNavController().popBackStack()
         }
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
     }
 
     private fun observeCountries() {
-        workLocationViewModel.countries.onEach { resource ->
+        filterViewModel.areas.onEach { resource ->
+            Log.d("CountrySelection", "Resource: $resource")
             when (resource) {
                 is Resource.Success -> {
                     val countries = resource.data?.filter { it.parentId == null } ?: emptyList()
-                    adapter?.updateData(countries)
+                    if (countries.isEmpty()) {
+                        updateUI(Resource.Success(emptyList()))
+                    } else {
+                        adapter?.updateData(countries)
+                        updateUI(Resource.Success(countries))
+                    }
                 }
-                is Resource.Error -> { }
-                else -> { }
+                is Resource.Error -> {
+                    updateUI(Resource.Error(resource.message))
+                }
+                is Resource.Loading -> {
+                    updateUI(Resource.Loading())
+                }
             }
         }.launchIn(lifecycleScope)
+    }
+
+    private fun updateUI(resource: Resource<List<FilterAreaDto>>) {
+        val progressBar = view?.findViewById<ProgressBar>(R.id.progressBar)
+        val recyclerView = view?.findViewById<RecyclerView>(R.id.recyclerView)
+        val layoutError = view?.findViewById<LinearLayout>(R.id.layoutError)
+        val layoutEmpty = view?.findViewById<LinearLayout>(R.id.layoutEmpty)
+
+        when (resource) {
+            is Resource.Loading -> {
+                progressBar?.visibility = View.VISIBLE
+                recyclerView?.visibility = View.GONE
+                layoutError?.visibility = View.GONE
+                layoutEmpty?.visibility = View.GONE
+            }
+            is Resource.Success -> {
+                progressBar?.visibility = View.GONE
+                if (resource.data.isNullOrEmpty()) {
+                    recyclerView?.visibility = View.GONE
+                    layoutError?.visibility = View.GONE
+                    layoutEmpty?.visibility = View.VISIBLE
+                } else {
+                    recyclerView?.visibility = View.VISIBLE
+                    layoutError?.visibility = View.GONE
+                    layoutEmpty?.visibility = View.GONE
+                }
+            }
+            is Resource.Error -> {
+                progressBar?.visibility = View.GONE
+                recyclerView?.visibility = View.GONE
+                layoutError?.visibility = View.VISIBLE
+                layoutEmpty?.visibility = View.GONE
+
+                val tvErrorText = view?.findViewById<TextView>(R.id.tvErrorText)
+                // Исправление: используем ?: для обработки null
+                val errorMessage = resource.message ?: "Ошибка загрузки данных"
+                tvErrorText?.text = errorMessage
+            }
+        }
     }
 
     inner class CountryAdapter(
@@ -113,83 +180,6 @@ class CountrySelectionFragment : Fragment() {
             fun bind(country: FilterAreaDto) {
                 textView.text = country.name
                 itemView.setOnClickListener { onItemClick(country) }
-        setupToolbar()
-        setupRecyclerView()
-        observeViewModel()
-    }
-
-    private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun setupRecyclerView() {
-        adapter = CountryAdapter { country ->
-            findNavController().previousBackStackEntry
-                ?.savedStateHandle
-                ?.set(WorkLocationFragment.KEY_SELECTED_COUNTRY_ID, country.id)
-            findNavController().previousBackStackEntry
-                ?.savedStateHandle
-                ?.set(WorkLocationFragment.KEY_SELECTED_COUNTRY_NAME, country.name)
-            findNavController().popBackStack()
-        }
-
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@CountrySelectionFragment.adapter
-            addItemDecoration(
-                androidx.recyclerview.widget.DividerItemDecoration(
-                    requireContext(),
-                    LinearLayoutManager.VERTICAL
-                )
-            )
-        }
-    }
-
-    override fun onDestroyView() {
-        binding.recyclerView.adapter = null
-        adapter = null
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun observeViewModel() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    renderState(state)
-                }
-            }
-        }
-    }
-
-    private fun renderState(state: CountrySelectionState) {
-        when (state) {
-            is CountrySelectionState.Loading -> {
-                binding.progressBar.visibility = View.VISIBLE
-                binding.recyclerView.visibility = View.GONE
-                binding.layoutError.visibility = View.GONE
-                binding.layoutEmpty.visibility = View.GONE
-            }
-            is CountrySelectionState.Content -> {
-                binding.progressBar.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.layoutError.visibility = View.GONE
-                binding.layoutEmpty.visibility = View.GONE
-                adapter?.submitList(state.countries)
-            }
-            is CountrySelectionState.Empty -> {
-                binding.progressBar.visibility = View.GONE
-                binding.recyclerView.visibility = View.GONE
-                binding.layoutError.visibility = View.GONE
-                binding.layoutEmpty.visibility = View.VISIBLE
-            }
-            is CountrySelectionState.Error -> {
-                binding.progressBar.visibility = View.GONE
-                binding.recyclerView.visibility = View.GONE
-                binding.layoutError.visibility = View.VISIBLE
-                binding.layoutEmpty.visibility = View.GONE
             }
         }
     }

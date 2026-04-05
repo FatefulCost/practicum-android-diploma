@@ -86,8 +86,6 @@ class SearchViewModel(
             return
         }
 
-        val filterSettings = filterRepository.getFilterSettings()
-
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
@@ -95,14 +93,19 @@ class SearchViewModel(
         }
 
         viewModelScope.launch {
+            // Получаем настройки фильтра
+            val filterSettings = filterRepository.getFilterSettings()
+            val regionId = filterRepository.loadSavedRegionId()
+
             val result = vacancyRepository.searchVacancies(
                 text = query,
                 page = page,
-                area = filterRepository.loadSavedRegionId(),
+                area = regionId,  // используем regionId
                 salary = filterSettings?.salary,
                 industry = filterSettings?.industryId,
                 onlyWithSalary = filterSettings?.onlyWithSalary ?: false
             )
+
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)

@@ -1,3 +1,4 @@
+// di/ViewModelModule.kt
 package ru.practicum.android.diploma.di
 
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -9,40 +10,20 @@ import ru.practicum.android.diploma.ui.filter.FilterViewModel
 import ru.practicum.android.diploma.ui.filter.industry.IndustrySelectionViewModel
 import ru.practicum.android.diploma.ui.filter.location.RegionSelectionViewModel
 import ru.practicum.android.diploma.ui.filter.location.WorkLocationViewModel
-import ru.practicum.android.diploma.ui.filter.location.CountrySelectionViewModel
 import ru.practicum.android.diploma.ui.root.RootViewModel
 import ru.practicum.android.diploma.ui.search.SearchViewModel
 
 val viewModelModule = module {
-
     viewModel { RootViewModel() }
-
-    viewModel {
-        SearchViewModel(
-            vacancyRepository = get(),
-            networkUtils = get()
-        )
-    }
-
+    viewModel { SearchViewModel(get(), get(), get()) }
     viewModel { FavoritesViewModel(get()) }
-
-    viewModel {
-        FilterViewModel(
-            filterRepository = get(),
-            filterStorage = get()
-        )
-    }
-
-    viewModel {
-        VacancyDetailViewModel(
-            vacancyRepository = get()
-        )
-    }
-
-    // Заглушки для остальных ViewModel
+    viewModel { FilterViewModel(get(), get()) }
+    viewModel { VacancyDetailViewModel(get()) }
     viewModel { WorkLocationViewModel(get()) }
-    viewModel { RegionSelectionViewModel() }
+
+    // RegionSelectionViewModel требует filterRepository
+    viewModel { RegionSelectionViewModel(get()) }
+
     viewModel { IndustrySelectionViewModel() }
     viewModel { AboutViewModel() }
-    viewModel { CountrySelectionViewModel(get()) }
 }

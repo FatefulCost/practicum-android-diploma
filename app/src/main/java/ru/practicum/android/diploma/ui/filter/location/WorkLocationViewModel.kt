@@ -20,6 +20,10 @@ class WorkLocationViewModel(
     private val _regions = MutableStateFlow<Resource<List<FilterAreaDto>>>(Resource.Loading())
     val regions: StateFlow<Resource<List<FilterAreaDto>>> = _regions.asStateFlow()
 
+    init {
+        loadCountries()
+    }
+
     fun loadCountries() {
         viewModelScope.launch {
             _countries.value = Resource.Loading()

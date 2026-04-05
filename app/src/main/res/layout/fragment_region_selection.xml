@@ -82,7 +82,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchContainer" />
 
-    <!-- Ошибка загрузки: "Не удалось получить список" -->
+    <!-- Ошибка загрузки -->
     <LinearLayout
         android:id="@+id/layoutError"
         android:layout_width="0dp"
@@ -105,6 +105,7 @@
             android:src="@drawable/il_region_error" />
 
         <TextView
+            android:id="@+id/tvErrorText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -114,9 +115,18 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
+        <Button
+            android:id="@+id/btnRetry"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/retry"
+            android:visibility="visible" />
+
     </LinearLayout>
 
-    <!-- Пустой результат поиска: "Такого региона нет" -->
+    <!-- Пустой результат поиска -->
     <LinearLayout
         android:id="@+id/layoutEmpty"
         android:layout_width="0dp"
@@ -139,6 +149,7 @@
             android:src="@drawable/il_region_empty" />
 
         <TextView
+            android:id="@+id/tvEmptyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
