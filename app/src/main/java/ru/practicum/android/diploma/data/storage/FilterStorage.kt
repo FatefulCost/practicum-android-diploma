@@ -14,43 +14,43 @@ class FilterStorage(context: Context) {
     companion object {
         private const val PREFS_NAME = "filters_prefs"
         private const val KEY_FILTER_SETTINGS = "filter_settings"
+        private const val TAG = "FilterStorage"
+        private const val SAVING_MSG = "=== SAVING FILTERS ==="
+        private const val LOADING_MSG = "=== LOADING FILTERS ==="
     }
 
     fun saveFilterSettings(settings: FilterSettings) {
-        Log.d("FilterStorage", "=== SAVING FILTERS ===")
-        Log.d("FilterStorage", "Settings to save: $settings")
+        Log.d(TAG, SAVING_MSG)
+        Log.d(TAG, "Settings to save: $settings")
         val json = gson.toJson(settings)
-        Log.d("FilterStorage", "JSON: $json")
+        Log.d(TAG, "JSON: $json")
         prefs.edit()
             .putString(KEY_FILTER_SETTINGS, json)
             .apply()
-        Log.d("FilterStorage", "Saved successfully")
+        Log.d(TAG, "Saved successfully")
     }
 
     fun loadFilterSettings(): FilterSettings {
         val json = prefs.getString(KEY_FILTER_SETTINGS, null)
-        Log.d("FilterStorage", "=== LOADING FILTERS ===")
-        Log.d("FilterStorage", "JSON from prefs: $json")
+        Log.d(TAG, LOADING_MSG)
+        Log.d(TAG, "JSON from prefs: $json")
         return if (json != null) {
             try {
                 val settings = gson.fromJson(json, FilterSettings::class.java)
-                Log.d("FilterStorage", "Loaded settings: $settings")
+                Log.d(TAG, "Loaded settings: $settings")
                 settings
             } catch (e: JsonSyntaxException) {
-                Log.e("FilterStorage", "Error parsing JSON", e)
-                FilterSettings()
-            } catch (e: Exception) {
-                Log.e("FilterStorage", "Unexpected error", e)
+                Log.e(TAG, "Error parsing JSON", e)
                 FilterSettings()
             }
         } else {
-            Log.d("FilterStorage", "No saved settings, returning default")
+            Log.d(TAG, "No saved settings, returning default")
             FilterSettings()
         }
     }
 
     fun clearFilterSettings() {
-        Log.d("FilterStorage", "Clearing all filters")
+        Log.d(TAG, "Clearing all filters")
         prefs.edit().remove(KEY_FILTER_SETTINGS).apply()
     }
 }

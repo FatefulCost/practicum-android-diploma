@@ -20,6 +20,10 @@ class FilterFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: FilterViewModel by viewModel()
 
+    companion object {
+        private const val TAG = "FilterFragment"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -53,7 +57,7 @@ class FilterFragment : Fragment() {
 
     private fun loadSavedFilters() {
         val settings = viewModel.filterSettings.value
-        Log.d("FilterFragment", "Loading saved filters: $settings")
+        Log.d(TAG, "Loading saved filters: $settings")
 
         settings.salary?.let {
             binding.etSalary.setText(it.toString())
@@ -88,7 +92,7 @@ class FilterFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.filterSettings.onEach { settings ->
-            Log.d("FilterFragment", "Settings updated: $settings")
+            Log.d(TAG, "Settings updated: $settings")
             updateWorkLocationDisplay(settings.countryName, settings.regionName)
 
             if (!settings.industryName.isNullOrBlank()) {
@@ -107,7 +111,12 @@ class FilterFragment : Fragment() {
                 append(countryName)
             }
         }
-        binding.tvWorkLocationValue.text = if (locationText.isNotEmpty()) locationText else getString(R.string.not_selected)
+        val displayText = if (locationText.isNotEmpty()) {
+            locationText
+        } else {
+            getString(R.string.not_selected)
+        }
+        binding.tvWorkLocationValue.text = displayText
     }
 
     private fun navigateToWorkLocation() {
@@ -127,8 +136,11 @@ class FilterFragment : Fragment() {
         viewModel.updateSalary(salary)
         viewModel.updateOnlyWithSalary(binding.cbHideWithoutSalary.isChecked)
 
-        Log.d("FilterFragment", "Applying filters - Salary: $salary, OnlyWithSalary: ${binding.cbHideWithoutSalary.isChecked}")
-        Log.d("FilterFragment", "Current settings after apply: ${viewModel.filterSettings.value}")
+        Log.d(
+            TAG,
+            "Applying filters - Salary: $salary, OnlyWithSalary: ${binding.cbHideWithoutSalary.isChecked}"
+        )
+        Log.d(TAG, "Current settings after apply: ${viewModel.filterSettings.value}")
 
         Toast.makeText(requireContext(), "Фильтры применены", Toast.LENGTH_SHORT).show()
         findNavController().popBackStack()

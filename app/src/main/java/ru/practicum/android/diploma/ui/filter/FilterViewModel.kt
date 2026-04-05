@@ -1,5 +1,6 @@
 package ru.practicum.android.diploma.ui.filter
 
+import android.content.ContentValues.TAG
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,8 +103,15 @@ class FilterViewModel(
         saveFilters()
     }
 
-    fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        Log.d("FilterViewModel", "updateLocation: countryId=$countryId, countryName=$countryName, regionId=$regionId, regionName=$regionName")
+    fun updateLocation(
+        countryId: Int?,
+        countryName: String?,
+        regionId: Int?,
+        regionName: String?
+    ) {
+        Log.d(TAG, "updateLocation: countryId=$countryId, countryName=$countryName, regionId=$regionId, regionName=$regionName"
+        )
+
         _filterSettings.update {
             it.copy(
                 countryId = countryId,
