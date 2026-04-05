@@ -9,6 +9,7 @@ import ru.practicum.android.diploma.ui.filter.FilterViewModel
 import ru.practicum.android.diploma.ui.filter.industry.IndustrySelectionViewModel
 import ru.practicum.android.diploma.ui.filter.location.RegionSelectionViewModel
 import ru.practicum.android.diploma.ui.filter.location.WorkLocationViewModel
+import ru.practicum.android.diploma.ui.filter.location.CountrySelectionViewModel
 import ru.practicum.android.diploma.ui.root.RootViewModel
 import ru.practicum.android.diploma.ui.search.SearchViewModel
 
@@ -23,11 +24,7 @@ val viewModelModule = module {
         )
     }
 
-    viewModel {
-        FavoritesViewModel(
-            repository = get()
-        )
-    }
+    viewModel { FavoritesViewModel(get()) }
 
     viewModel {
         FilterViewModel(
@@ -42,9 +39,10 @@ val viewModelModule = module {
         )
     }
 
-    // Заглушки для остальных ViewModel (нет параметров)
+    // Заглушки для остальных ViewModel
     viewModel { WorkLocationViewModel(get()) }
     viewModel { RegionSelectionViewModel() }
     viewModel { IndustrySelectionViewModel() }
     viewModel { AboutViewModel() }
+    viewModel { CountrySelectionViewModel(get()) }
 }

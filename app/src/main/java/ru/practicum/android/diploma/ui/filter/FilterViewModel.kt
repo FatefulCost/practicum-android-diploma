@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.storage.FilterStorage
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
 
@@ -24,9 +25,14 @@ class FilterViewModel(
     private val _industries = MutableStateFlow<Resource<List<FilterIndustryDto>>>(Resource.Loading())
     val industries: StateFlow<Resource<List<FilterIndustryDto>>> = _industries.asStateFlow()
 
+    private val _areas = MutableStateFlow<Resource<List<FilterAreaDto>>>(Resource.Loading())
+    val areas: StateFlow<Resource<List<FilterAreaDto>>> = _areas.asStateFlow()
+
     init {
         loadSavedFilters()
         loadIndustries()
+        loadAreas()
+        loadSavedLocation()
     }
 
     private fun loadSavedFilters() {
@@ -53,9 +59,6 @@ class FilterViewModel(
         }
     }
 
-    private val _areas = MutableStateFlow<Resource<List<FilterAreaDto>>>(Resource.Loading())
-    val areas: StateFlow<Resource<List<FilterAreaDto>>> = _areas.asStateFlow()
-
     private fun loadAreas() {
         viewModelScope.launch {
             _areas.value = Resource.Loading()
@@ -71,10 +74,19 @@ class FilterViewModel(
         }
     }
 
-    init {
-        loadSavedFilters()
-        loadIndustries()
-        loadAreas()
+    private fun loadSavedLocation() {
+        val countryId = filterRepository.loadSavedCountryId()
+        val countryName = filterRepository.loadSavedCountryName()
+        val regionId = filterRepository.loadSavedRegionId()
+        val regionName = filterRepository.loadSavedRegionName()
+        if (countryId != null || regionId != null) {
+            _filterSettings.value = _filterSettings.value.copy(
+                countryId = countryId,
+                countryName = countryName,
+                regionId = regionId,
+                regionName = regionName
+            )
+        }
     }
 
     fun updateSalary(salary: Int?) {
@@ -98,20 +110,20 @@ class FilterViewModel(
     }
 
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.update {
-            it.copy(
-                countryId = countryId,
-                countryName = countryName,
-                regionId = regionId,
-                regionName = regionName
-            )
-        }
+        _filterSettings.value = _filterSettings.value.copy(
+            countryId = countryId,
+            countryName = countryName,
+            regionId = regionId,
+            regionName = regionName
+        )
+        filterRepository.saveLocation(countryId, countryName, regionId, regionName)
         saveFilters()
     }
 
     fun resetFilters() {
         _filterSettings.value = FilterSettings()
         filterStorage.clearFilterSettings()
+        filterRepository.saveLocation(null, null, null, null)
     }
 
     fun refreshFilters() {
