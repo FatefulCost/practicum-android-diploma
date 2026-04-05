@@ -6,14 +6,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
-import ru.practicum.android.diploma.databinding.ItemCountryBinding
+import ru.practicum.android.diploma.databinding.ItemRegionBinding
 
 class RegionAdapter(
     private val onRegionClick: (FilterAreaDto) -> Unit
 ) : ListAdapter<FilterAreaDto, RegionAdapter.RegionViewHolder>(RegionDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RegionViewHolder {
-        val binding = ItemCountryBinding.inflate(
+        val binding = ItemRegionBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -26,12 +26,12 @@ class RegionAdapter(
     }
 
     class RegionViewHolder(
-        private val binding: ItemCountryBinding,
+        private val binding: ItemRegionBinding,
         private val onRegionClick: (FilterAreaDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(region: FilterAreaDto) {
-            binding.tvCountryName.text = region.name
+            binding.tvRegionName.text = region.name
             binding.root.setOnClickListener { onRegionClick(region) }
         }
     }

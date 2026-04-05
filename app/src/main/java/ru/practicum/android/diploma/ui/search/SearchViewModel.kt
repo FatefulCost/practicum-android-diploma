@@ -14,7 +14,7 @@ import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
 
 class SearchViewModel(
-    private val repository: VacancyRepository,
+    private val vacancyRepository: VacancyRepository,
     private val filterRepository: FilterRepository,
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
@@ -66,7 +66,7 @@ class SearchViewModel(
         if (isLoading || isLastPage || currentQuery.isBlank()) return
 
         val nextPage = currentPage + 1
-        if (nextPage < totalPages) {
+        if (nextPage <= totalPages) {
             performSearch(currentQuery, nextPage, isLoadMore = true)
         }
     }
@@ -86,8 +86,6 @@ class SearchViewModel(
             return
         }
 
-        val filterSettings = filterRepository.getFilterSettings()
-
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
@@ -95,14 +93,19 @@ class SearchViewModel(
         }
 
         viewModelScope.launch {
-            val result = repository.searchVacancies(
+            // Получаем настройки фильтра
+            val filterSettings = filterRepository.getFilterSettings()
+            val regionId = filterRepository.loadSavedRegionId()
+
+            val result = vacancyRepository.searchVacancies(
                 text = query,
                 page = page,
-                area = filterRepository.loadSavedRegionId(),
+                area = regionId,
                 salary = filterSettings?.salary,
                 industry = filterSettings?.industryId,
                 onlyWithSalary = filterSettings?.onlyWithSalary ?: false
             )
+
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)
@@ -123,7 +126,7 @@ class SearchViewModel(
         currentQuery = query
         currentPage = response.page
         totalPages = response.pages
-        isLastPage = response.page >= response.pages
+        isLastPage = currentPage >= totalPages
 
         val newVacancies = response.vacancies ?: emptyList()
 

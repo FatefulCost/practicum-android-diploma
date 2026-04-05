@@ -6,12 +6,8 @@ import com.google.gson.reflect.TypeToken
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
-import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
-
-private const val NUMBERFORMAGIC1 = 1
-private const val NUMBERFORMAGIC2 = 2
-private const val NUMBERFORMAGIC3 = 3
+import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 class FilterRepositoryImpl(
     private val networkClient: NetworkClient,
@@ -32,10 +28,11 @@ class FilterRepositoryImpl(
     }
 
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
-        val cached = getCachedAreas()
-        if (cached != null) {
-            return Result.success(cached)
+        val cachedAreas = getCachedAreas()
+        if (cachedAreas != null && cachedAreas.isNotEmpty()) {
+            return Result.success(cachedAreas)
         }
+
         val result = networkClient.getAreas()
         result.onSuccess { areas ->
             cacheAreas(areas)
@@ -44,13 +41,16 @@ class FilterRepositoryImpl(
     }
 
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
-        return Result.success(
-            listOf(
-                FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-                FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-                FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
-            )
-        )
+        val cachedIndustries = getCachedIndustries()
+        if (cachedIndustries != null && cachedIndustries.isNotEmpty()) {
+            return Result.success(cachedIndustries)
+        }
+
+        val result = networkClient.getIndustries()
+        result.onSuccess { industries ->
+            cacheIndustries(industries)
+        }
+        return result
     }
 
     override suspend fun getCachedAreas(): List<FilterAreaDto>? {
@@ -98,18 +98,32 @@ class FilterRepositoryImpl(
     }
 
     override fun loadSavedCountryId(): Int? {
-        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        // Проверяем тип значения в SharedPreferences
+        val value = sharedPreferences.all[KEY_COUNTRY_ID]
+        val id = when (value) {
+            is Int -> value
+            is String -> value.toIntOrNull() ?: NO_ID
+            else -> sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        }
         return if (id == NO_ID) null else id
     }
 
-    override fun loadSavedCountryName(): String? =
-        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+    override fun loadSavedCountryName(): String? {
+        return sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+    }
 
     override fun loadSavedRegionId(): Int? {
-        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        // Проверяем тип значения в SharedPreferences
+        val value = sharedPreferences.all[KEY_REGION_ID]
+        val id = when (value) {
+            is Int -> value
+            is String -> value.toIntOrNull() ?: NO_ID
+            else -> sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        }
         return if (id == NO_ID) null else id
     }
 
-    override fun loadSavedRegionName(): String? =
-        sharedPreferences.getString(KEY_REGION_NAME, null)
+    override fun loadSavedRegionName(): String? {
+        return sharedPreferences.getString(KEY_REGION_NAME, null)
+    }
 }
