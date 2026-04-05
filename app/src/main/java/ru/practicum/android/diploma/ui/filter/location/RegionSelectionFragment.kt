@@ -1,111 +1,127 @@
 package ru.practicum.android.diploma.ui.filter.location
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
-import ru.practicum.android.diploma.data.dto.FilterAreaDto
-import ru.practicum.android.diploma.util.Resource
+import ru.practicum.android.diploma.databinding.FragmentRegionSelectionBinding
 
 class RegionSelectionFragment : Fragment() {
 
-    private val workLocationViewModel: WorkLocationViewModel by viewModel()
+    private var _binding: FragmentRegionSelectionBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: RegionSelectionViewModel by viewModel()
     private var adapter: RegionAdapter? = null
-    private var countryId: Int = -1
-    private var countryName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_region_selection, container, false)
+        _binding = FragmentRegionSelectionBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupToolbar()
+        setupRecyclerView()
+        setupSearch()
+        observeViewModel()
 
-        arguments?.let {
-            countryId = it.getInt("countryId", -1)
-            countryName = it.getString("countryName", "")
-        }
-
-        setupRecyclerView(view)
-        observeRegions()
-
-        if (countryId != -1) {
-            workLocationViewModel.loadRegions(countryId)
-        }
+        val countryId = arguments?.getInt("countryId", -1) ?: -1
+        viewModel.loadRegions(countryId)
     }
 
-    private fun setupRecyclerView(view: View) {
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
-        adapter = RegionAdapter(emptyList()) { region ->
-            val bundle = Bundle().apply {
-                putInt("selectedRegionId", region.id)
-                putString("selectedRegionName", region.name)
-            }
-            parentFragmentManager.setFragmentResult("region_selection", bundle)
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = adapter
     }
 
-    private fun observeRegions() {
-        workLocationViewModel.regions.onEach { resource ->
-            when (resource) {
-                is Resource.Success -> {
-                    adapter?.updateData(resource.data ?: emptyList())
+    private fun setupRecyclerView() {
+        adapter = RegionAdapter { region ->
+            findNavController().previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_ID, region.id)
+            findNavController().previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_NAME, region.name)
+            findNavController().popBackStack()
+        }
+
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@RegionSelectionFragment.adapter
+        }
+    }
+
+    private fun setupSearch() {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s?.toString() ?: ""
+                updateSearchIcon(query)
+                viewModel.filterRegions(query)
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
+
+        binding.ivSearchClear.setOnClickListener {
+            if (binding.etSearch.text.isNotEmpty()) {
+                binding.etSearch.text.clear()
+            }
+        }
+    }
+
+    private fun updateSearchIcon(query: String) {
+        if (query.isEmpty()) {
+            binding.ivSearchClear.setImageResource(R.drawable.search_24px)
+            binding.ivSearchClear.isClickable = false
+        } else {
+            binding.ivSearchClear.setImageResource(R.drawable.close_24px)
+            binding.ivSearchClear.isClickable = true
+        }
+    }
+
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    renderState(state)
                 }
-                is Resource.Error -> { }
-                else -> { }
             }
-        }.launchIn(lifecycleScope)
+        }
     }
 
-    inner class RegionAdapter(
-        private var regions: List<FilterAreaDto>,
-        private val onItemClick: (FilterAreaDto) -> Unit
-    ) : RecyclerView.Adapter<RegionAdapter.RegionViewHolder>() {
+    private fun renderState(state: RegionSelectionState) {
+        binding.progressBar.isVisible = state is RegionSelectionState.Loading
+        binding.recyclerView.isVisible = state is RegionSelectionState.Content
+        binding.layoutError.isVisible = state is RegionSelectionState.Error
+        binding.layoutEmpty.isVisible = state is RegionSelectionState.Empty
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RegionViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(android.R.layout.simple_list_item_1, parent, false)
-            return RegionViewHolder(view, onItemClick)
+        if (state is RegionSelectionState.Content) {
+            adapter?.submitList(state.regions)
         }
+    }
 
-        override fun onBindViewHolder(holder: RegionViewHolder, position: Int) {
-            holder.bind(regions[position])
-        }
-
-        override fun getItemCount(): Int = regions.size
-
-        fun updateData(newRegions: List<FilterAreaDto>) {
-            regions = newRegions
-            notifyDataSetChanged()
-        }
-
-        inner class RegionViewHolder(
-            itemView: View,
-            private val onItemClick: (FilterAreaDto) -> Unit
-        ) : RecyclerView.ViewHolder(itemView) {
-            private val textView: TextView = itemView.findViewById(android.R.id.text1)
-
-            fun bind(region: FilterAreaDto) {
-                textView.text = region.name
-                itemView.setOnClickListener { onItemClick(region) }
-            }
-        }
+    override fun onDestroyView() {
+        binding.recyclerView.adapter = null
+        adapter = null
+        super.onDestroyView()
+        _binding = null
     }
 }

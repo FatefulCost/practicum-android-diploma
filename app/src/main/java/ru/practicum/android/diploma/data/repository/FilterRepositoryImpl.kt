@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 
 class FilterRepositoryImpl(
@@ -17,6 +18,13 @@ class FilterRepositoryImpl(
     companion object {
         private const val KEY_AREAS_CACHE = "cached_areas"
         private const val KEY_INDUSTRIES_CACHE = "cached_industries"
+        private const val KEY_FILTER_SETTINGS = "filter_settings"
+
+        private const val KEY_COUNTRY_ID = "filter_country_id"
+        private const val KEY_COUNTRY_NAME = "filter_country_name"
+        private const val KEY_REGION_ID = "filter_region_id"
+        private const val KEY_REGION_NAME = "filter_region_name"
+        private const val NO_ID = -1
     }
 
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
@@ -27,10 +35,6 @@ class FilterRepositoryImpl(
         }
 
         // Если кэша нет, делаем реальный запрос к API
-        val cached = getCachedAreas()
-        if (cached != null) {
-            return Result.success(cached)
-        }
         val result = networkClient.getAreas()
         result.onSuccess { areas ->
             cacheAreas(areas)
@@ -76,4 +80,40 @@ class FilterRepositoryImpl(
     override suspend fun cacheIndustries(industries: List<FilterIndustryDto>) {
         sharedPreferences.edit().putString(KEY_INDUSTRIES_CACHE, gson.toJson(industries)).apply()
     }
+
+    override fun saveFilterSettings(settings: FilterSettings) {
+        sharedPreferences.edit()
+            .putString(KEY_FILTER_SETTINGS, gson.toJson(settings))
+            .apply()
+    }
+
+    override fun getFilterSettings(): FilterSettings? {
+        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null) ?: return null
+        return gson.fromJson(json, FilterSettings::class.java)
+    }
+
+    override fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
+        sharedPreferences.edit()
+            .putInt(KEY_COUNTRY_ID, countryId ?: NO_ID)
+            .putString(KEY_COUNTRY_NAME, countryName)
+            .putInt(KEY_REGION_ID, regionId ?: NO_ID)
+            .putString(KEY_REGION_NAME, regionName)
+            .apply()
+    }
+
+    override fun loadSavedCountryId(): Int? {
+        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedCountryName(): String? =
+        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+
+    override fun loadSavedRegionId(): Int? {
+        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedRegionName(): String? =
+        sharedPreferences.getString(KEY_REGION_NAME, null)
 }

@@ -24,11 +24,7 @@ val viewModelModule = module {
         )
     }
 
-    viewModel {
-        FavoritesViewModel(
-            repository = get()
-        )
-    }
+    viewModel { FavoritesViewModel(get()) }
 
     viewModel {
         FilterViewModel(
@@ -36,7 +32,6 @@ val viewModelModule = module {
             filterStorage = get()
         )
     }
-    viewModel { FavoritesViewModel(get()) }
 
     viewModel {
         VacancyDetailViewModel(
@@ -44,12 +39,10 @@ val viewModelModule = module {
         )
     }
 
-    // Заглушки для остальных ViewModel (нет параметров)
+    // Заглушки для остальных ViewModel
     viewModel { WorkLocationViewModel(get()) }
     viewModel { RegionSelectionViewModel() }
     viewModel { IndustrySelectionViewModel() }
     viewModel { AboutViewModel() }
-    viewModel { VacancyDetailViewModel(get()) }
-
     viewModel { CountrySelectionViewModel(get()) }
 }
