@@ -29,6 +29,11 @@ import android.util.Log
 
 class RegionSelectionFragment : Fragment() {
 
+    companion object {
+        private const val TAG = "RegionSelection"
+        private const val START_MSG = "=== START ==="
+    }
+
     private val filterViewModel: FilterViewModel by viewModel()
     private var adapter: RegionAdapter? = null
     private var countryId: Int = -1
@@ -51,8 +56,8 @@ class RegionSelectionFragment : Fragment() {
             countryName = it.getString("countryName", "")
         }
 
-        Log.d("RegionSelection", "=== START ===")
-        Log.d("RegionSelection", "Country ID: $countryId, Country Name: $countryName")
+        Log.d(TAG, START_MSG)
+        Log.d(TAG, "Country ID: $countryId, Country Name: $countryName")
 
         setupToolbar(view)
         setupSearch(view)
@@ -61,22 +66,27 @@ class RegionSelectionFragment : Fragment() {
         observeRegions()
 
         val currentAreas = filterViewModel.areas.value
-        Log.d("RegionSelection", "Current areas state: $currentAreas")
+        Log.d(TAG, "Current areas state: $currentAreas")
 
         when (currentAreas) {
             is Resource.Success -> {
+                Log.d(TAG, "Areas loaded, total count: ${currentAreas.data?.size}")
+                currentAreas.data?.forEach { area ->
+                    Log.d(TAG, "Area: id=${area.id}, name=${area.name}, parentId=${area.parentId}")
+                }
                 extractAndDisplayRegions(currentAreas.data)
             }
             is Resource.Error -> {
+                Log.e(TAG, "Error: ${currentAreas.message}")
                 val errorMessage = currentAreas.message ?: "Ошибка загрузки"
                 updateUI(Resource.Error(errorMessage))
             }
             is Resource.Loading -> {
+                Log.d(TAG, "Loading...")
                 updateUI(Resource.Loading())
             }
             else -> {
-                Log.d("RegionSelection", "No data, forcing load")
-
+                Log.d(TAG, "No data, forcing load")
                 filterViewModel.loadAreas()
             }
         }
@@ -84,21 +94,19 @@ class RegionSelectionFragment : Fragment() {
 
     private fun extractAndDisplayRegions(areas: List<FilterAreaDto>?) {
         if (areas == null) {
-            Log.e("RegionSelection", "Areas is null")
+            Log.e(TAG, "Areas is null")
             updateUI(Resource.Success(emptyList()))
             return
         }
 
-        // Ищем страну по ID
         val country = areas.find { it.id == countryId }
-        Log.d("RegionSelection", "Found country: ${country?.name}")
+        Log.d(TAG, "Found country: ${country?.name}")
 
         if (country != null) {
-            // Регионы - это вложенные areas в стране
             val regions = country.areas ?: emptyList()
-            Log.d("RegionSelection", "Regions found: ${regions.size}")
+            Log.d(TAG, "Regions found: ${regions.size}")
             regions.forEach { region ->
-                Log.d("RegionSelection", "Region: id=${region.id}, name=${region.name}")
+                Log.d(TAG, "Region: id=${region.id}, name=${region.name}")
             }
 
             allRegions = regions
@@ -106,15 +114,14 @@ class RegionSelectionFragment : Fragment() {
                 adapter?.updateData(regions)
                 updateUI(Resource.Success(regions))
             } else {
-                Log.d("RegionSelection", "No regions found for country $countryId")
+                Log.d(TAG, "No regions found for country $countryId")
                 updateUI(Resource.Success(emptyList()))
             }
         } else {
-            // Альтернативный способ: ищем по parentId
             val regions = areas.filter { it.parentId == countryId }
-            Log.d("RegionSelection", "Regions by parentId: ${regions.size}")
+            Log.d(TAG, "Regions by parentId: ${regions.size}")
             regions.forEach { region ->
-                Log.d("RegionSelection", "Region: id=${region.id}, name=${region.name}, parentId=${region.parentId}")
+                Log.d(TAG, "Region: id=${region.id}, name=${region.name}, parentId=${region.parentId}")
             }
 
             allRegions = regions
@@ -122,7 +129,7 @@ class RegionSelectionFragment : Fragment() {
                 adapter?.updateData(regions)
                 updateUI(Resource.Success(regions))
             } else {
-                Log.d("RegionSelection", "No regions found for country $countryId")
+                Log.d(TAG, "No regions found for country $countryId")
                 updateUI(Resource.Success(emptyList()))
             }
         }
@@ -141,9 +148,11 @@ class RegionSelectionFragment : Fragment() {
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Не используется
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Не используется
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -200,7 +209,7 @@ class RegionSelectionFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
 
         adapter = RegionAdapter(emptyList()) { region ->
-            Log.d("RegionSelection", "Selected region: ${region.name}")
+            Log.d(TAG, "Selected region: ${region.name}")
             val bundle = Bundle().apply {
                 putInt("selectedRegionId", region.id)
                 putString("selectedRegionName", region.name)
@@ -215,7 +224,7 @@ class RegionSelectionFragment : Fragment() {
 
     private fun observeRegions() {
         filterViewModel.areas.onEach { resource ->
-            Log.d("RegionSelection", "Observe - Resource: $resource")
+            Log.d(TAG, "Observe - Resource: $resource")
             when (resource) {
                 is Resource.Success -> {
                     extractAndDisplayRegions(resource.data)

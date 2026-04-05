@@ -1,6 +1,6 @@
 package ru.practicum.android.diploma.ui.filter
 
-import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,12 +13,15 @@ import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.storage.FilterStorage
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
-import android.util.Log
 
 class FilterViewModel(
     private val filterRepository: FilterRepository,
     private val filterStorage: FilterStorage
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "FilterViewModel"
+    }
 
     private val _filterSettings = MutableStateFlow(FilterSettings())
     val filterSettings: StateFlow<FilterSettings> = _filterSettings.asStateFlow()
@@ -37,12 +40,12 @@ class FilterViewModel(
 
     private fun loadSavedFilters() {
         val savedSettings = filterStorage.loadFilterSettings()
-        Log.d("FilterViewModel", "loadSavedFilters: $savedSettings")
+        Log.d(TAG, "loadSavedFilters: $savedSettings")
         _filterSettings.value = savedSettings
     }
 
     private fun saveFilters() {
-        Log.d("FilterViewModel", "saveFilters: ${_filterSettings.value}")
+        Log.d(TAG, "saveFilters: ${_filterSettings.value}")
         filterStorage.saveFilterSettings(_filterSettings.value)
     }
 
@@ -55,7 +58,9 @@ class FilterViewModel(
                     _industries.value = Resource.Success(industries)
                 },
                 onFailure = { error ->
-                    _industries.value = Resource.Error(error.message ?: "Ошибка загрузки отраслей")
+                    _industries.value = Resource.Error(
+                        error.message ?: "Ошибка загрузки отраслей"
+                    )
                 }
             )
         }
@@ -63,37 +68,39 @@ class FilterViewModel(
 
     fun loadAreas() {
         viewModelScope.launch {
-            Log.d("FilterViewModel", "loadAreas - START")
+            Log.d(TAG, "loadAreas - START")
             _areas.value = Resource.Loading()
             val result = filterRepository.getAreas()
-            Log.d("FilterViewModel", "loadAreas - result: $result")
+            Log.d(TAG, "loadAreas - result: $result")
             result.fold(
                 onSuccess = { areas ->
-                    Log.d("FilterViewModel", "loadAreas - SUCCESS, count: ${areas.size}")
+                    Log.d(TAG, "loadAreas - SUCCESS, count: ${areas.size}")
                     _areas.value = Resource.Success(areas)
                 },
                 onFailure = { error ->
-                    Log.e("FilterViewModel", "loadAreas - ERROR: ${error.message}")
-                    _areas.value = Resource.Error(error.message ?: "Ошибка загрузки регионов")
+                    Log.e(TAG, "loadAreas - ERROR: ${error.message}")
+                    _areas.value = Resource.Error(
+                        error.message ?: "Ошибка загрузки регионов"
+                    )
                 }
             )
         }
     }
 
     fun updateSalary(salary: Int?) {
-        Log.d("FilterViewModel", "updateSalary: $salary")
+        Log.d(TAG, "updateSalary: $salary")
         _filterSettings.update { it.copy(salary = salary) }
         saveFilters()
     }
 
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
-        Log.d("FilterViewModel", "updateOnlyWithSalary: $onlyWithSalary")
+        Log.d(TAG, "updateOnlyWithSalary: $onlyWithSalary")
         _filterSettings.update { it.copy(onlyWithSalary = onlyWithSalary) }
         saveFilters()
     }
 
     fun updateIndustry(industryId: Int?, industryName: String?) {
-        Log.d("FilterViewModel", "updateIndustry: id=$industryId, name=$industryName")
+        Log.d(TAG, "updateIndustry: id=$industryId, name=$industryName")
         _filterSettings.update {
             it.copy(
                 industryId = industryId,
@@ -109,7 +116,10 @@ class FilterViewModel(
         regionId: Int?,
         regionName: String?
     ) {
-        Log.d(TAG, "updateLocation: countryId=$countryId, countryName=$countryName, regionId=$regionId, regionName=$regionName"
+        Log.d(
+            TAG,
+            "updateLocation: countryId=$countryId, countryName=$countryName, " +
+                "regionId=$regionId, regionName=$regionName"
         )
 
         _filterSettings.update {
@@ -124,7 +134,7 @@ class FilterViewModel(
     }
 
     fun resetFilters() {
-        Log.d("FilterViewModel", "resetFilters")
+        Log.d(TAG, "resetFilters")
         _filterSettings.value = FilterSettings()
         filterStorage.clearFilterSettings()
     }
