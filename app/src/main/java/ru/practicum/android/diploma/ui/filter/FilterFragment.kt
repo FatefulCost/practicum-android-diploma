@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import kotlinx.coroutines.launch
 
 private val NOT_SELECTED: Int = R.string.not_selected

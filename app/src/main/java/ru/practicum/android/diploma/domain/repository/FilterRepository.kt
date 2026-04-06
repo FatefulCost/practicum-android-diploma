@@ -2,7 +2,7 @@ package ru.practicum.android.diploma.domain.repository
 
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
-import ru.practicum.android.diploma.ui.filter.FilterSettings
+import ru.practicum.android.diploma.domain.model.FilterSettings
 
 interface FilterRepository {
 
