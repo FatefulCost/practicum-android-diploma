@@ -14,7 +14,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class VacancyDetailViewModel(
-    private val repository: VacancyRepository
+    private val vacancyRepository: VacancyRepository
 ) : ViewModel() {
 
     private val _vacancyState = MutableLiveData<VacancyDetailState>()
@@ -37,7 +37,7 @@ class VacancyDetailViewModel(
         _vacancyState.value = VacancyDetailState.Loading
 
         viewModelScope.launch {
-            repository.getVacancyDetails(vacancyId)
+            vacancyRepository.getVacancyDetails(vacancyId)
                 .onSuccess { vacancy ->
                     currentVacancy = vacancy
                     _vacancyState.value = VacancyDetailState.Success(vacancy)
@@ -63,7 +63,7 @@ class VacancyDetailViewModel(
 
     // suspend, чтобы вызываться в контексте уже запущенной корутины
     private suspend fun checkFavoriteStatus(vacancyId: String) {
-        _isFavorite.value = repository.isFavorite(vacancyId)
+        _isFavorite.value = vacancyRepository.isFavorite(vacancyId)
     }
 
     fun toggleFavorite() {
@@ -73,9 +73,9 @@ class VacancyDetailViewModel(
         viewModelScope.launch {
             try {
                 if (previousState) {
-                    repository.removeFromFavorites(vacancy.id)
+                    vacancyRepository.removeFromFavorites(vacancy.id)
                 } else {
-                    repository.addToFavorites(vacancy)
+                    vacancyRepository.addToFavorites(vacancy)
                 }
                 _isFavorite.value = !previousState
             } catch (e: SQLiteException) {

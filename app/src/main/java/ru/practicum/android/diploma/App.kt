@@ -23,6 +23,7 @@ class App : Application() {
                 databaseModule,
                 storageModule,
                 repositoryModule,
+                storageModule,
                 viewModelModule,
                 utilModule
             )

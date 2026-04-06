@@ -7,8 +7,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -22,6 +25,7 @@ private val NOT_SELECTED: Int = R.string.not_selected
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: FilterViewModel by viewModel()
 
     private val viewModel: FilterViewModel by viewModel()
 
@@ -71,31 +75,58 @@ class FilterFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.filterSettings.collect { settings ->
-                    updateUI(settings)
-                }
-            }
-        }
+        viewModel.filterSettings.onEach { settings ->
+            updateUI(settings)
+        }.launchIn(lifecycleScope)
     }
 
     private fun updateUI(settings: FilterSettings) {
-        if (binding.etSalary.text?.toString() != settings.salary?.toString()) {
-            binding.etSalary.setText(settings.salary?.toString() ?: "")
+        // Зарплата
+        settings.salary?.let {
+            binding.etSalary.setText(it.toString())
+        } ?: binding.etSalary.text?.clear()
+
+        // Чекбокс
+        binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
+
+        // Отрасль
+        if (!settings.industryName.isNullOrBlank()) {
+            binding.tvIndustryValue.text = settings.industryName
+        } else {
+            binding.tvIndustryValue.text = getString(R.string.not_selected)
         }
 
-        if (binding.cbHideWithoutSalary.isChecked != settings.onlyWithSalary) {
-            binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
+        // Место работы
+        val locationText = buildString {
+            if (!settings.regionName.isNullOrBlank()) {
+                append(settings.regionName)
+            } else if (!settings.countryName.isNullOrBlank()) {
+                append(settings.countryName)
+            }
         }
 
-        binding.tvWorkLocationValue.text = when {
-            settings.regionName != null -> settings.regionName
-            settings.countryName != null -> settings.countryName
-            else -> getString(NOT_SELECTED)
+        val locationValue = if (locationText.isNotEmpty()) {
+            locationText
+        } else {
+            getString(R.string.not_selected)
         }
+        binding.tvWorkLocationValue.text = locationValue
+    }
 
-        binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
+    private fun applyFilters() {
+        val salaryText = binding.etSalary.text?.toString()
+        val salary = if (!salaryText.isNullOrBlank()) salaryText.toIntOrNull() else null
+
+        viewModel.updateSalary(salary)
+        viewModel.updateOnlyWithSalary(binding.cbHideWithoutSalary.isChecked)
+
+        Toast.makeText(requireContext(), "Фильтры применены", Toast.LENGTH_SHORT).show()
+        findNavController().popBackStack()
+    }
+
+    private fun resetFilters() {
+        viewModel.resetFilters()
+        Toast.makeText(requireContext(), "Фильтры сброшены", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
