@@ -69,19 +69,9 @@ class IndustrySelectionFragment : Fragment() {
         })
     }
 
-    private fun setupButtons() {
-        binding.btnChoose.setOnClickListener {
-            val selected = adapter.getSelectedItem()
-            if (selected != null) {
-                val result = Bundle().apply {
-                    putInt("industryId", selected.id)
-                    putString("industryName", selected.name)
-                }
-                parentFragmentManager.setFragmentResult("industry_selection", result)
-                findNavController().popBackStack()
-            } else {
-                Toast.makeText(requireContext(), "Пожалуйста выберите отрасль", Toast.LENGTH_SHORT).show()
-            }
+        btnSelect.setOnClickListener {
+            Toast.makeText(requireContext(), R.string.industry_selected, Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
         }
     }
 
@@ -102,8 +92,6 @@ class IndustrySelectionFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        Toast.makeText(requireContext(), R.string.industries_loading_coming_soon, Toast.LENGTH_SHORT).show()
     }
 }
