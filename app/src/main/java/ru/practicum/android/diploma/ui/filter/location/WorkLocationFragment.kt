@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import ru.practicum.android.diploma.R
@@ -65,12 +66,11 @@ class WorkLocationFragment : Fragment() {
         updateLocationUI()
 
         binding.layoutCountry.setOnClickListener {
-            findNavController().navigate(R.id.action_workLocationFragment_to_countrySelectionFragment)
+            Toast.makeText(requireContext(), R.string.location_selection_coming_soon, Toast.LENGTH_SHORT).show()
         }
 
         binding.layoutRegion.setOnClickListener {
-            val args = Bundle().apply { putInt("countryId", selectedCountryId) }
-            findNavController().navigate(R.id.action_workLocationFragment_to_regionSelectionFragment, args)
+            Toast.makeText(requireContext(), R.string.region_selection_coming_soon, Toast.LENGTH_SHORT).show()
         }
 
         binding.btnSelect.setOnClickListener {

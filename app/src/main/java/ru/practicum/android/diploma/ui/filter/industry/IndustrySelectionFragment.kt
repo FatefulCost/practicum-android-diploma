@@ -25,10 +25,10 @@ class IndustrySelectionFragment : Fragment() {
         val btnSelect = view.findViewById<android.widget.Button>(R.id.btnSelect)
 
         btnSelect.setOnClickListener {
-            Toast.makeText(requireContext(), "Отрасль выбрана", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.industry_selected, Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
 
-        Toast.makeText(requireContext(), "Список отраслей будет добавлен позже", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), R.string.industries_loading_coming_soon, Toast.LENGTH_SHORT).show()
     }
 }

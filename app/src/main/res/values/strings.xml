@@ -24,6 +24,13 @@
     <string name="reset">Сбросить</string>
     <string name="select">Выбрать</string>
     <string name="not_selected">Не выбрано</string>
+    <string name="filters_applied">Фильтры применены</string>
+    <string name="filters_reset">Фильтры сброшены</string>
+    <string name="industry_selected">Отрасль выбрана</string>
+    <string name="location_selection_coming_soon">Выбор места работы (скоро)</string>
+    <string name="region_selection_coming_soon">Выбор региона (скоро)</string>
+    <string name="industries_loading_coming_soon">Список отраслей будет добавлен позже</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
 
     <!-- Work Location -->
     <string name="select_work_location">Выбор места работы</string>

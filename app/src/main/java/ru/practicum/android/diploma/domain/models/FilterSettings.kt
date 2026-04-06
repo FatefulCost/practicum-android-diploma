@@ -1,4 +1,4 @@
-package ru.practicum.android.diploma.domain.model
+package ru.practicum.android.diploma.domain.models
 
 data class FilterSettings(
     val salary: Int? = null,
