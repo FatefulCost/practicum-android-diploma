@@ -5,18 +5,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
+import ru.practicum.android.diploma.domain.models.FilterSettings
+import kotlinx.coroutines.launch
+
+private val NOT_SELECTED: Int = R.string.not_selected
 
 class FilterFragment : Fragment() {
     private var _binding: FragmentFilterBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: FilterViewModel by viewModel()
+
     private val viewModel: FilterViewModel by viewModel()
 
     override fun onCreateView(
@@ -35,12 +45,24 @@ class FilterFragment : Fragment() {
     }
 
     private fun setupUI() {
+        binding.etSalary.addTextChangedListener { text ->
+            val salary = text?.toString()?.toIntOrNull()
+            viewModel.updateSalary(salary)
+        }
+
+        binding.cbHideWithoutSalary.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.updateOnlyWithSalary(isChecked)
+        }
+
         binding.btnApply.setOnClickListener {
-            applyFilters()
+            viewModel.saveSettings()
+            Toast.makeText(requireContext(), R.string.filters_applied, Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
         }
 
         binding.btnReset.setOnClickListener {
-            resetFilters()
+            viewModel.resetFilters()
+            Toast.makeText(requireContext(), R.string.filters_reset, Toast.LENGTH_SHORT).show()
         }
 
         binding.layoutWorkLocation.setOnClickListener {

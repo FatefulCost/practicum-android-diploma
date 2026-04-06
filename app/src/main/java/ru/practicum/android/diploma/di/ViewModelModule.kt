@@ -42,9 +42,9 @@ val viewModelModule = module {
         )
     }
 
-    // Заглушки для остальных ViewModel (нет параметров)
-    viewModel { WorkLocationViewModel() }
-    viewModel { RegionSelectionViewModel() }
-    viewModel { IndustrySelectionViewModel() }
-    viewModel { AboutViewModel() }
+    viewModel { VacancyDetailViewModel(get()) }
+
+    viewModel { CountrySelectionViewModel(get()) }
+
+    viewModel { RegionSelectionViewModel(get()) }
 }
