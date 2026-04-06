@@ -1,6 +1,7 @@
 package ru.practicum.android.diploma.ui.search
 
 import android.annotation.SuppressLint
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +42,8 @@ class SearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
         observeViewModel()
+        observeFilterState()
+        observeFilterChanges()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -84,6 +88,44 @@ class SearchFragment : Fragment() {
         // Кнопка фильтра
         binding.fabFilter.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_filterFragment)
+        }
+    }
+
+    /**
+     * ✅ Наблюдаем за состоянием активных фильтров и меняем цвет кнопки
+     */
+    private fun observeFilterState() {
+        viewModel.hasActiveFilters.observe(viewLifecycleOwner) { hasFilters ->
+            updateFilterButtonColor(hasFilters)
+        }
+    }
+
+    /**
+     * ✅ Меняем цвет иконки фильтра в зависимости от наличия активных фильтров
+     */
+    private fun updateFilterButtonColor(hasFilters: Boolean) {
+        val colorRes = if (hasFilters) {
+            R.color.blue  // Активные фильтры — синяя иконка
+        } else {
+            R.color.filter_icon  // Нет фильтров — стандартный цвет
+        }
+        val color = ContextCompat.getColor(requireContext(), colorRes)
+        binding.fabFilter.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+    }
+
+    /**
+     * ✅ Наблюдаем за изменениями фильтров (когда возвращаемся с экрана фильтрации)
+     */
+    private fun observeFilterChanges() {
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("filters_changed")?.observe(viewLifecycleOwner) { changed ->
+            if (changed == true) {
+                viewModel.refreshFilterState()
+                // Если есть активный поисковый запрос — повторяем поиск с новыми фильтрами
+                val currentQuery = binding.editTextSearch.text.toString()
+                if (currentQuery.isNotBlank()) {
+                    viewModel.updateSearchQuery(currentQuery)
+                }
+            }
         }
     }
 

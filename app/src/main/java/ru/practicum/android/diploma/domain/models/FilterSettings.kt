@@ -9,4 +9,12 @@ data class FilterSettings(
     val countryName: String? = null,
     val regionId: Int? = null,
     val regionName: String? = null
-)
+) {
+    fun hasActiveFilters(): Boolean {
+        return salary != null ||
+            onlyWithSalary ||
+            industryId != null ||
+            countryId != null ||
+            regionId != null
+    }
+}

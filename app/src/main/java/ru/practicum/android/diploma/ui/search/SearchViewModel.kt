@@ -33,6 +33,8 @@ class SearchViewModel(
 
     // Список всех загруженных вакансий
     private var allVacancies = mutableListOf<VacancyDetailDto>()
+    private val _hasActiveFilters = MutableLiveData(false)
+    val hasActiveFilters: LiveData<Boolean> = _hasActiveFilters
 
     companion object {
         private const val DEBOUNCE_DELAY = 2000L
@@ -40,6 +42,18 @@ class SearchViewModel(
 
     init {
         _searchState.value = SearchState.Empty
+        loadFilterState()
+    }
+
+    private fun loadFilterState() {
+        viewModelScope.launch {
+            val settings = filterRepository.getFilterSettings()
+            _hasActiveFilters.value = settings?.hasActiveFilters() ?: false
+        }
+    }
+
+    fun refreshFilterState() {
+        loadFilterState()
     }
 
     fun updateSearchQuery(query: String) {

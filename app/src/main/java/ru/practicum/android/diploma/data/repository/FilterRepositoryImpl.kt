@@ -95,13 +95,15 @@ class FilterRepositoryImpl(
     }
 
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
-        return Result.success(
-            listOf(
-                FilterIndustryDto(NUMBERFORMAGIC1, "IT"),
-                FilterIndustryDto(NUMBERFORMAGIC2, "Маркетинг"),
-                FilterIndustryDto(NUMBERFORMAGIC3, "Продажи")
-            )
-        )
+        val cached = getCachedIndustries()
+        if (cached != null) {
+            return Result.success(cached)
+        }
+        val result = networkClient.getIndustries()
+        result.onSuccess { industries ->
+            cacheIndustries(industries)
+        }
+        return result
     }
 
     override suspend fun getCachedAreas(): List<FilterAreaDto>? {
