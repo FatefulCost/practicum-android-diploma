@@ -32,6 +32,9 @@
     <string name="industries_loading_coming_soon">Список отраслей будет добавлен позже</string>
     <string name="unknown_error">Неизвестная ошибка</string>
 
+    <!-- FilterIndustry Screen-->
+    <string name="industry_hint">Введите отрасль</string>
+
     <!-- Work Location -->
     <string name="select_work_location">Выбор места работы</string>
     <string name="country">Страна</string>
