@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
-import ru.practicum.android.diploma.domain.model.FilterSettings
+import ru.practicum.android.diploma.domain.models.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 
 private const val NUMBERFORMAGIC1 = 1
@@ -31,34 +31,35 @@ class FilterRepositoryImpl(
         private const val SUFFIX_COUNTRY_NAME = "_countryName"
         private const val SUFFIX_REGION_ID = "_regionId"
         private const val SUFFIX_REGION_NAME = "_regionName"
+        private const val NO_ID = -1
     }
 
     override fun saveFilterSettings(settings: FilterSettings) {
         sharedPreferences.edit()
-            .putInt(KEY_FILTER_SETTINGS + SUFFIX_SALARY, settings.salary ?: -1)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_SALARY, settings.salary ?: NO_ID)
             .putBoolean(KEY_FILTER_SETTINGS + SUFFIX_ONLY_WITH_SALARY, settings.onlyWithSalary)
-            .putInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, settings.industryId ?: -1)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, settings.industryId ?: NO_ID)
             .putString(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_NAME, settings.industryName)
-            .putInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, settings.countryId ?: -1)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, settings.countryId ?: NO_ID)
             .putString(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME, settings.countryName)
-            .putInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, settings.regionId ?: -1)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, settings.regionId ?: NO_ID)
             .putString(KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME, settings.regionName)
             .apply()
     }
 
     override fun getFilterSettings(): FilterSettings? {
-        val salary = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_SALARY, -1)
-        if (salary == -1 && !sharedPreferences.contains(KEY_FILTER_SETTINGS + SUFFIX_SALARY)) {
+        val salary = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_SALARY, NO_ID)
+        if (salary == NO_ID && !sharedPreferences.contains(KEY_FILTER_SETTINGS + SUFFIX_SALARY)) {
             return null
         }
         return FilterSettings(
-            salary = if (salary == -1) null else salary,
+            salary = if (salary == NO_ID) null else salary,
             onlyWithSalary = sharedPreferences.getBoolean(KEY_FILTER_SETTINGS + SUFFIX_ONLY_WITH_SALARY, false),
-            industryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, -1).takeIf { it != -1 },
+            industryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, NO_ID).takeIf { it != NO_ID },
             industryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_NAME, null),
-            countryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, -1).takeIf { it != -1 },
+            countryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, NO_ID).takeIf { it != NO_ID },
             countryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME, null),
-            regionId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, -1).takeIf { it != -1 },
+            regionId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, NO_ID).takeIf { it != NO_ID },
             regionName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME, null)
         )
     }
@@ -109,39 +110,28 @@ class FilterRepositoryImpl(
         sharedPreferences.edit().putString(KEY_INDUSTRIES_CACHE, gson.toJson(industries)).apply()
     }
 
-    override fun saveFilterSettings(settings: FilterSettings) {
-        sharedPreferences.edit()
-            .putString(KEY_FILTER_SETTINGS, gson.toJson(settings))
-            .apply()
-    }
-
-    override fun getFilterSettings(): FilterSettings? {
-        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null) ?: return null
-        return gson.fromJson(json, FilterSettings::class.java)
-    }
-
     override fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
         sharedPreferences.edit()
-            .putInt(KEY_COUNTRY_ID, countryId ?: NO_ID)
-            .putString(KEY_COUNTRY_NAME, countryName)
-            .putInt(KEY_REGION_ID, regionId ?: NO_ID)
-            .putString(KEY_REGION_NAME, regionName)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, countryId ?: NO_ID)
+            .putString(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME, countryName)
+            .putInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, regionId ?: NO_ID)
+            .putString(KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME, regionName)
             .apply()
     }
 
     override fun loadSavedCountryId(): Int? {
-        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        val id = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, NO_ID)
         return if (id == NO_ID) null else id
     }
 
     override fun loadSavedCountryName(): String? =
-        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+        sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME, null)
 
     override fun loadSavedRegionId(): Int? {
-        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        val id = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, NO_ID)
         return if (id == NO_ID) null else id
     }
 
     override fun loadSavedRegionName(): String? =
-        sharedPreferences.getString(KEY_REGION_NAME, null)
+        sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME, null)
 }
