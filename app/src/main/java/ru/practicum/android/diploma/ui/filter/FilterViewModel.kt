@@ -36,6 +36,7 @@ class FilterViewModel(
     init {
         loadSavedSettings()
         loadIndustries()
+        loadSavedLocation()
     }
 
     private fun loadSavedSettings() {
@@ -83,7 +84,25 @@ class FilterViewModel(
     }
 
     /**
-     * Обновить местоположение
+     * Загрузить сохранённое место работы из SharedPreferences
+     */
+    private fun loadSavedLocation() {
+        val countryId = filterRepository.loadSavedCountryId()
+        val countryName = filterRepository.loadSavedCountryName()
+        val regionId = filterRepository.loadSavedRegionId()
+        val regionName = filterRepository.loadSavedRegionName()
+        if (countryId != null || regionId != null) {
+            _filterSettings.value = _filterSettings.value.copy(
+                countryId = countryId,
+                countryName = countryName,
+                regionId = regionId,
+                regionName = regionName
+            )
+        }
+    }
+
+    /**
+     * Обновить местоположение и сохранить в SharedPreferences
      */
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
         _filterSettings.value = _filterSettings.value.copy(
@@ -92,6 +111,7 @@ class FilterViewModel(
             regionId = regionId,
             regionName = regionName
         )
+        filterRepository.saveLocation(countryId, countryName, regionId, regionName)
     }
 
     /**
