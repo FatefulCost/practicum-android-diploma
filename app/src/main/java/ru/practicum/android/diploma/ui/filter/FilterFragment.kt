@@ -38,6 +38,37 @@ class FilterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupUI()
         observeViewModel()
+        setupResultListener()
+    }
+
+    private fun setupResultListener() {
+        // Обработка выбора отрасли
+        parentFragmentManager.setFragmentResultListener("industry_selection", viewLifecycleOwner) { _, bundle ->
+            val industryId = bundle.getInt("industry_id", -1)
+            val industryName = bundle.getString("industry_name")
+            if (industryId != -1 && !industryName.isNullOrBlank()) {
+                viewModel.updateIndustry(industryId, industryName)
+                // Обновляем UI
+                binding.tvIndustryValue.text = industryName
+            }
+        }
+
+        // Обработка выбора места работы (если нужно)
+        parentFragmentManager.setFragmentResultListener("work_location_selection", viewLifecycleOwner) { _, bundle ->
+            val countryId = bundle.getInt("country_id", -1)
+            val countryName = bundle.getString("country_name")
+            val regionId = bundle.getInt("region_id", -1)
+            val regionName = bundle.getString("region_name")
+            viewModel.updateLocation(countryId, countryName, regionId, regionName)
+
+            // Обновляем UI
+            val locationText = when {
+                !regionName.isNullOrBlank() -> regionName
+                !countryName.isNullOrBlank() -> countryName
+                else -> getString(R.string.not_selected)
+            }
+            binding.tvWorkLocationValue.text = locationText
+        }
     }
 
     private fun setupUI() {
@@ -53,12 +84,14 @@ class FilterFragment : Fragment() {
         binding.btnApply.setOnClickListener {
             viewModel.saveSettings()
             Toast.makeText(requireContext(), R.string.filters_applied, Toast.LENGTH_SHORT).show()
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
             findNavController().popBackStack()
         }
 
         binding.btnReset.setOnClickListener {
             viewModel.resetFilters()
             Toast.makeText(requireContext(), R.string.filters_reset, Toast.LENGTH_SHORT).show()
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
         }
 
         binding.layoutWorkLocation.setOnClickListener {
