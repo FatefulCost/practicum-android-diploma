@@ -92,7 +92,7 @@ class SearchFragment : Fragment() {
     }
 
     /**
-     * ✅ Наблюдаем за состоянием активных фильтров и меняем цвет кнопки
+     * Наблюдаем за состоянием активных фильтров и меняем цвет кнопки
      */
     private fun observeFilterState() {
         viewModel.hasActiveFilters.observe(viewLifecycleOwner) { hasFilters ->
@@ -101,26 +101,28 @@ class SearchFragment : Fragment() {
     }
 
     /**
-     * ✅ Меняем цвет иконки фильтра в зависимости от наличия активных фильтров
+     * Меняем цвет иконки фильтра в зависимости от наличия активных фильтров
      */
     private fun updateFilterButtonColor(hasFilters: Boolean) {
         val colorRes = if (hasFilters) {
-            R.color.blue  // Активные фильтры — синяя иконка
+            R.color.blue // Активные фильтры — синяя иконка
         } else {
-            R.color.filter_icon  // Нет фильтров — стандартный цвет
+            R.color.filter_icon // Нет фильтров — стандартный цвет
         }
         val color = ContextCompat.getColor(requireContext(), colorRes)
         binding.fabFilter.setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
     /**
-     * ✅ Наблюдаем за изменениями фильтров (когда возвращаемся с экрана фильтрации)
+     * Наблюдаем за изменениями фильтров (когда возвращаемся с экрана фильтрации)
      */
     private fun observeFilterChanges() {
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>("filters_changed")?.observe(viewLifecycleOwner) { changed ->
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        val liveData = savedStateHandle?.getLiveData<Boolean>("filters_changed")
+
+        liveData?.observe(viewLifecycleOwner) { changed ->
             if (changed == true) {
                 viewModel.refreshFilterState()
-                // Если есть активный поисковый запрос — повторяем поиск с новыми фильтрами
                 val currentQuery = binding.editTextSearch.text.toString()
                 if (currentQuery.isNotBlank()) {
                     viewModel.updateSearchQuery(currentQuery)
