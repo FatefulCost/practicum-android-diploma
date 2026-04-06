@@ -6,13 +6,13 @@ import com.google.gson.reflect.TypeToken
 import ru.practicum.android.diploma.data.dto.FilterAreaDto
 import ru.practicum.android.diploma.data.dto.FilterIndustryDto
 import ru.practicum.android.diploma.data.network.NetworkClient
+import ru.practicum.android.diploma.domain.model.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.ui.filter.FilterSettings
 
 private const val NUMBERFORMAGIC1 = 1
 private const val NUMBERFORMAGIC2 = 2
 private const val NUMBERFORMAGIC3 = 3
-private const val NUMBERFORMAGIC4 = 4
 
 class FilterRepositoryImpl(
     private val networkClient: NetworkClient,
@@ -64,40 +64,18 @@ class FilterRepositoryImpl(
         )
     }
 
-    // Заглушка для регионов
     override suspend fun getAreas(): Result<List<FilterAreaDto>> {
-        val testAreas = listOf(
-            FilterAreaDto(
-                id = NUMBERFORMAGIC1,
-                name = "Россия",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC2,
-                        name = "Москва",
-                        parentId = NUMBERFORMAGIC1,
-                        areas = emptyList()
-                    )
-                )
-            ),
-            FilterAreaDto(
-                id = NUMBERFORMAGIC3,
-                name = "Беларусь",
-                parentId = null,
-                areas = listOf(
-                    FilterAreaDto(
-                        id = NUMBERFORMAGIC4,
-                        name = "Минск",
-                        parentId = NUMBERFORMAGIC3,
-                        areas = emptyList()
-                    )
-                )
-            )
-        )
-        return Result.success(testAreas)
+        val cached = getCachedAreas()
+        if (cached != null) {
+            return Result.success(cached)
+        }
+        val result = networkClient.getAreas()
+        result.onSuccess { areas ->
+            cacheAreas(areas)
+        }
+        return result
     }
 
-    // Заглушка для отраслей
     override suspend fun getIndustries(): Result<List<FilterIndustryDto>> {
         return Result.success(
             listOf(
@@ -108,7 +86,6 @@ class FilterRepositoryImpl(
         )
     }
 
-    // Кэширование (через SharedPreferences)
     override suspend fun getCachedAreas(): List<FilterAreaDto>? {
         val json = sharedPreferences.getString(KEY_AREAS_CACHE, null)
         return json?.let {
@@ -132,4 +109,40 @@ class FilterRepositoryImpl(
     override suspend fun cacheIndustries(industries: List<FilterIndustryDto>) {
         sharedPreferences.edit().putString(KEY_INDUSTRIES_CACHE, gson.toJson(industries)).apply()
     }
+
+    override fun saveFilterSettings(settings: FilterSettings) {
+        sharedPreferences.edit()
+            .putString(KEY_FILTER_SETTINGS, gson.toJson(settings))
+            .apply()
+    }
+
+    override fun getFilterSettings(): FilterSettings? {
+        val json = sharedPreferences.getString(KEY_FILTER_SETTINGS, null) ?: return null
+        return gson.fromJson(json, FilterSettings::class.java)
+    }
+
+    override fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
+        sharedPreferences.edit()
+            .putInt(KEY_COUNTRY_ID, countryId ?: NO_ID)
+            .putString(KEY_COUNTRY_NAME, countryName)
+            .putInt(KEY_REGION_ID, regionId ?: NO_ID)
+            .putString(KEY_REGION_NAME, regionName)
+            .apply()
+    }
+
+    override fun loadSavedCountryId(): Int? {
+        val id = sharedPreferences.getInt(KEY_COUNTRY_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedCountryName(): String? =
+        sharedPreferences.getString(KEY_COUNTRY_NAME, null)
+
+    override fun loadSavedRegionId(): Int? {
+        val id = sharedPreferences.getInt(KEY_REGION_ID, NO_ID)
+        return if (id == NO_ID) null else id
+    }
+
+    override fun loadSavedRegionName(): String? =
+        sharedPreferences.getString(KEY_REGION_NAME, null)
 }

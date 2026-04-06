@@ -23,4 +23,15 @@ interface FilterRepository {
     suspend fun cacheAreas(areas: List<FilterAreaDto>)
     suspend fun getCachedIndustries(): List<FilterIndustryDto>?
     suspend fun cacheIndustries(industries: List<FilterIndustryDto>)
+
+    // Сохранение/загрузка настроек фильтра
+    fun saveFilterSettings(settings: FilterSettings)
+    fun getFilterSettings(): FilterSettings?
+
+    // Сохранение выбранного места работы (страна и регион)
+    fun saveLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?)
+    fun loadSavedCountryId(): Int?
+    fun loadSavedCountryName(): String?
+    fun loadSavedRegionId(): Int?
+    fun loadSavedRegionName(): String?
 }
