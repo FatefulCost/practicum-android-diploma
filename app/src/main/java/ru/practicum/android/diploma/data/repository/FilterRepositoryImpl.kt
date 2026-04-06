@@ -54,13 +54,31 @@ class FilterRepositoryImpl(
         }
         return FilterSettings(
             salary = if (salary == NO_ID) null else salary,
-            onlyWithSalary = sharedPreferences.getBoolean(KEY_FILTER_SETTINGS + SUFFIX_ONLY_WITH_SALARY, false),
-            industryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, NO_ID).takeIf { it != NO_ID },
-            industryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_NAME, null),
-            countryId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, NO_ID).takeIf { it != NO_ID },
-            countryName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME, null),
-            regionId = sharedPreferences.getInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, NO_ID).takeIf { it != NO_ID },
-            regionName = sharedPreferences.getString(KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME, null)
+            onlyWithSalary = sharedPreferences.getBoolean(
+                KEY_FILTER_SETTINGS + SUFFIX_ONLY_WITH_SALARY,
+                false
+            ),
+            industryId = sharedPreferences
+                .getInt(KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_ID, NO_ID)
+                .takeIf { it != NO_ID },
+            industryName = sharedPreferences.getString(
+                KEY_FILTER_SETTINGS + SUFFIX_INDUSTRY_NAME,
+                null
+            ),
+            countryId = sharedPreferences
+                .getInt(KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_ID, NO_ID)
+                .takeIf { it != NO_ID },
+            countryName = sharedPreferences.getString(
+                KEY_FILTER_SETTINGS + SUFFIX_COUNTRY_NAME,
+                null
+            ),
+            regionId = sharedPreferences
+                .getInt(KEY_FILTER_SETTINGS + SUFFIX_REGION_ID, NO_ID)
+                .takeIf { it != NO_ID },
+            regionName = sharedPreferences.getString(
+                KEY_FILTER_SETTINGS + SUFFIX_REGION_NAME,
+                null
+            )
         )
     }
 
