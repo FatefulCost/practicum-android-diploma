@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="blue">#3772E7</color>
+    <color name="gray">#AEAFB4</color>
     <color name="backgroundColor">#1A1B22</color>
     <color name="dividerColor">#FFFFFF</color>
+    <color name="white">#FDFDFD</color>
+    <color name="black_day">#1A1B22</color>
+    <color name="white_day">#FDFDFD</color>
     <color name="filter_icon">#FDFDFD</color>
     <color name="edit_text_back">#AEAFB4</color>
     <color name="text_hint">#FDFDFD</color>
     <color name="text_edit">#1A1B22</color>
     <color name="title_color">#FDFDFD</color>
     <color name="error_placeholder">#FDFDFD</color>
-
     <color name="vacancy_in_search">#FDFDFD</color>
     <color name="placeholder_logo_bg">#1A1B22</color>
-
     <color name="text_vacancy_detail">#FDFDFD</color>
 </resources>
