@@ -45,7 +45,6 @@ class WorkLocationFragment : Fragment() {
         loadSavedSelection()
         setupUI()
         observeNavigationResults()
-        updateSelectButtonVisibility()
     }
 
     private fun setupToolbar() {
@@ -70,12 +69,10 @@ class WorkLocationFragment : Fragment() {
         }
 
         updateLocationUI()
-        updateSelectButtonVisibility()
     }
 
     private fun setupUI() {
         updateLocationUI()
-        updateSelectButtonVisibility()
 
         // Переход на экран выбора страны
         binding.layoutCountry.setOnClickListener {
@@ -103,7 +100,6 @@ class WorkLocationFragment : Fragment() {
             selectedRegionId = -1
             selectedRegionName = ""
             updateLocationUI()
-            updateSelectButtonVisibility()
             saveSelectionAndReturn()
         }
 
@@ -112,18 +108,12 @@ class WorkLocationFragment : Fragment() {
             selectedRegionId = -1
             selectedRegionName = ""
             updateLocationUI()
-            updateSelectButtonVisibility()
             saveSelectionAndReturn()
         }
 
         binding.btnSelect.setOnClickListener {
             saveSelectionAndReturn()
         }
-    }
-
-    private fun updateSelectButtonVisibility() {
-        val hasSelection = selectedCountryId != -1 || selectedRegionId != -1
-        binding.btnSelect.visibility = if (hasSelection) View.VISIBLE else View.GONE
     }
 
     private fun saveSelectionAndReturn() {
@@ -158,7 +148,6 @@ class WorkLocationFragment : Fragment() {
                 selectedRegionId = -1
                 selectedRegionName = ""
                 updateLocationUI()
-                updateSelectButtonVisibility()
             }
         }
 
@@ -174,7 +163,6 @@ class WorkLocationFragment : Fragment() {
             if (id != null && id != -1) {
                 selectedRegionId = id
                 updateLocationUI()
-                updateSelectButtonVisibility()
             }
         }
 
@@ -189,30 +177,42 @@ class WorkLocationFragment : Fragment() {
     private fun updateLocationUI() {
         // Обновляем отображение страны
         if (selectedCountryName.isNotEmpty() && selectedCountryId != -1) {
-            binding.tvCountryLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_day))
+            // Страна выбрана
+            binding.tvCountryLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
+            binding.tvCountryLabel.alpha = 1.0f
             binding.tvCountryValue.text = selectedCountryName
             binding.tvCountryValue.visibility = View.VISIBLE
+            binding.tvCountryValue.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
             binding.ivCountryArrow.visibility = View.GONE
             binding.ivCountryClear.visibility = View.VISIBLE
         } else {
-            binding.tvCountryLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
-            binding.tvCountryValue.visibility = View.VISIBLE
+            // Страна не выбрана
+            binding.tvCountryLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
+            binding.tvCountryLabel.alpha = 0.6f
+            binding.tvCountryValue.visibility = View.GONE
             binding.ivCountryArrow.visibility = View.VISIBLE
             binding.ivCountryClear.visibility = View.GONE
+            binding.ivCountryArrow.alpha = 0.6f
         }
 
         // Обновляем отображение региона
         if (selectedRegionName.isNotEmpty() && selectedRegionId != -1) {
-            binding.tvRegionLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_day))
+            // Регион выбран
+            binding.tvRegionLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
+            binding.tvRegionLabel.alpha = 1.0f
             binding.tvRegionValue.text = selectedRegionName
             binding.tvRegionValue.visibility = View.VISIBLE
+            binding.tvRegionValue.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
             binding.ivRegionArrow.visibility = View.GONE
             binding.ivRegionClear.visibility = View.VISIBLE
         } else {
-            binding.tvRegionLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
-            binding.tvRegionValue.visibility = View.VISIBLE
+            // Регион не выбран
+            binding.tvRegionLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
+            binding.tvRegionLabel.alpha = 0.6f
+            binding.tvRegionValue.visibility = View.GONE
             binding.ivRegionArrow.visibility = View.VISIBLE
             binding.ivRegionClear.visibility = View.GONE
+            binding.ivRegionArrow.alpha = 0.6f
         }
     }
 
