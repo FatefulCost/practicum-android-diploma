@@ -11,7 +11,7 @@ import ru.practicum.android.diploma.databinding.ItemIndustryBinding
 
 class IndustryAdapter(
     private val onIndustryClick: (FilterIndustryDto) -> Unit,
-    private val onSelectionChanged: () -> Unit  // Добавляем callback для изменения выбора
+    private val onSelectionChanged: () -> Unit // Добавляем callback для изменения выбора
 ) : ListAdapter<FilterIndustryDto, IndustryAdapter.IndustryViewHolder>(IndustryDiffCallback()) {
 
     private var selectedIndustryId: Int? = null
@@ -37,7 +37,7 @@ class IndustryAdapter(
     fun setSelectedIndustry(industryId: Int?) {
         selectedIndustryId = industryId
         notifyDataSetChanged()
-        onSelectionChanged()  // Уведомляем о изменении выбора
+        onSelectionChanged() // Уведомляем о изменении выбора
     }
 
     /**
