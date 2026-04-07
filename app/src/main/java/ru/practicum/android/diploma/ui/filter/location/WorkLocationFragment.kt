@@ -20,6 +20,9 @@ class WorkLocationFragment : Fragment() {
         const val KEY_SELECTED_COUNTRY_NAME = "selected_country_name"
         const val KEY_SELECTED_REGION_ID = "selected_region_id"
         const val KEY_SELECTED_REGION_NAME = "selected_region_name"
+
+        private const val TEXT_SIZE_SELECTED = 12f
+        private const val TEXT_SIZE_DEFAULT = 16f
     }
 
     private var _binding: FragmentWorkLocationBinding? = null
@@ -204,11 +207,11 @@ class WorkLocationFragment : Fragment() {
         val countryValue = binding.layoutCountry.findViewById<TextView>(R.id.tvCountryValue)
 
         if (hasCountry) {
-            // Меняем цвет текста выбранной страны и надписи "Страна" на белый
-            countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-            countryValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            // Меняем цвет текста выбранной страны и надписи "Страна"
+            countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
+            countryValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
             // Меняем размер текста "Страна" на 12sp
-            countryTitleView.textSize = 12f
+            countryTitleView.textSize = TEXT_SIZE_SELECTED
 
             // Показываем выбранную страну
             binding.tvCountryValue.text = selectedCountryName
@@ -217,7 +220,7 @@ class WorkLocationFragment : Fragment() {
             // Возвращаем цвет обратно на серый
             countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
             // Возвращаем размер текста на 16sp
-            countryTitleView.textSize = 16f
+            countryTitleView.textSize = TEXT_SIZE_DEFAULT
 
             // Скрываем TextView с названием
             binding.tvCountryValue.visibility = View.GONE
@@ -235,15 +238,15 @@ class WorkLocationFragment : Fragment() {
         val regionValue = binding.layoutRegion.findViewById<TextView>(R.id.tvRegionValue)
 
         if (hasRegion) {
-            regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_day))
-            regionValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_day))
-            regionTitleView.textSize = 12f
+            regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
+            regionValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
+            regionTitleView.textSize = TEXT_SIZE_SELECTED
 
             binding.tvRegionValue.text = selectedRegionName
             binding.tvRegionValue.visibility = View.VISIBLE
         } else {
             regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
-            regionTitleView.textSize = 16f
+            regionTitleView.textSize = TEXT_SIZE_DEFAULT
             binding.tvRegionValue.visibility = View.GONE
         }
     }
