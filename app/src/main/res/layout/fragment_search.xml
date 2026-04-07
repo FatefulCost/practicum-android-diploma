@@ -15,6 +15,7 @@
         android:textStyle="bold"
         android:textColor="@color/title_color"
         android:layout_marginTop="20dp"
+        android:fontFamily="@font/ys_display_medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/fabFilter"
         app:layout_constraintTop_toTopOf="parent" />
@@ -47,6 +48,7 @@
         android:inputType="text"
         android:maxLines="1"
         android:textCursorDrawable="@drawable/bg_cursor"
+        android:fontFamily="@font/ys_display_regular"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
@@ -83,7 +85,8 @@
             android:paddingVertical="8dp"
             android:textColor="@color/white"
             android:textSize="14sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:fontFamily="@font/ys_display_regular"/>
 
     </FrameLayout>
 
@@ -156,7 +159,8 @@
             android:textColor="@color/error_placeholder"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
@@ -187,7 +191,8 @@
             android:textColor="@color/error_placeholder"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
@@ -218,7 +223,8 @@
             android:textColor="@color/error_placeholder"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 

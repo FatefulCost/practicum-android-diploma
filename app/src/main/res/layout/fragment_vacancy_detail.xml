@@ -13,6 +13,7 @@
         android:background="@color/backgroundColor"
         android:paddingStart="4dp"
         android:paddingEnd="8dp"
+        android:fontFamily="@font/ys_display_medium"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="@string/vacancy_details"
         app:titleTextColor="@color/text_vacancy_detail"
@@ -51,6 +52,7 @@
                 android:textColor="@color/text_vacancy_detail"
                 android:textSize="32sp"
                 android:textStyle="bold"
+                android:fontFamily="@font/ys_display_bold"
                 android:lineSpacingMultiplier="1.19" />
 
             <!-- Зарплата: Medium/22 -->
@@ -59,6 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:fontFamily="@font/ys_display_medium"
                 android:textColor="@color/text_vacancy_detail"
                 android:textSize="22sp" />
 
@@ -101,7 +104,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/black_day"
-                        android:textSize="22sp" />
+                        android:textSize="22sp"
+                        android:fontFamily="@font/ys_display_medium"/>
 
                     <!-- Город: Regular/16 -->
                     <TextView
@@ -110,7 +114,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/black_day"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:fontFamily="@font/ys_display_regular"/>
 
                 </LinearLayout>
 
@@ -131,7 +136,8 @@
                     android:text="@string/required_experience"
                     android:textColor="@color/text_vacancy_detail"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="@font/ys_display_medium"/>
 
                 <!-- Значение опыта: Regular/16 -->
                 <TextView
@@ -140,7 +146,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:textColor="@color/text_vacancy_detail"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:fontFamily="@font/ys_display_regular"/>
 
             </LinearLayout>
 
@@ -151,7 +158,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_vacancy_detail"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/ys_display_regular"/>
 
             <!-- Секция: Описание вакансии -->
             <LinearLayout
@@ -168,7 +176,8 @@
                     android:text="@string/description"
                     android:textColor="@color/text_vacancy_detail"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="@font/ys_display_medium"/>
 
                 <!-- Текст описания: Regular/16 (HTML) -->
                 <TextView
@@ -177,7 +186,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textColor="@color/text_vacancy_detail"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:fontFamily="@font/ys_display_regular"/>
 
             </LinearLayout>
 
@@ -196,7 +206,8 @@
                     android:text="@string/key_skills"
                     android:textColor="@color/text_vacancy_detail"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="@font/ys_display_medium"/>
 
                 <!-- Навыки: Regular/16 -->
                 <TextView
@@ -205,7 +216,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textColor="@color/text_vacancy_detail"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:fontFamily="@font/ys_display_regular"/>
 
             </LinearLayout>
 
@@ -225,7 +237,8 @@
                     android:text="@string/contacts"
                     android:textColor="@color/text_vacancy_detail"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="@font/ys_display_medium"/>
 
                 <!-- Контактное лицо -->
                 <LinearLayout
@@ -240,7 +253,8 @@
                         android:text="@string/contact_person"
                         android:textColor="@color/text_vacancy_detail"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:fontFamily="@font/ys_display_bold"/>
 
                     <TextView
                         android:id="@+id/tvContactPerson"
@@ -248,7 +262,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/text_vacancy_detail"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:fontFamily="@font/ys_display_regular"/>
 
                 </LinearLayout>
 
@@ -265,7 +280,8 @@
                         android:text="@string/email_label"
                         android:textColor="@color/text_vacancy_detail"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:fontFamily="@font/ys_display_bold"/>
 
                     <TextView
                         android:id="@+id/tvEmail"
@@ -273,7 +289,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/blue"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:fontFamily="@font/ys_display_regular"/>
 
                 </LinearLayout>
 
@@ -290,7 +307,8 @@
                         android:text="@string/phone_label"
                         android:textColor="@color/text_vacancy_detail"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:fontFamily="@font/ys_display_bold"/>
 
                     <TextView
                         android:id="@+id/tvPhone"
@@ -298,7 +316,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/blue"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:fontFamily="@font/ys_display_regular"/>
 
                 </LinearLayout>
 
@@ -335,7 +354,8 @@
             android:textColor="@color/text_vacancy_detail"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 

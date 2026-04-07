@@ -11,10 +11,12 @@
         android:layout_height="64dp"
         android:background="@color/backgroundColor"
         android:paddingStart="4dp"
+        android:fontFamily="@font/ys_display_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back"
+        app:titleTextColor="@color/title_color"
         app:title="@string/select_region"
         app:titleTextAppearance="@style/TopBarTitleStyle" />
 
@@ -32,7 +34,7 @@
         <EditText
             android:id="@+id/etSearch"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="55dp"
             android:background="@drawable/bg_search_edit"
             android:hint="@string/region_search_hint"
             android:imeOptions="actionSearch"
@@ -42,7 +44,8 @@
             android:paddingEnd="44dp"
             android:textColor="@color/text_edit"
             android:textColorHint="@color/text_hint"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
         <ImageView
             android:id="@+id/ivSearchClear"
@@ -52,8 +55,8 @@
             android:layout_marginEnd="10dp"
             android:contentDescription="@null"
             android:src="@drawable/search_24px"
-            android:tint="@color/black_day"
-            android:visibility="visible" />
+            android:visibility="visible"
+            app:tint="@color/black_day" />
 
     </FrameLayout>
 
@@ -110,9 +113,10 @@
             android:layout_marginTop="24dp"
             android:gravity="center"
             android:text="@string/region_list_error"
-            android:textColor="@color/black_day"
+            android:textColor="@color/title_color"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
@@ -144,9 +148,10 @@
             android:layout_marginTop="24dp"
             android:gravity="center"
             android:text="@string/region_not_found"
-            android:textColor="@color/black_day"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textColor="@color/title_color"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
