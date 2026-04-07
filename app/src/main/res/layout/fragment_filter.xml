@@ -4,8 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/filter_settings"
+        app:titleTextAppearance="@style/TopBarTitleStyleFilter" />
 
     <!-- Место работы -->
 
@@ -13,8 +23,9 @@
         android:id="@+id/layoutWorkLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="?attr/selectableItemBackground">
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="16dp">
 
         <!-- Контейнер для текстов -->
         <LinearLayout
@@ -65,8 +76,9 @@
         android:id="@+id/layoutIndustry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="?attr/selectableItemBackground">
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="16dp">
 
         <!-- Контейнер для текстов -->
         <LinearLayout
@@ -115,12 +127,14 @@
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/bg_input_salary"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp">
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="12dp">
 
         <!-- Заголовок сверху -->
         <TextView
@@ -152,7 +166,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <TextView
             android:layout_width="0dp"
@@ -182,7 +197,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="16dp">
+        android:padding="16dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApply"
