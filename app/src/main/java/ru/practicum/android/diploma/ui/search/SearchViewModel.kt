@@ -3,80 +3,190 @@ package ru.practicum.android.diploma.ui.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import ru.practicum.android.diploma.data.dto.VacancyDetailDto
+import ru.practicum.android.diploma.data.dto.VacancyResponseDto
+import ru.practicum.android.diploma.domain.repository.VacancyRepository
+import ru.practicum.android.diploma.util.NetworkUtils
 
-//  ViewModel для экрана поиска
-//
-//  Пока просто заглушка
-//  Хранит текст поискового запроса, чтобы не терялся при повороте
-//  Позже добавим логику
-class SearchViewModel : ViewModel() {
+class SearchViewModel(
+    private val repository: VacancyRepository,
+    private val networkUtils: NetworkUtils
+) : ViewModel() {
 
-    // Текст поискового запроса (сохраняется при повороте)
-    private val _searchQuery = MutableLiveData("")
-    val searchQuery: LiveData<String> = _searchQuery
-
-    // Состояние поиска (загрузка, результат, ошибка)
-    // Пока просто заглушка, в Epic 1 будет настоящая логика
     private val _searchState = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = _searchState
 
+    private var searchJob: Job? = null
+
+    // Параметры для пагинации
+    private var currentQuery = ""
+    private var currentPage = 1
+    private var totalPages = 0
+    private var isLoading = false
+    private var isLastPage = false
+
+    // Список всех загруженных вакансий
+    private var allVacancies = mutableListOf<VacancyDetailDto>()
+
+    companion object {
+        private const val DEBOUNCE_DELAY = 2000L
+    }
+
     init {
-        // Начальное состояние — пусто
         _searchState.value = SearchState.Empty
     }
 
-    /**
-     * Обновить текст поискового запроса
-     * Вызывается из фрагмента при вводе текста
-     */
     fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
+        searchJob?.cancel()
+        if (query.isBlank()) {
+            clearSearch()
+            return
+        }
 
-        // В Epic 1 здесь будет запускаться debounced поиск
-        // Пока просто меняем состояние
-        if (query.isNotBlank()) {
-            _searchState.value = SearchState.HasQuery(query)
-        } else {
-            _searchState.value = SearchState.Empty
+        // При новом запросе сбрасываем пагинацию
+        resetPagination()
+        currentQuery = query
+
+        searchJob = viewModelScope.launch {
+            delay(DEBOUNCE_DELAY)
+            performSearch(query, 1, isLoadMore = false)
         }
     }
 
     /**
-     * Очистить поисковый запрос
+     * Загрузить следующую страницу (вызывается из фрагмента при скролле)
      */
-    fun clearSearchQuery() {
-        _searchQuery.value = ""
+    fun loadNextPage() {
+        if (isLoading || isLastPage || currentQuery.isBlank()) return
+
+        val nextPage = currentPage + 1
+        if (nextPage < totalPages) {
+            performSearch(currentQuery, nextPage, isLoadMore = true)
+        }
+    }
+
+    private fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
+        // Проверяем все условия в начале
+        val isValidQuery = query.isNotBlank()
+        val canPerformSearch = isValidQuery && !isLoading
+
+        if (!canPerformSearch) return
+
+        isLoading = true
+
+        if (!networkUtils.isNetworkAvailable()) {
+            _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
+            isLoading = false
+            return
+        }
+
+        if (!isLoadMore) {
+            _searchState.value = SearchState.Loading
+        } else {
+            _searchState.value = SearchState.LoadingMore
+        }
+
+        viewModelScope.launch {
+            val result = repository.searchVacancies(text = query, page = page)
+            result.fold(
+                onSuccess = { response ->
+                    handleSearchSuccess(response, query, page, isLoadMore)
+                },
+                onFailure = { exception ->
+                    handleSearchError(exception, isLoadMore)
+                }
+            )
+        }
+    }
+
+    private fun handleSearchSuccess(
+        response: VacancyResponseDto,
+        query: String,
+        page: Int,
+        isLoadMore: Boolean
+    ) {
+        currentQuery = query
+        currentPage = response.page
+        totalPages = response.pages
+        isLastPage = response.page >= response.pages
+
+        val newVacancies = response.vacancies ?: emptyList()
+
+        if (newVacancies.isEmpty() && page == 1) {
+            _searchState.value = SearchState.EmptyResult
+            isLoading = false
+            return
+        }
+
+        if (isLoadMore) {
+            // Добавляем новые вакансии к уже существующим
+            allVacancies.addAll(newVacancies)
+            _searchState.value = SearchState.Success(
+                vacancies = allVacancies.toList(),
+                totalFound = response.found,
+                isLoadingMore = false
+            )
+        } else {
+            // Новая страница, заменяем список
+            allVacancies.clear()
+            allVacancies.addAll(newVacancies)
+            _searchState.value = SearchState.Success(
+                vacancies = allVacancies.toList(),
+                totalFound = response.found,
+                isLoadingMore = false
+            )
+        }
+
+        isLoading = false
+    }
+
+    private fun handleSearchError(exception: Throwable, isLoadMore: Boolean) {
+        isLoading = false
+
+        if (isLoadMore) {
+            // При ошибке дозагрузки показываем сообщение, но не меняем список
+            _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
+        } else {
+            _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
+        }
+    }
+
+    fun clearSearch() {
+        searchJob?.cancel()
+        resetPagination()
+        allVacancies.clear()
         _searchState.value = SearchState.Empty
     }
 
-    /**
-     * Запустить поиск (заглушка)
-     * В Epic 1 здесь будет реальный поиск через репозиторий
-     */
-    fun performSearch() {
-        val query = _searchQuery.value ?: return
-        if (query.isNotBlank()) {
-            // В Epic 1 здесь будет загрузка из сети
-            _searchState.value = SearchState.Loading
-            // Пока просто имитируем, что поиск не реализован
-            _searchState.value = SearchState.NotImplemented
-        }
+    private fun resetPagination() {
+        currentQuery = ""
+        currentPage = 1
+        totalPages = 0
+        isLastPage = false
+        isLoading = false
+        allVacancies.clear()
     }
 }
 
-/**
- * Состояния экрана поиска
- */
 sealed class SearchState {
-    // Ничего не введено
     object Empty : SearchState()
-
-    // Есть введенный текст (но поиск не запущен)
-    data class HasQuery(val query: String) : SearchState()
-
-    // Идет загрузка
     object Loading : SearchState()
+    object LoadingMore : SearchState() // Дозагрузка
+    object EmptyResult : SearchState()
+    data class Success(
+        val vacancies: List<VacancyDetailDto>,
+        val totalFound: Int,
+        val isLoadingMore: Boolean = false
+    ) : SearchState()
+    data class LoadMoreError(val message: String) : SearchState() // Ошибка при дозагрузке
+    data class Error(val error: ErrorType) : SearchState()
+}
 
-    // Поиск еще не реализован (для Epic 0)
-    object NotImplemented : SearchState()
+enum class ErrorType {
+    NO_INTERNET,
+    SERVER_ERROR
 }
