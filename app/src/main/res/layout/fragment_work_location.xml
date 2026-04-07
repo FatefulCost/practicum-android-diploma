@@ -56,9 +56,9 @@
 
                 <ImageView
                     android:id="@+id/ivCountryArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward"
+                    android:layout_width="8dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_arrow_forward_24"
                     android:tint="?attr/colorOnSurface"
                     android:alpha="0.6"
                     android:visibility="visible" />
@@ -67,7 +67,6 @@
                     android:id="@+id/ivCountryClear"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/close_24px"
                     android:tint="?attr/colorOnSurface"
                     android:visibility="gone"
                     android:clickable="true"
@@ -122,9 +121,9 @@
 
                 <ImageView
                     android:id="@+id/ivRegionArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_forward"
+                    android:layout_width="8dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_arrow_forward_24"
                     android:tint="?attr/colorOnSurface"
                     android:alpha="0.6"
                     android:visibility="visible" />
@@ -133,7 +132,6 @@
                     android:id="@+id/ivRegionClear"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/close_24px"
                     android:tint="?attr/colorOnSurface"
                     android:visibility="gone"
                     android:clickable="true"
