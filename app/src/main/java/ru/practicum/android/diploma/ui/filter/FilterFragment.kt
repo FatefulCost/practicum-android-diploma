@@ -84,7 +84,8 @@ class FilterFragment : Fragment() {
             else -> getString(NOT_SELECTED)
         }
         binding.tvWorkLocationValue.text = locationText
-        binding.tvWorkLocationValue.visibility = if (countryPart.isNotEmpty() || regionPart.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.tvWorkLocationValue.visibility = if (countryPart.isNotEmpty() || regionPart.isNotEmpty()) View.VISIBLE
+            else View.GONE
     }
 
     private fun setupUI() {
