@@ -31,7 +31,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/work_location"
                 android:textColor="@color/text_hint"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/ys_display_regular"/>
 
             <TextView
                 android:id="@+id/tvIndustryValue"
@@ -41,7 +42,8 @@
                 android:text="@string/not_selected"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
-                android:visibility="gone" />
+                android:fontFamily="@font/ys_display_regular"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <!-- Кнопка/Иконка справа -->
@@ -81,7 +83,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/industry"
                 android:textColor="@color/text_hint"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/ys_display_regular"/>
 
             <TextView
                 android:id="@+id/tvIndustryValue"
@@ -91,7 +94,8 @@
                 android:text="@string/not_selected"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
-                android:visibility="gone" />
+                android:fontFamily="@font/ys_display_regular"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <!-- Кнопка/Иконка справа -->
@@ -124,7 +128,8 @@
             android:layout_height="wrap_content"
             android:text="Ожидаемая зарплата"
             android:textColor="@color/text_hint"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
         <!-- Поле ввода без стандартной линии снизу -->
         <EditText
@@ -136,7 +141,8 @@
             android:inputType="number"
             android:textColor="@color/black"
             android:textColorHint="@color/text_hint"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
 
     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -154,7 +160,8 @@
             android:layout_weight="1"
             android:text="@string/hide_without_salary"
             android:textColor="@color/text_vacancy_detail"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
         <CheckBox
             android:id="@+id/cbHideWithoutSalary"
@@ -184,8 +191,9 @@
             android:layout_weight="1"
             android:text="@string/apply"
             android:textColor="@color/white"
+            android:fontFamily="@font/ys_display_medium"
             app:cornerRadius="12dp"
-            app:backgroundTint="@color/blue" />
+            app:backgroundTint="@color/blue"/>
 
 
         <com.google.android.material.button.MaterialButton
@@ -195,6 +203,7 @@
             android:layout_weight="1"
             android:text="@string/reset"
             android:textColor="@color/red"
+            android:fontFamily="@font/ys_display_medium"
             android:background=""/>
 
     </LinearLayout>
