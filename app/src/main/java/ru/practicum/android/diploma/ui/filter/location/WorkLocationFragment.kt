@@ -181,7 +181,12 @@ class WorkLocationFragment : Fragment() {
     private fun observeNavigationResults() {
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
-        // Обработка выбора страны
+        observeCountrySelection(savedStateHandle)
+        observeRegionSelection(savedStateHandle)
+        observeAutoCountrySelection(savedStateHandle)
+    }
+
+    private fun observeCountrySelection(savedStateHandle: androidx.lifecycle.SavedStateHandle?) {
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_COUNTRY_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedCountryId = id
@@ -198,8 +203,9 @@ class WorkLocationFragment : Fragment() {
                 updateLocationUI()
             }
         }
+    }
 
-        // Обработка выбора региона (автоматически выбирает страну)
+    private fun observeRegionSelection(savedStateHandle: androidx.lifecycle.SavedStateHandle?) {
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_REGION_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedRegionId = id
@@ -214,8 +220,9 @@ class WorkLocationFragment : Fragment() {
                 updateLocationUI()
             }
         }
+    }
 
-        // Обработка случая, когда регион выбрал страну автоматически
+    private fun observeAutoCountrySelection(savedStateHandle: androidx.lifecycle.SavedStateHandle?) {
         savedStateHandle?.getLiveData<Int>("auto_selected_country_id")?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1 && selectedCountryId == -1) {
                 selectedCountryId = id
