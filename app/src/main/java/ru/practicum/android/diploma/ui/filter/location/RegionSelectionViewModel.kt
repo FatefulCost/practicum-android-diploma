@@ -25,7 +25,6 @@ class RegionSelectionViewModel(
 
     private var allRegions: List<FilterAreaDto> = emptyList()
     private val regionToCountryMap = mutableMapOf<Int, Pair<Int, String>>()
-    private val allCountries = mutableListOf<FilterAreaDto>()
 
     fun loadRegions(countryId: Int) {
         _state.value = RegionSelectionState.Loading
@@ -33,7 +32,7 @@ class RegionSelectionViewModel(
             val result = filterRepository.getAreas()
             result.fold(
                 onSuccess = { areas ->
-                    parseAreas(areas)
+                    buildRegionToCountryMap(areas)
                     allRegions = extractRegions(areas, countryId)
 
                     if (allRegions.isEmpty()) {
@@ -50,25 +49,42 @@ class RegionSelectionViewModel(
     }
 
     /**
-     * Парсим все области и строим карту регион - страна
+     * Строит карту соответствия регион - страна
+     * Разбито на несколько маленьких функций
      */
-    private fun parseAreas(areas: List<FilterAreaDto>) {
+    private fun buildRegionToCountryMap(areas: List<FilterAreaDto>) {
         regionToCountryMap.clear()
-        allCountries.clear()
 
-        for (country in areas) {
-            // Страна это элемент с parentId == null
-            if (country.parentId == null) {
-                allCountries.add(country)
-
-                // Регионы это элементы в списке areas у страны
-                for (region in country.areas.orEmpty()) {
-                    if (region.parentId != null) {
-                        regionToCountryMap[region.id] = Pair(country.id, country.name)
-                    }
-                }
-            }
+        val countries = extractCountries(areas)
+        countries.forEach { country ->
+            addCountryRegionsToMap(country)
         }
+    }
+
+    /**
+     * Извлекает страны из списка областей
+     */
+    private fun extractCountries(areas: List<FilterAreaDto>): List<FilterAreaDto> {
+        return areas.filter { it.parentId == null }
+    }
+
+    /**
+     * Добавляет все регионы страны в карту
+     */
+    private fun addCountryRegionsToMap(country: FilterAreaDto) {
+        val regions = country.areas.orEmpty()
+        val validRegions = filterValidRegions(regions)
+
+        validRegions.forEach { region ->
+            regionToCountryMap[region.id] = Pair(country.id, country.name)
+        }
+    }
+
+    /**
+     * Фильтрует только регионы
+     */
+    private fun filterValidRegions(regions: List<FilterAreaDto>): List<FilterAreaDto> {
+        return regions.filter { it.parentId != null }
     }
 
     fun getCountryIdForRegion(regionId: Int): Int {
@@ -99,20 +115,32 @@ class RegionSelectionViewModel(
     }
 
     /**
-     * Извлекаем регионы
+     * Извлекает регионы
      */
     private fun extractRegions(areas: List<FilterAreaDto>, countryId: Int): List<FilterAreaDto> {
         return if (countryId != -1) {
-            // Страна выбрана - регионы только этой страны
-            val country = areas.find { it.id == countryId }
-            country?.areas.orEmpty()
-                .filter { it.parentId != null }
-                .sortedBy { it.name }
+            extractRegionsForCountry(areas, countryId)
         } else {
-            // Страна не выбрана - регионы из всех стран
-            areas.flatMap { country -> country.areas.orEmpty() }
-                .filter { it.parentId != null }
-                .sortedBy { it.name }
+            extractAllRegions(areas)
         }
+    }
+
+    /**
+     * Извлекает регионы для конкретной страны
+     */
+    private fun extractRegionsForCountry(areas: List<FilterAreaDto>, countryId: Int): List<FilterAreaDto> {
+        val country = areas.find { it.id == countryId }
+        val regions = country?.areas.orEmpty()
+        return regions.filter { it.parentId != null }.sortedBy { it.name }
+    }
+
+    /**
+     * Извлекает все регионы из всех стран
+     */
+    private fun extractAllRegions(areas: List<FilterAreaDto>): List<FilterAreaDto> {
+        val countries = extractCountries(areas)
+        return countries.flatMap { country -> country.areas.orEmpty() }
+            .filter { it.parentId != null }
+            .sortedBy { it.name }
     }
 }
