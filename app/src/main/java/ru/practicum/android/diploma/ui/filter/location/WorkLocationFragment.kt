@@ -300,7 +300,6 @@ class WorkLocationFragment : Fragment() {
         }
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
