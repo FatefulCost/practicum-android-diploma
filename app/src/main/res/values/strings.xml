@@ -99,7 +99,7 @@
     <string name="required_experience">Требуемый опыт</string>
 
     <!-- Industry Selection -->
-    <string name="industry_search_hint">Поиск отрасли</string>
+    <string name="industry_search_hint">Введите отрасль</string>
     <string name="industry_not_found">Такой отрасли нет</string>
     <string name="industry_list_error">Не удалось получить список</string>
 

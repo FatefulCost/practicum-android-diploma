@@ -14,7 +14,7 @@
         android:id="@+id/tvIndustryName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/black_day"
+        android:textColor="@color/title_color"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/ivChevron"
@@ -35,9 +35,9 @@
         android:id="@+id/ivCheck"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/ic_radio_unchecked"
+        android:src="@drawable/radio_button_off__24px"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" /
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

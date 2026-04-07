@@ -41,6 +41,7 @@ class IndustrySelectionFragment : Fragment() {
         setupRecyclerView()
         setupSearch()
         observeViewModel()
+        setupButton()
     }
 
     private fun setupToolbar() {
@@ -50,17 +51,23 @@ class IndustrySelectionFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = IndustryAdapter { industry ->
-            // Возвращаем результат в FilterFragment
-            parentFragmentManager.setFragmentResult(
-                "industry_selection",
-                Bundle().apply {
-                    putInt("industry_id", industry.id)
-                    putString("industry_name", industry.name)
+        adapter = IndustryAdapter(
+            onIndustryClick = { industry ->
+                // При клике на отрасль обновляем выбранную
+                val currentSelected = adapter?.getSelectedIndustry()
+                if (currentSelected?.id == industry.id) {
+                    // Если нажали на уже выбранную, то снимаем выбор
+                    adapter?.setSelectedIndustry(null)
+                } else {
+                    // Иначе выбираем новую
+                    adapter?.setSelectedIndustry(industry.id)
                 }
-            )
-            findNavController().popBackStack()
-        }
+            },
+            onSelectionChanged = {
+                // При изменении выбора обновляем видимость кнопки
+                updateSelectButtonVisibility()
+            }
+        )
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -76,6 +83,8 @@ class IndustrySelectionFragment : Fragment() {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(query)
                 viewModel.filterIndustries(query)
+                // При поиске сбрасываем выбранную отрасль
+                adapter?.setSelectedIndustry(null)
             }
 
             override fun afterTextChanged(s: Editable?) = Unit
@@ -98,6 +107,31 @@ class IndustrySelectionFragment : Fragment() {
         }
     }
 
+    private fun setupButton() {
+        binding.btnSelect.setOnClickListener {
+            val selectedIndustry = adapter?.getSelectedIndustry()
+            if (selectedIndustry != null) {
+                // Возвращаем результат в FilterFragment
+                parentFragmentManager.setFragmentResult(
+                    "industry_selection",
+                    Bundle().apply {
+                        putInt("industry_id", selectedIndustry.id)
+                        putString("industry_name", selectedIndustry.name)
+                    }
+                )
+                findNavController().popBackStack()
+            }
+        }
+    }
+
+    /**
+     * Показываем/скрываем кнопку "Выбрать" в зависимости от выбора
+     */
+    private fun updateSelectButtonVisibility() {
+        val hasSelection = adapter?.getSelectedIndustry() != null
+        binding.btnSelect.visibility = if (hasSelection) View.VISIBLE else View.GONE
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -116,6 +150,9 @@ class IndustrySelectionFragment : Fragment() {
 
         if (state is IndustrySelectionState.Content) {
             adapter?.submitList(state.industries)
+            // При загрузке нового списка сбрасываем выбор и скрываем кнопку
+            adapter?.setSelectedIndustry(null)
+            updateSelectButtonVisibility()
         }
     }
 
