@@ -98,9 +98,54 @@ class WorkLocationFragment : Fragment() {
             )
         }
 
+        // Обработка нажатия на крестик (очистка страны)
+        binding.ivCountryClear.setOnClickListener {
+            clearCountrySelection()
+        }
+
+        // Обработка нажатия на крестик (очистка региона)
+        binding.ivRegionClear.setOnClickListener {
+            clearRegionSelection()
+        }
+
         binding.btnSelect.setOnClickListener {
             saveSelectionAndReturn()
         }
+    }
+
+    /**
+     * Очистка выбранной страны
+     */
+    private fun clearCountrySelection() {
+        selectedCountryId = -1
+        selectedCountryName = ""
+        selectedRegionId = -1
+        selectedRegionName = ""
+
+        updateLocationUI()
+        updateSelectButtonVisibility()
+
+        // Сохраняем изменения
+        filterRepository.saveLocation(null, null, null, null)
+    }
+
+    /**
+     * Очистка выбранного региона
+     */
+    private fun clearRegionSelection() {
+        selectedRegionId = -1
+        selectedRegionName = ""
+
+        updateLocationUI()
+        updateSelectButtonVisibility()
+
+        // Сохраняем изменения
+        filterRepository.saveLocation(
+            if (selectedCountryId != -1) selectedCountryId else null,
+            selectedCountryName,
+            null,
+            null
+        )
     }
 
     /**
@@ -199,31 +244,29 @@ class WorkLocationFragment : Fragment() {
      * Обновляет UI для страны
      */
     private fun updateCountryUI() {
+        // Обновление текста при выборе страны
         val hasCountry = selectedCountryName.isNotEmpty()
-
-        // Находим TextView "Страна" внутри layoutCountry
         val countryTitleView = binding.layoutCountry.findViewById<TextView>(R.id.tvCountryTitle)
-        // Переменная для выбранной страны
-        val countryValue = binding.layoutCountry.findViewById<TextView>(R.id.tvCountryValue)
+        val countryValue = binding.tvCountryValue
 
         if (hasCountry) {
-            // Меняем цвет текста выбранной страны и надписи "Страна"
             countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
-            countryValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
-            // Меняем размер текста "Страна" на 12sp
             countryTitleView.textSize = TEXT_SIZE_SELECTED
+            countryValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
+            countryValue.text = selectedCountryName
+            countryValue.visibility = View.VISIBLE
 
-            // Показываем выбранную страну
-            binding.tvCountryValue.text = selectedCountryName
-            binding.tvCountryValue.visibility = View.VISIBLE
+            // Показываем крестик, скрываем стрелку
+            binding.ivCountryChevron.visibility = View.GONE
+            binding.ivCountryClear.visibility = View.VISIBLE
         } else {
-            // Возвращаем цвет обратно на серый
             countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
-            // Возвращаем размер текста на 16sp
             countryTitleView.textSize = TEXT_SIZE_DEFAULT
+            countryValue.visibility = View.GONE
 
-            // Скрываем TextView с названием
-            binding.tvCountryValue.visibility = View.GONE
+            // Показываем стрелку, скрываем крестик
+            binding.ivCountryChevron.visibility = View.VISIBLE
+            binding.ivCountryClear.visibility = View.GONE
         }
     }
 
@@ -231,23 +274,29 @@ class WorkLocationFragment : Fragment() {
      * Обновляет UI для региона
      */
     private fun updateRegionUI() {
+        // Обновление текста при выборе региона
         val hasRegion = selectedRegionName.isNotEmpty()
-
-        // Такой же подход как и с страной
         val regionTitleView = binding.layoutRegion.findViewById<TextView>(R.id.tvRegionTitle)
-        val regionValue = binding.layoutRegion.findViewById<TextView>(R.id.tvRegionValue)
+        val regionValue = binding.tvRegionValue
 
         if (hasRegion) {
             regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
-            regionValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
             regionTitleView.textSize = TEXT_SIZE_SELECTED
+            regionValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.title_color))
+            regionValue.text = selectedRegionName
+            regionValue.visibility = View.VISIBLE
 
-            binding.tvRegionValue.text = selectedRegionName
-            binding.tvRegionValue.visibility = View.VISIBLE
+            // Показываем крестик, скрываем стрелку
+            binding.ivRegionChevron.visibility = View.GONE
+            binding.ivRegionClear.visibility = View.VISIBLE
         } else {
             regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
             regionTitleView.textSize = TEXT_SIZE_DEFAULT
-            binding.tvRegionValue.visibility = View.GONE
+            regionValue.visibility = View.GONE
+
+            // Показываем стрелку, скрываем крестик
+            binding.ivRegionChevron.visibility = View.VISIBLE
+            binding.ivRegionClear.visibility = View.GONE
         }
     }
 
