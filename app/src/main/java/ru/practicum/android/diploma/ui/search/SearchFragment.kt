@@ -105,12 +105,22 @@ class SearchFragment : Fragment() {
      */
     private fun updateFilterButtonColor(hasFilters: Boolean) {
         val colorRes = if (hasFilters) {
-            R.color.blue // Активные фильтры — синяя иконка
+            R.color.white_day // Активные фильтры — белая иконка
         } else {
             R.color.filter_icon // Нет фильтров — стандартный цвет
         }
         val color = ContextCompat.getColor(requireContext(), colorRes)
         binding.fabFilter.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+
+        val backgroundRes = if (hasFilters) {
+            R.drawable.bg_filter_button_active
+        } else {
+            R.drawable.bg_filter_button_inactive
+        }
+        binding.fabFilter.setImageDrawable(
+            ContextCompat.getDrawable(requireContext(), R.drawable.ic_filter)
+        )
+        binding.fabFilter.background = ContextCompat.getDrawable(requireContext(), backgroundRes)
     }
 
     /**

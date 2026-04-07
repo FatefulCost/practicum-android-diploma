@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import org.koin.android.ext.android.inject
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentWorkLocationBinding
+import ru.practicum.android.diploma.domain.repository.FilterRepository
 
 class WorkLocationFragment : Fragment() {
 
@@ -22,6 +23,7 @@ class WorkLocationFragment : Fragment() {
     private var _binding: FragmentWorkLocationBinding? = null
     private val binding get() = _binding!!
 
+    private val filterRepository: FilterRepository by inject()
     private var selectedCountryId: Int = -1
     private var selectedCountryName: String = ""
     private var selectedRegionId: Int = -1
@@ -38,55 +40,101 @@ class WorkLocationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        loadSavedSelection()
         setupUI()
         observeNavigationResults()
-        restoreArgumentsIfNeeded()
+        updateSelectButtonVisibility()
     }
 
-    private fun restoreArgumentsIfNeeded() {
-        val args = arguments
-        if (args != null) {
-            val countryId = args.getInt("selectedCountryId", -1)
-            val countryName = args.getString("selectedCountryName", "")
-            val regionId = args.getInt("selectedRegionId", -1)
-            val regionName = args.getString("selectedRegionName", "")
-            if (countryId != -1) {
-                selectedCountryId = countryId
-                selectedCountryName = countryName ?: ""
-            }
-            if (regionId != -1) {
-                selectedRegionId = regionId
-                selectedRegionName = regionName ?: ""
-            }
-            updateLocationUI()
+    /**
+     * Загружаем сохраненные настройки из SharedPreferences
+     */
+    private fun loadSavedSelection() {
+        val countryId = filterRepository.loadSavedCountryId()
+        val countryName = filterRepository.loadSavedCountryName()
+        val regionId = filterRepository.loadSavedRegionId()
+        val regionName = filterRepository.loadSavedRegionName()
+
+        if (countryId != null && countryId != -1) {
+            selectedCountryId = countryId
+            selectedCountryName = countryName ?: ""
         }
+        if (regionId != null && regionId != -1) {
+            selectedRegionId = regionId
+            selectedRegionName = regionName ?: ""
+        }
+
+        updateLocationUI()
+        updateSelectButtonVisibility()
     }
 
     private fun setupUI() {
         updateLocationUI()
+        updateSelectButtonVisibility()
 
+        // Переход на экран выбора страны
         binding.layoutCountry.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.location_selection_coming_soon, Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_workLocationFragment_to_countrySelectionFragment)
         }
 
+        // Переход на экран выбора региона
         binding.layoutRegion.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.region_selection_coming_soon, Toast.LENGTH_SHORT).show()
+            val bundle = Bundle().apply {
+                putInt("selected_country_id", selectedCountryId)
+                putString("selected_country_name", selectedCountryName)
+            }
+            findNavController().navigate(
+                R.id.action_workLocationFragment_to_regionSelectionFragment,
+                bundle
+            )
         }
 
         binding.btnSelect.setOnClickListener {
-            findNavController().popBackStack()
+            saveSelectionAndReturn()
         }
+    }
+
+    /**
+     * Кнопка "Выбрать" видна, если есть выбранная страна ИЛИ регион
+     */
+    private fun updateSelectButtonVisibility() {
+        val hasSelection = selectedCountryId != -1 || selectedRegionId != -1
+        binding.btnSelect.visibility = if (hasSelection) View.VISIBLE else View.GONE
+    }
+
+    private fun saveSelectionAndReturn() {
+        // Сохраняем выбор в SharedPreferences
+        filterRepository.saveLocation(
+            countryId = if (selectedCountryId != -1) selectedCountryId else null,
+            countryName = selectedCountryName.takeIf { it.isNotEmpty() },
+            regionId = if (selectedRegionId != -1) selectedRegionId else null,
+            regionName = selectedRegionName.takeIf { it.isNotEmpty() }
+        )
+
+        // Отправляем результат в FilterFragment
+        parentFragmentManager.setFragmentResult(
+            "work_location_selection",
+            Bundle().apply {
+                putInt("country_id", selectedCountryId)
+                putString("country_name", selectedCountryName)
+                putInt("region_id", selectedRegionId)
+                putString("region_name", selectedRegionName)
+            }
+        )
+        findNavController().popBackStack()
     }
 
     private fun observeNavigationResults() {
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
+        // Обработка выбора страны
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_COUNTRY_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedCountryId = id
                 selectedRegionId = -1
                 selectedRegionName = ""
                 updateLocationUI()
+                updateSelectButtonVisibility()
             }
         }
 
@@ -97,10 +145,12 @@ class WorkLocationFragment : Fragment() {
             }
         }
 
+        // Обработка выбора региона (автоматически выбирает страну)
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_REGION_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedRegionId = id
                 updateLocationUI()
+                updateSelectButtonVisibility()
             }
         }
 
@@ -110,19 +160,37 @@ class WorkLocationFragment : Fragment() {
                 updateLocationUI()
             }
         }
+
+        // Обработка случая, когда регион выбрал страну автоматически
+        savedStateHandle?.getLiveData<Int>("auto_selected_country_id")?.observe(viewLifecycleOwner) { id ->
+            if (id != null && id != -1 && selectedCountryId == -1) {
+                selectedCountryId = id
+                updateLocationUI()
+                updateSelectButtonVisibility()
+            }
+        }
+
+        savedStateHandle?.getLiveData<String>("auto_selected_country_name")?.observe(viewLifecycleOwner) { name ->
+            if (!name.isNullOrEmpty() && selectedCountryName.isEmpty()) {
+                selectedCountryName = name
+                updateLocationUI()
+            }
+        }
     }
 
     private fun updateLocationUI() {
+        // Отображаем страну
         binding.tvCountryValue.text = if (selectedCountryName.isNotEmpty()) {
             selectedCountryName
         } else {
-            getString(ru.practicum.android.diploma.R.string.not_selected)
+            getString(R.string.not_selected)
         }
 
+        // Отображаем регион
         binding.tvRegionValue.text = if (selectedRegionName.isNotEmpty()) {
             selectedRegionName
         } else {
-            getString(ru.practicum.android.diploma.R.string.not_selected)
+            getString(R.string.not_selected)
         }
     }
 

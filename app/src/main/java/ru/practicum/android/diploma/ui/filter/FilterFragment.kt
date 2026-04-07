@@ -53,7 +53,7 @@ class FilterFragment : Fragment() {
             }
         }
 
-        // Обработка выбора места работы (если нужно)
+        // Обработка выбора места работы
         parentFragmentManager.setFragmentResultListener("work_location_selection", viewLifecycleOwner) { _, bundle ->
             val countryId = bundle.getInt("country_id", -1)
             val countryName = bundle.getString("country_name")
@@ -61,14 +61,29 @@ class FilterFragment : Fragment() {
             val regionName = bundle.getString("region_name")
             viewModel.updateLocation(countryId, countryName, regionId, regionName)
 
-            // Обновляем UI
-            val locationText = when {
-                !regionName.isNullOrBlank() -> regionName
-                !countryName.isNullOrBlank() -> countryName
-                else -> getString(R.string.not_selected)
-            }
-            binding.tvWorkLocationValue.text = locationText
+            viewModel.updateLocation(
+                if (countryId != -1) countryId else null,
+                countryName,
+                if (regionId != -1) regionId else null,
+                regionName
+            )
+
+            // обновляем UI (без ожидания обсервера)
+            updateLocationUI(countryName, regionName)
         }
+    }
+
+    private fun updateLocationUI(countryName: String?, regionName: String?) {
+        val countryPart = countryName.takeIf { !it.isNullOrBlank() } ?: ""
+        val regionPart = regionName.takeIf { !it.isNullOrBlank() } ?: ""
+
+        val locationText = when {
+            countryPart.isNotEmpty() && regionPart.isNotEmpty() -> "$countryPart, $regionPart"
+            countryPart.isNotEmpty() -> countryPart
+            regionPart.isNotEmpty() -> regionPart
+            else -> getString(R.string.not_selected)
+        }
+        binding.tvWorkLocationValue.text = locationText
     }
 
     private fun setupUI() {
@@ -122,11 +137,7 @@ class FilterFragment : Fragment() {
             binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
         }
 
-        binding.tvWorkLocationValue.text = when {
-            settings.regionName != null -> settings.regionName
-            settings.countryName != null -> settings.countryName
-            else -> getString(NOT_SELECTED)
-        }
+        updateLocationUI(settings.countryName, settings.regionName)
 
         binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
     }

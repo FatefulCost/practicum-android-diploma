@@ -25,6 +25,8 @@ class RegionSelectionFragment : Fragment() {
 
     private val viewModel: RegionSelectionViewModel by viewModel()
     private var adapter: RegionAdapter? = null
+    private var selectedCountryId: Int = -1
+    private var selectedCountryName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,13 +39,17 @@ class RegionSelectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Получаем переданные аргументы
+        selectedCountryId = arguments?.getInt("selected_country_id", -1) ?: -1
+        selectedCountryName = arguments?.getString("selected_country_name", "") ?: ""
+
         setupToolbar()
         setupRecyclerView()
         setupSearch()
         observeViewModel()
 
-        val countryId = arguments?.getInt("countryId", -1) ?: -1
-        viewModel.loadRegions(countryId)
+        // Загружаем регионы с учетом выбранной страны
+        viewModel.loadRegions(selectedCountryId)
     }
 
     private fun setupToolbar() {
@@ -54,12 +60,22 @@ class RegionSelectionFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = RegionAdapter { region ->
-            findNavController().previousBackStackEntry
-                ?.savedStateHandle
-                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_ID, region.id)
-            findNavController().previousBackStackEntry
-                ?.savedStateHandle
-                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_NAME, region.name)
+            // Находим страну, к которой относится регион
+            val countryId = viewModel.getCountryIdForRegion(region.id)
+            val countryName = viewModel.getCountryNameForRegion(region.id)
+
+            val savedStateHandle = findNavController().previousBackStackEntry?.savedStateHandle
+
+            // Если страны не было выбрана, то автоматически выбираем её
+            if (selectedCountryId == -1 && countryId != -1) {
+                savedStateHandle?.set("auto_selected_country_id", countryId)
+                savedStateHandle?.set("auto_selected_country_name", countryName)
+            }
+
+            // Сохраняем выбранный регион
+            savedStateHandle?.set(WorkLocationFragment.KEY_SELECTED_REGION_ID, region.id)
+            savedStateHandle?.set(WorkLocationFragment.KEY_SELECTED_REGION_NAME, region.name)
+
             findNavController().popBackStack()
         }
 
@@ -72,11 +88,13 @@ class RegionSelectionFragment : Fragment() {
     private fun setupSearch() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(query)
                 viewModel.filterRegions(query)
             }
+
             override fun afterTextChanged(s: Editable?) = Unit
         })
 
