@@ -81,12 +81,18 @@ class FilterFragment : Fragment() {
             countryPart.isNotEmpty() && regionPart.isNotEmpty() -> "$countryPart, $regionPart"
             countryPart.isNotEmpty() -> countryPart
             regionPart.isNotEmpty() -> regionPart
-            else -> getString(R.string.not_selected)
+            else -> getString(NOT_SELECTED)
         }
         binding.tvWorkLocationValue.text = locationText
+        val hasLocation = countryPart.isNotEmpty() || regionPart.isNotEmpty()
+        binding.tvWorkLocationValue.visibility = if (hasLocation) View.VISIBLE else View.GONE
     }
 
     private fun setupUI() {
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.etSalary.addTextChangedListener { text ->
             val salary = text?.toString()?.toIntOrNull()
             viewModel.updateSalary(salary)
@@ -139,7 +145,20 @@ class FilterFragment : Fragment() {
 
         updateLocationUI(settings.countryName, settings.regionName)
 
+        val hasIndustry = !settings.industryName.isNullOrBlank()
         binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
+        binding.tvIndustryValue.visibility = if (hasIndustry) View.VISIBLE else View.GONE
+
+        updateButtonsVisibility(settings)
+    }
+
+    private fun updateButtonsVisibility(settings: FilterSettings) {
+        val hasFilters = settings.salary != null ||
+            settings.onlyWithSalary ||
+            settings.industryId != null ||
+            settings.countryId != null ||
+            settings.regionId != null
+        binding.btnApply.parent.let { (it as View).visibility = if (hasFilters) View.VISIBLE else View.GONE }
     }
 
     override fun onDestroyView() {
