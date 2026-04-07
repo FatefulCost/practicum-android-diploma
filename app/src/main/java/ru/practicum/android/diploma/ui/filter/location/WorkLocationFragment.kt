@@ -1,10 +1,10 @@
 package ru.practicum.android.diploma.ui.filter.location
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.koin.android.ext.android.inject
@@ -19,6 +19,14 @@ class WorkLocationFragment : Fragment() {
         const val KEY_SELECTED_COUNTRY_NAME = "selected_country_name"
         const val KEY_SELECTED_REGION_ID = "selected_region_id"
         const val KEY_SELECTED_REGION_NAME = "selected_region_name"
+
+        // Константы для размеров шрифта
+        private const val TEXT_SIZE_SMALL_SP = 12f
+        private const val TEXT_SIZE_LARGE_SP = 16f
+
+        // Константы для прозрачности
+        private const val ALPHA_ACTIVE = 1.0f
+        private const val ALPHA_INACTIVE = 0.6f
     }
 
     private var _binding: FragmentWorkLocationBinding? = null
@@ -45,6 +53,7 @@ class WorkLocationFragment : Fragment() {
         loadSavedSelection()
         setupUI()
         observeNavigationResults()
+        updateLocationUI()
     }
 
     private fun setupToolbar() {
@@ -67,13 +76,9 @@ class WorkLocationFragment : Fragment() {
             selectedRegionId = regionId
             selectedRegionName = regionName ?: ""
         }
-
-        updateLocationUI()
     }
 
     private fun setupUI() {
-        updateLocationUI()
-
         // Переход на экран выбора страны
         binding.layoutCountry.setOnClickListener {
             findNavController().navigate(R.id.action_workLocationFragment_to_countrySelectionFragment)
@@ -117,7 +122,6 @@ class WorkLocationFragment : Fragment() {
     }
 
     private fun saveSelectionAndReturn() {
-        // Сохраняем выбор в SharedPreferences
         filterRepository.saveLocation(
             countryId = if (selectedCountryId != -1) selectedCountryId else null,
             countryName = selectedCountryName.takeIf { it.isNotEmpty() },
@@ -125,7 +129,6 @@ class WorkLocationFragment : Fragment() {
             regionName = selectedRegionName.takeIf { it.isNotEmpty() }
         )
 
-        // Отправляем результат в FilterFragment
         parentFragmentManager.setFragmentResult(
             "work_location_selection",
             Bundle().apply {
@@ -141,7 +144,6 @@ class WorkLocationFragment : Fragment() {
     private fun observeNavigationResults() {
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
-        // Обработка выбора страны
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_COUNTRY_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedCountryId = id
@@ -158,7 +160,6 @@ class WorkLocationFragment : Fragment() {
             }
         }
 
-        // Обработка выбора региона
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_REGION_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedRegionId = id
@@ -175,44 +176,53 @@ class WorkLocationFragment : Fragment() {
     }
 
     private fun updateLocationUI() {
-        // Обновляем отображение страны
-        if (selectedCountryName.isNotEmpty() && selectedCountryId != -1) {
+        updateCountryUI()
+        updateRegionUI()
+    }
+
+    private fun updateCountryUI() {
+        val isCountrySelected = selectedCountryName.isNotEmpty() && selectedCountryId != -1
+
+        if (isCountrySelected) {
             // Страна выбрана
-            binding.tvCountryLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
-            binding.tvCountryLabel.alpha = 1.0f
+            binding.tvCountryLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_SMALL_SP)
+            binding.tvCountryLabel.alpha = ALPHA_ACTIVE
             binding.tvCountryValue.text = selectedCountryName
             binding.tvCountryValue.visibility = View.VISIBLE
-            binding.tvCountryValue.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
+            binding.tvCountryValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_LARGE_SP)
             binding.ivCountryArrow.visibility = View.GONE
             binding.ivCountryClear.visibility = View.VISIBLE
         } else {
             // Страна не выбрана
-            binding.tvCountryLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
-            binding.tvCountryLabel.alpha = 0.6f
+            binding.tvCountryLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_LARGE_SP)
+            binding.tvCountryLabel.alpha = ALPHA_INACTIVE
             binding.tvCountryValue.visibility = View.GONE
             binding.ivCountryArrow.visibility = View.VISIBLE
             binding.ivCountryClear.visibility = View.GONE
-            binding.ivCountryArrow.alpha = 0.6f
+            binding.ivCountryArrow.alpha = ALPHA_INACTIVE
         }
+    }
 
-        // Обновляем отображение региона
-        if (selectedRegionName.isNotEmpty() && selectedRegionId != -1) {
+    private fun updateRegionUI() {
+        val isRegionSelected = selectedRegionName.isNotEmpty() && selectedRegionId != -1
+
+        if (isRegionSelected) {
             // Регион выбран
-            binding.tvRegionLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
-            binding.tvRegionLabel.alpha = 1.0f
+            binding.tvRegionLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_SMALL_SP)
+            binding.tvRegionLabel.alpha = ALPHA_ACTIVE
             binding.tvRegionValue.text = selectedRegionName
             binding.tvRegionValue.visibility = View.VISIBLE
-            binding.tvRegionValue.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
+            binding.tvRegionValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_LARGE_SP)
             binding.ivRegionArrow.visibility = View.GONE
             binding.ivRegionClear.visibility = View.VISIBLE
         } else {
             // Регион не выбран
-            binding.tvRegionLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f)
-            binding.tvRegionLabel.alpha = 0.6f
+            binding.tvRegionLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE_LARGE_SP)
+            binding.tvRegionLabel.alpha = ALPHA_INACTIVE
             binding.tvRegionValue.visibility = View.GONE
             binding.ivRegionArrow.visibility = View.VISIBLE
             binding.ivRegionClear.visibility = View.GONE
-            binding.ivRegionArrow.alpha = 0.6f
+            binding.ivRegionArrow.alpha = ALPHA_INACTIVE
         }
     }
 
