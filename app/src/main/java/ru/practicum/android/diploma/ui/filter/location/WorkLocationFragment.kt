@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.koin.android.ext.android.inject
@@ -69,6 +71,10 @@ class WorkLocationFragment : Fragment() {
     }
 
     private fun setupUI() {
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         updateLocationUI()
         updateSelectButtonVisibility()
 
@@ -178,19 +184,67 @@ class WorkLocationFragment : Fragment() {
         }
     }
 
+    /**
+     * Обновляет UI для страны и региона
+     */
     private fun updateLocationUI() {
-        // Отображаем страну
-        binding.tvCountryValue.text = if (selectedCountryName.isNotEmpty()) {
-            selectedCountryName
-        } else {
-            getString(R.string.not_selected)
-        }
+        updateCountryUI()
+        updateRegionUI()
+    }
 
-        // Отображаем регион
-        binding.tvRegionValue.text = if (selectedRegionName.isNotEmpty()) {
-            selectedRegionName
+    /**
+     * Обновляет UI для страны
+     */
+    private fun updateCountryUI() {
+        val hasCountry = selectedCountryName.isNotEmpty()
+
+        // Находим TextView "Страна" внутри layoutCountry
+        val countryTitleView = binding.layoutCountry.findViewById<TextView>(R.id.tvCountryTitle)
+        // Переменная для выбранной страны
+        val countryValue = binding.layoutCountry.findViewById<TextView>(R.id.tvCountryValue)
+
+        if (hasCountry) {
+            // Меняем цвет текста выбранной страны и надписи "Страна" на белый
+            countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            countryValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            // Меняем размер текста "Страна" на 12sp
+            countryTitleView.textSize = 12f
+
+            // Показываем выбранную страну
+            binding.tvCountryValue.text = selectedCountryName
+            binding.tvCountryValue.visibility = View.VISIBLE
         } else {
-            getString(R.string.not_selected)
+            // Возвращаем цвет обратно на серый
+            countryTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+            // Возвращаем размер текста на 16sp
+            countryTitleView.textSize = 16f
+
+            // Скрываем TextView с названием
+            binding.tvCountryValue.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Обновляет UI для региона
+     */
+    private fun updateRegionUI() {
+        val hasRegion = selectedRegionName.isNotEmpty()
+
+        // Такой же подход как и с страной
+        val regionTitleView = binding.layoutRegion.findViewById<TextView>(R.id.tvRegionTitle)
+        val regionValue = binding.layoutRegion.findViewById<TextView>(R.id.tvRegionValue)
+
+        if (hasRegion) {
+            regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_day))
+            regionValue.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_day))
+            regionTitleView.textSize = 12f
+
+            binding.tvRegionValue.text = selectedRegionName
+            binding.tvRegionValue.visibility = View.VISIBLE
+        } else {
+            regionTitleView.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+            regionTitleView.textSize = 16f
+            binding.tvRegionValue.visibility = View.GONE
         }
     }
 
