@@ -1,6 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme -->
-    <style name="Base.Theme.PracticumAndroidDiploma" parent="Theme.Material3.DayNight.NoActionBar"></style>
+    <style name="Base.Theme.PracticumAndroidDiploma" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/backgroundColor</item>
+        <item name="colorOnSurface">@color/text_vacancy_detail</item>
+        <item name="colorSecondary">@color/gray</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
 
     <style name="Theme.PracticumAndroidDiploma" parent="Base.Theme.PracticumAndroidDiploma" />
 </resources>

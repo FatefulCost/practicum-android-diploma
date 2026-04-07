@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import org.koin.android.ext.android.inject
@@ -40,15 +41,19 @@ class WorkLocationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupToolbar()
         loadSavedSelection()
         setupUI()
         observeNavigationResults()
         updateSelectButtonVisibility()
     }
 
-    /**
-     * Загружаем сохраненные настройки из SharedPreferences
-     */
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
     private fun loadSavedSelection() {
         val countryId = filterRepository.loadSavedCountryId()
         val countryName = filterRepository.loadSavedCountryName()
@@ -79,14 +84,36 @@ class WorkLocationFragment : Fragment() {
 
         // Переход на экран выбора региона
         binding.layoutRegion.setOnClickListener {
-            val bundle = Bundle().apply {
-                putInt("selected_country_id", selectedCountryId)
-                putString("selected_country_name", selectedCountryName)
+            if (selectedCountryId != -1) {
+                val bundle = Bundle().apply {
+                    putInt("selected_country_id", selectedCountryId)
+                    putString("selected_country_name", selectedCountryName)
+                }
+                findNavController().navigate(
+                    R.id.action_workLocationFragment_to_regionSelectionFragment,
+                    bundle
+                )
             }
-            findNavController().navigate(
-                R.id.action_workLocationFragment_to_regionSelectionFragment,
-                bundle
-            )
+        }
+
+        // Очистка выбора страны
+        binding.ivCountryClear.setOnClickListener {
+            selectedCountryId = -1
+            selectedCountryName = ""
+            selectedRegionId = -1
+            selectedRegionName = ""
+            updateLocationUI()
+            updateSelectButtonVisibility()
+            saveSelectionAndReturn()
+        }
+
+        // Очистка выбора региона
+        binding.ivRegionClear.setOnClickListener {
+            selectedRegionId = -1
+            selectedRegionName = ""
+            updateLocationUI()
+            updateSelectButtonVisibility()
+            saveSelectionAndReturn()
         }
 
         binding.btnSelect.setOnClickListener {
@@ -94,9 +121,6 @@ class WorkLocationFragment : Fragment() {
         }
     }
 
-    /**
-     * Кнопка "Выбрать" видна, если есть выбранная страна ИЛИ регион
-     */
     private fun updateSelectButtonVisibility() {
         val hasSelection = selectedCountryId != -1 || selectedRegionId != -1
         binding.btnSelect.visibility = if (hasSelection) View.VISIBLE else View.GONE
@@ -145,7 +169,7 @@ class WorkLocationFragment : Fragment() {
             }
         }
 
-        // Обработка выбора региона (автоматически выбирает страну)
+        // Обработка выбора региона
         savedStateHandle?.getLiveData<Int>(KEY_SELECTED_REGION_ID)?.observe(viewLifecycleOwner) { id ->
             if (id != null && id != -1) {
                 selectedRegionId = id
@@ -160,37 +184,35 @@ class WorkLocationFragment : Fragment() {
                 updateLocationUI()
             }
         }
-
-        // Обработка случая, когда регион выбрал страну автоматически
-        savedStateHandle?.getLiveData<Int>("auto_selected_country_id")?.observe(viewLifecycleOwner) { id ->
-            if (id != null && id != -1 && selectedCountryId == -1) {
-                selectedCountryId = id
-                updateLocationUI()
-                updateSelectButtonVisibility()
-            }
-        }
-
-        savedStateHandle?.getLiveData<String>("auto_selected_country_name")?.observe(viewLifecycleOwner) { name ->
-            if (!name.isNullOrEmpty() && selectedCountryName.isEmpty()) {
-                selectedCountryName = name
-                updateLocationUI()
-            }
-        }
     }
 
     private fun updateLocationUI() {
-        // Отображаем страну
-        binding.tvCountryValue.text = if (selectedCountryName.isNotEmpty()) {
-            selectedCountryName
+        // Обновляем отображение страны
+        if (selectedCountryName.isNotEmpty() && selectedCountryId != -1) {
+            binding.tvCountryLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_day))
+            binding.tvCountryValue.text = selectedCountryName
+            binding.tvCountryValue.visibility = View.VISIBLE
+            binding.ivCountryArrow.visibility = View.GONE
+            binding.ivCountryClear.visibility = View.VISIBLE
         } else {
-            getString(R.string.not_selected)
+            binding.tvCountryLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+            binding.tvCountryValue.visibility = View.VISIBLE
+            binding.ivCountryArrow.visibility = View.VISIBLE
+            binding.ivCountryClear.visibility = View.GONE
         }
 
-        // Отображаем регион
-        binding.tvRegionValue.text = if (selectedRegionName.isNotEmpty()) {
-            selectedRegionName
+        // Обновляем отображение региона
+        if (selectedRegionName.isNotEmpty() && selectedRegionId != -1) {
+            binding.tvRegionLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_day))
+            binding.tvRegionValue.text = selectedRegionName
+            binding.tvRegionValue.visibility = View.VISIBLE
+            binding.ivRegionArrow.visibility = View.GONE
+            binding.ivRegionClear.visibility = View.VISIBLE
         } else {
-            getString(R.string.not_selected)
+            binding.tvRegionLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+            binding.tvRegionValue.visibility = View.VISIBLE
+            binding.ivRegionArrow.visibility = View.VISIBLE
+            binding.ivRegionClear.visibility = View.GONE
         }
     }
 
