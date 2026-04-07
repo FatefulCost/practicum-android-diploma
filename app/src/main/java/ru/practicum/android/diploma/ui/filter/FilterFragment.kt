@@ -70,6 +70,16 @@ class FilterFragment : Fragment() {
 
             // обновляем UI (без ожидания обсервера)
             updateLocationUI(countryName, regionName)
+
+            // Обновляем видимость иконок
+            val hasWorkLocation = !countryName.isNullOrBlank() || !regionName.isNullOrBlank()
+            if (hasWorkLocation) {
+                binding.ivWorkLocationChevron.visibility = View.GONE
+                binding.ivWorkLocationClear.visibility = View.VISIBLE
+            } else {
+                binding.ivWorkLocationChevron.visibility = View.VISIBLE
+                binding.ivWorkLocationClear.visibility = View.GONE
+            }
         }
     }
 
@@ -122,6 +132,31 @@ class FilterFragment : Fragment() {
         binding.layoutIndustry.setOnClickListener {
             findNavController().navigate(R.id.action_filterFragment_to_industrySelectionFragment)
         }
+
+        // Очистка отрасли
+        binding.ivIndustryClear.setOnClickListener {
+            viewModel.updateIndustry(null, null)
+            binding.tvIndustryValue.text = getString(R.string.not_selected)
+            binding.tvIndustryValue.visibility = View.GONE
+            binding.ivIndustryChevron.visibility = View.VISIBLE
+            binding.ivIndustryClear.visibility = View.GONE
+        }
+
+        binding.ivWorkLocationClear.setOnClickListener {
+            clearWorkLocation()
+        }
+
+    }
+
+    /**
+     * Очистка выбранного места работы
+     */
+    private fun clearWorkLocation() {
+        viewModel.updateLocation(null, null, null, null)
+        binding.tvWorkLocationValue.text = getString(R.string.not_selected)
+        binding.tvWorkLocationValue.visibility = View.GONE
+        binding.ivWorkLocationChevron.visibility = View.VISIBLE
+        binding.ivWorkLocationClear.visibility = View.GONE
     }
 
     private fun observeViewModel() {
@@ -145,9 +180,28 @@ class FilterFragment : Fragment() {
 
         updateLocationUI(settings.countryName, settings.regionName)
 
+        // Обновляем видимость иконок для места работы
+        val hasWorkLocation = !settings.countryName.isNullOrBlank() || !settings.regionName.isNullOrBlank()
+        if (hasWorkLocation) {
+            binding.ivWorkLocationChevron.visibility = View.GONE
+            binding.ivWorkLocationClear.visibility = View.VISIBLE
+        } else {
+            binding.ivWorkLocationChevron.visibility = View.VISIBLE
+            binding.ivWorkLocationClear.visibility = View.GONE
+        }
+
         val hasIndustry = !settings.industryName.isNullOrBlank()
         binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
         binding.tvIndustryValue.visibility = if (hasIndustry) View.VISIBLE else View.GONE
+
+        // Обновляем видимость иконок для отрасли
+        if (hasIndustry) {
+            binding.ivIndustryChevron.visibility = View.GONE
+            binding.ivIndustryClear.visibility = View.VISIBLE
+        } else {
+            binding.ivIndustryChevron.visibility = View.VISIBLE
+            binding.ivIndustryClear.visibility = View.GONE
+        }
 
         updateButtonsVisibility(settings)
     }

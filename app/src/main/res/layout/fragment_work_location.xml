@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ivChevron"
+            app:layout_constraintEnd_toStartOf="@+id/iconContainerCountry"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -63,14 +63,33 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ivChevron"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/arrow_forward_24px"
+        <FrameLayout
+            android:id="@+id/iconContainerCountry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Стрелка (видна когда ничего не выбрано) -->
+            <ImageView
+                android:id="@+id/ivCountryChevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward_24px"
+                android:visibility="visible" />
+
+            <!-- Крестик (виден когда выбрана страна) -->
+            <ImageView
+                android:id="@+id/ivCountryClear"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/close_24px"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -92,7 +111,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ivChevronSecond"
+            app:layout_constraintEnd_toStartOf="@+id/iconContainerRegion"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -118,14 +137,33 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ivChevronSecond"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/arrow_forward_24px"
+        <FrameLayout
+            android:id="@+id/iconContainerRegion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Стрелка (видна когда ничего не выбрано) -->
+            <ImageView
+                android:id="@+id/ivRegionChevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/arrow_forward_24px"
+                android:visibility="visible" />
+
+            <!-- Крестик (виден когда выбран регион) -->
+            <ImageView
+                android:id="@+id/ivRegionClear"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/close_24px"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
