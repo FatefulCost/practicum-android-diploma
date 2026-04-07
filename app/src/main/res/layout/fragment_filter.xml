@@ -197,18 +197,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApply"
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_weight="1"
+            android:fontFamily="@font/ys_display_medium"
             android:text="@string/apply"
             android:textColor="@color/white"
-            android:fontFamily="@font/ys_display_medium"
-            app:cornerRadius="12dp"
-            app:backgroundTint="@color/blue"/>
+            app:backgroundTint="@color/blue"
+            app:cornerRadius="12dp" />
 
 
         <com.google.android.material.button.MaterialButton
@@ -216,10 +218,10 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_weight="1"
-            android:text="@string/reset"
-            android:textColor="@color/red"
+            android:background="@android:color/transparent"
             android:fontFamily="@font/ys_display_medium"
-            android:background="@android:color/transparent"/>
+            android:text="@string/reset"
+            android:textColor="@color/red" />
 
     </LinearLayout>
 
