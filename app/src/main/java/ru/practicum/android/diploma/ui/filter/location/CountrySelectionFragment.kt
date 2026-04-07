@@ -52,6 +52,12 @@ class CountrySelectionFragment : Fragment() {
             findNavController().previousBackStackEntry
                 ?.savedStateHandle
                 ?.set(WorkLocationFragment.KEY_SELECTED_COUNTRY_NAME, country.name)
+            findNavController().previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_ID, -1)
+            findNavController().previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(WorkLocationFragment.KEY_SELECTED_REGION_NAME, "")
             findNavController().popBackStack()
         }
 

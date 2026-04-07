@@ -109,11 +109,13 @@ class SearchViewModel(
             _searchState.value = SearchState.LoadingMore
         }
 
+        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
+
         viewModelScope.launch {
             val result = repository.searchVacancies(
                 text = query,
                 page = page,
-                area = filterRepository.loadSavedRegionId(),
+                area = areaId,
                 salary = filterSettings?.salary,
                 industry = filterSettings?.industryId,
                 onlyWithSalary = filterSettings?.onlyWithSalary ?: false

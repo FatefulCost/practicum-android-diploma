@@ -21,10 +21,9 @@
 
     <ImageView
         android:id="@+id/fabFilter"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:src="@drawable/ic_filter"
-        android:padding="12dp"
         android:clickable="true"
         android:focusable="true"
         android:layout_marginTop="10dp"
