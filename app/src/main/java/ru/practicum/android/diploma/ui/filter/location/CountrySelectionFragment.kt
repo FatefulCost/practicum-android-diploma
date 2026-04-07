@@ -64,12 +64,6 @@ class CountrySelectionFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@CountrySelectionFragment.adapter
-            addItemDecoration(
-                androidx.recyclerview.widget.DividerItemDecoration(
-                    requireContext(),
-                    LinearLayoutManager.VERTICAL
-                )
-            )
         }
     }
 
