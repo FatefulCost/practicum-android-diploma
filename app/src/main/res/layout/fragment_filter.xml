@@ -173,7 +173,6 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/close_24px"
                 android:visibility="gone"
-                app:tint="@color/filter_icon"
                 tools:visibility="visible" />
 
         </LinearLayout>
