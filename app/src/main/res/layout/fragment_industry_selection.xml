@@ -12,6 +12,7 @@
         android:layout_height="64dp"
         android:background="@color/backgroundColor"
         android:paddingStart="4dp"
+        android:fontFamily="@font/ys_display_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -43,6 +44,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="44dp"
             android:textColor="@color/text_edit"
+            android:fontFamily="@font/ys_display_regular"
             android:textColorHint="@color/text_hint"
             android:textSize="16sp" />
 
@@ -113,7 +115,8 @@
             android:text="@string/industry_list_error"
             android:textColor="@color/title_color"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
@@ -145,7 +148,8 @@
             android:text="@string/industry_not_found"
             android:textColor="@color/title_color"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 
@@ -161,6 +165,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:fontFamily="@font/ys_display_medium"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

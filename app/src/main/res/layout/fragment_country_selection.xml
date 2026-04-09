@@ -16,6 +16,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="@string/select_country"
+        app:titleTextColor="@color/title_color"
+        android:fontFamily="@font/ys_display_medium"
         app:titleTextAppearance="@style/TopBarTitleStyle" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -68,6 +70,7 @@
             android:textColor="@color/black_day"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:fontFamily="@font/ys_display_medium"
             android:gravity="center" />
 
     </LinearLayout>
@@ -100,7 +103,8 @@
             android:textColor="@color/black_day"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            android:fontFamily="@font/ys_display_medium"/>
 
     </LinearLayout>
 

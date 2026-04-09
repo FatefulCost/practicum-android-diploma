@@ -87,12 +87,12 @@ class SearchViewModel(
     }
 
     private fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
-        if (query.isBlank()) {
-            _searchState.value = SearchState.Empty
-            return
-        }
+        // Проверяем все условия в начале
+        val isValidQuery = query.isNotBlank()
+        val canPerformSearch = isValidQuery && !isLoading
 
-        if (isLoading) return
+        if (!canPerformSearch) return
+
         isLoading = true
 
         if (!networkUtils.isNetworkAvailable()) {
@@ -203,14 +203,14 @@ class SearchViewModel(
 sealed class SearchState {
     object Empty : SearchState()
     object Loading : SearchState()
-    object LoadingMore : SearchState()        // Дозагрузка
+    object LoadingMore : SearchState() // Дозагрузка
     object EmptyResult : SearchState()
     data class Success(
         val vacancies: List<VacancyDetailDto>,
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState()  // Ошибка при дозагрузке
+    data class LoadMoreError(val message: String) : SearchState() // Ошибка при дозагрузке
     data class Error(val error: ErrorType) : SearchState()
 }
 
