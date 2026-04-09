@@ -18,6 +18,7 @@
         app:titleTextAppearance="@style/TopBarTitleStyleFilter" />
 
     <!-- Место работы -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutWorkLocation"
         android:layout_width="match_parent"
@@ -32,7 +33,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/iconContainerWorkLocation"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -56,35 +56,16 @@
                 android:visibility="gone"/>
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/iconContainerWorkLocation"
+        <!-- Кнопка/Иконка справа -->
+        <ImageView
+            android:id="@+id/ivWorkLocationIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_forward_go"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Стрелка (видна когда ничего не выбрано) -->
-            <ImageView
-                android:id="@+id/ivWorkLocationChevron"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_arrow_forward_go"
-                app:tint="@color/filter_icon"
-                android:visibility="visible" />
-
-            <!-- Крестик (виден когда выбрано место работы) -->
-            <ImageView
-                android:id="@+id/ivWorkLocationClear"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/close_24px"
-                app:tint="@color/filter_icon"
-                android:visibility="gone"
-                android:clickable="true"
-                android:focusable="true" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/filter_icon"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -104,7 +85,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/iconContainerIndustry"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -128,35 +108,16 @@
                 android:visibility="gone"/>
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/iconContainerIndustry"
+        <!-- Кнопка/Иконка справа -->
+        <ImageView
+            android:id="@+id/ivIndustryIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_forward_go"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Стрелка (видна когда ничего не выбрано) -->
-            <ImageView
-                android:id="@+id/ivIndustryChevron"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_arrow_forward_go"
-                app:tint="@color/filter_icon"
-                android:visibility="visible" />
-
-            <!-- Крестик (виден когда выбрана отрасль) -->
-            <ImageView
-                android:id="@+id/ivIndustryClear"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/close_24px"
-                app:tint="@color/filter_icon"
-                android:visibility="gone"
-                android:clickable="true"
-                android:focusable="true" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/filter_icon"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -175,6 +136,7 @@
 
         <!-- Заголовок сверху -->
         <TextView
+            android:id="@+id/tvSalaryHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ожидаемая зарплата"
@@ -182,18 +144,38 @@
             android:textSize="12sp"
             android:fontFamily="@font/ys_display_regular"/>
 
-        <!-- Поле ввода без стандартной линии снизу -->
-        <EditText
-            android:id="@+id/etSalary"
+        <!-- Поле ввода и крестик -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:hint="Введите сумму"
-            android:inputType="number"
-            android:textColor="@color/black"
-            android:textColorHint="@color/text_hint"
-            android:textSize="16sp"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Поле ввода без стандартной линии снизу -->
+            <EditText
+                android:id="@+id/etSalary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="Введите сумму"
+                android:inputType="number"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="16sp"
+                android:fontFamily="@font/ys_display_regular"/>
+
+            <!-- Крестик для очистки -->
+            <ImageView
+                android:id="@+id/ivSalaryClear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/close_24px"
+                android:visibility="gone"
+                app:tint="@color/filter_icon"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
 
     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -219,7 +201,10 @@
             android:id="@+id/cbHideWithoutSalary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="@color/blue" />
+            android:button="@drawable/checkbox_blue"
+            app:buttonTint="@null"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
