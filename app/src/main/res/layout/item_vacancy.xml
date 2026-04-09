@@ -42,8 +42,7 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:maxLines="3"
-            android:ellipsize="end"
-            android:fontFamily="@font/ys_display_medium"/>
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/tvCompanyName"
@@ -53,8 +52,7 @@
             android:textColor="@color/vacancy_in_search"
             android:textSize="16sp"
             android:maxLines="1"
-            android:ellipsize="end"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/tvSalary"
@@ -62,8 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/vacancy_in_search"
-            android:textSize="16sp"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:textSize="16sp" />
 
     </LinearLayout>
 
