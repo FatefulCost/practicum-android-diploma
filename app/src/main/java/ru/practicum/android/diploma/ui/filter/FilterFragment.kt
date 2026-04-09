@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -62,7 +60,6 @@ class FilterFragment : Fragment() {
             val countryName = bundle.getString("country_name")
             val regionId = bundle.getInt("region_id", -1)
             val regionName = bundle.getString("region_name")
-            viewModel.updateLocation(countryId, countryName, regionId, regionName)
 
             viewModel.updateLocation(
                 if (countryId != -1) countryId else null,
@@ -149,6 +146,11 @@ class FilterFragment : Fragment() {
             clearWorkLocation()
         }
 
+        binding.ivSalaryClear.setOnClickListener {
+            binding.etSalary.setText("")
+            viewModel.updateSalary(null)
+        }
+
     }
 
     /**
@@ -160,27 +162,6 @@ class FilterFragment : Fragment() {
         binding.tvWorkLocationValue.visibility = View.GONE
         binding.ivWorkLocationChevron.visibility = View.VISIBLE
         binding.ivWorkLocationClear.visibility = View.GONE
-
-        binding.ivWorkLocationIcon.setOnClickListener {
-            if (binding.tvWorkLocationValue.isVisible) {
-                viewModel.updateLocation(null, null, null, null)
-                binding.tvWorkLocationValue.visibility = View.GONE
-                updateWorkLocationIcon(false)
-            }
-        }
-
-        binding.ivIndustryIcon.setOnClickListener {
-            if (binding.tvIndustryValue.isVisible) {
-                viewModel.updateIndustry(null, null)
-                binding.tvIndustryValue.visibility = View.GONE
-                updateIndustryIcon(false)
-            }
-        }
-
-        binding.ivSalaryClear.setOnClickListener {
-            binding.etSalary.setText("")
-            viewModel.updateSalary(null)
-        }
     }
 
     private fun observeViewModel() {
@@ -228,23 +209,7 @@ class FilterFragment : Fragment() {
             binding.ivIndustryClear.visibility = View.GONE
         }
 
-        val hasLocation = !settings.countryName.isNullOrBlank() || !settings.regionName.isNullOrBlank()
-        updateWorkLocationIcon(hasLocation)
-        updateIndustryIcon(hasIndustry)
-
         updateButtonsVisibility(settings)
-    }
-
-    private fun updateWorkLocationIcon(hasLocation: Boolean) {
-        binding.ivWorkLocationIcon.setImageResource(
-            if (hasLocation) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
-        )
-    }
-
-    private fun updateIndustryIcon(hasIndustry: Boolean) {
-        binding.ivIndustryIcon.setImageResource(
-            if (hasIndustry) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
-        )
     }
 
     private fun updateButtonsVisibility(settings: FilterSettings) {
