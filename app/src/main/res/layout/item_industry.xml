@@ -16,12 +16,20 @@
         android:layout_height="wrap_content"
         android:textColor="@color/title_color"
         android:textSize="16sp"
-        android:fontFamily="@font/ys_display_regular"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ivCheck"
+        app:layout_constraintEnd_toStartOf="@+id/ivChevron"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/ivChevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_arrow_forward"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/backgroundColor" />
 
     <ImageView
         android:id="@+id/ivCheck"

@@ -6,10 +6,9 @@ import java.util.Locale
 
 object SalaryFormatter {
 
-    private const val SALARY_NOT_SPECIFIED = "Зарплата не указана"
-
+    // Превращает объект Salary в читаемую строку
     fun format(salary: SalaryDto?): String {
-        if (salary == null) return SALARY_NOT_SPECIFIED
+        if (salary == null) return "Зарплата не указана"
 
         val from = salary.from
         val to = salary.to
@@ -19,7 +18,7 @@ object SalaryFormatter {
             from != null && to != null -> "от ${formatNumber(from)} до ${formatNumber(to)} $currency"
             from != null -> "от ${formatNumber(from)} $currency"
             to != null -> "до ${formatNumber(to)} $currency"
-            else -> SALARY_NOT_SPECIFIED
+            else -> "Зарплата не указана"
         }
     }
 
@@ -29,7 +28,7 @@ object SalaryFormatter {
             from != null && to != null -> "от ${formatNumber(from)} до ${formatNumber(to)} $cur"
             from != null -> "от ${formatNumber(from)} $cur"
             to != null -> "до ${formatNumber(to)} $cur"
-            else -> SALARY_NOT_SPECIFIED
+            else -> "Зарплата не указана"
         }
     }
 
