@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -122,6 +125,27 @@ class FilterFragment : Fragment() {
         binding.layoutIndustry.setOnClickListener {
             findNavController().navigate(R.id.action_filterFragment_to_industrySelectionFragment)
         }
+
+        binding.ivWorkLocationIcon.setOnClickListener {
+            if (binding.tvWorkLocationValue.isVisible) {
+                viewModel.updateLocation(null, null, null, null)
+                binding.tvWorkLocationValue.visibility = View.GONE
+                updateWorkLocationIcon(false)
+            }
+        }
+
+        binding.ivIndustryIcon.setOnClickListener {
+            if (binding.tvIndustryValue.isVisible) {
+                viewModel.updateIndustry(null, null)
+                binding.tvIndustryValue.visibility = View.GONE
+                updateIndustryIcon(false)
+            }
+        }
+
+        binding.ivSalaryClear.setOnClickListener {
+            binding.etSalary.setText("")
+            viewModel.updateSalary(null)
+        }
     }
 
     private fun observeViewModel() {
@@ -138,6 +162,7 @@ class FilterFragment : Fragment() {
         if (binding.etSalary.text?.toString() != settings.salary?.toString()) {
             binding.etSalary.setText(settings.salary?.toString() ?: "")
         }
+        binding.ivSalaryClear.isVisible = !binding.etSalary.text.isNullOrEmpty()
 
         if (binding.cbHideWithoutSalary.isChecked != settings.onlyWithSalary) {
             binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
@@ -149,7 +174,23 @@ class FilterFragment : Fragment() {
         binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
         binding.tvIndustryValue.visibility = if (hasIndustry) View.VISIBLE else View.GONE
 
+        val hasLocation = !settings.countryName.isNullOrBlank() || !settings.regionName.isNullOrBlank()
+        updateWorkLocationIcon(hasLocation)
+        updateIndustryIcon(hasIndustry)
+
         updateButtonsVisibility(settings)
+    }
+
+    private fun updateWorkLocationIcon(hasLocation: Boolean) {
+        binding.ivWorkLocationIcon.setImageResource(
+            if (hasLocation) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
+        )
+    }
+
+    private fun updateIndustryIcon(hasIndustry: Boolean) {
+        binding.ivIndustryIcon.setImageResource(
+            if (hasIndustry) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
+        )
     }
 
     private fun updateButtonsVisibility(settings: FilterSettings) {
