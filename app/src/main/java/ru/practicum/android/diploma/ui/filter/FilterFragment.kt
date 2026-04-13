@@ -95,9 +95,13 @@ class FilterFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        binding.etSalary.filters = arrayOf(android.text.InputFilter.LengthFilter(10))
+        binding.etSalary.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+
         binding.etSalary.addTextChangedListener { text ->
             val salary = text?.toString()?.toIntOrNull()
             viewModel.updateSalary(salary)
+            binding.ivSalaryClear.isVisible = !text.isNullOrEmpty()
         }
 
         binding.etSalary.setOnEditorActionListener { _, actionId, _ ->
