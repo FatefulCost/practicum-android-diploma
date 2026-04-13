@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -105,7 +104,9 @@ class FilterFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 binding.etSalary.clearFocus()
                 true
-            } else false
+            } else {
+                false
+            }
         }
 
         binding.cbHideWithoutSalary.setOnCheckedChangeListener { _, isChecked ->
