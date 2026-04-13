@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -70,16 +72,6 @@ class FilterFragment : Fragment() {
 
             // обновляем UI (без ожидания обсервера)
             updateLocationUI(countryName, regionName)
-
-            // Обновляем видимость иконок
-            val hasWorkLocation = !countryName.isNullOrBlank() || !regionName.isNullOrBlank()
-            if (hasWorkLocation) {
-                binding.ivWorkLocationChevron.visibility = View.GONE
-                binding.ivWorkLocationClear.visibility = View.VISIBLE
-            } else {
-                binding.ivWorkLocationChevron.visibility = View.VISIBLE
-                binding.ivWorkLocationClear.visibility = View.GONE
-            }
         }
     }
 
@@ -108,6 +100,15 @@ class FilterFragment : Fragment() {
             viewModel.updateSalary(salary)
         }
 
+        binding.etSalary.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.etSalary.clearFocus()
+                true
+            } else {
+                false
+            }
+        }
+
         binding.cbHideWithoutSalary.setOnCheckedChangeListener { _, isChecked ->
             viewModel.updateOnlyWithSalary(isChecked)
         }
@@ -133,30 +134,26 @@ class FilterFragment : Fragment() {
             findNavController().navigate(R.id.action_filterFragment_to_industrySelectionFragment)
         }
 
-        // Очистка отрасли
-        binding.ivIndustryClear.setOnClickListener {
-            viewModel.updateIndustry(null, null)
-            binding.tvIndustryValue.text = getString(R.string.not_selected)
-            binding.tvIndustryValue.visibility = View.GONE
-            binding.ivIndustryChevron.visibility = View.VISIBLE
-            binding.ivIndustryClear.visibility = View.GONE
+        binding.ivWorkLocationIcon.setOnClickListener {
+            if (binding.tvWorkLocationValue.isVisible) {
+                viewModel.updateLocation(null, null, null, null)
+                binding.tvWorkLocationValue.visibility = View.GONE
+                updateWorkLocationIcon(false)
+            }
         }
 
-        binding.ivWorkLocationClear.setOnClickListener {
-            clearWorkLocation()
+        binding.ivIndustryIcon.setOnClickListener {
+            if (binding.tvIndustryValue.isVisible) {
+                viewModel.updateIndustry(null, null)
+                binding.tvIndustryValue.visibility = View.GONE
+                updateIndustryIcon(false)
+            }
         }
 
-    }
-
-    /**
-     * Очистка выбранного места работы
-     */
-    private fun clearWorkLocation() {
-        viewModel.updateLocation(null, null, null, null)
-        binding.tvWorkLocationValue.text = getString(R.string.not_selected)
-        binding.tvWorkLocationValue.visibility = View.GONE
-        binding.ivWorkLocationChevron.visibility = View.VISIBLE
-        binding.ivWorkLocationClear.visibility = View.GONE
+        binding.ivSalaryClear.setOnClickListener {
+            binding.etSalary.setText("")
+            viewModel.updateSalary(null)
+        }
     }
 
     private fun observeViewModel() {
@@ -173,6 +170,7 @@ class FilterFragment : Fragment() {
         if (binding.etSalary.text?.toString() != settings.salary?.toString()) {
             binding.etSalary.setText(settings.salary?.toString() ?: "")
         }
+        binding.ivSalaryClear.isVisible = !binding.etSalary.text.isNullOrEmpty()
 
         if (binding.cbHideWithoutSalary.isChecked != settings.onlyWithSalary) {
             binding.cbHideWithoutSalary.isChecked = settings.onlyWithSalary
@@ -180,39 +178,32 @@ class FilterFragment : Fragment() {
 
         updateLocationUI(settings.countryName, settings.regionName)
 
-        // Обновляем видимость иконок для места работы
-        val hasWorkLocation = !settings.countryName.isNullOrBlank() || !settings.regionName.isNullOrBlank()
-        if (hasWorkLocation) {
-            binding.ivWorkLocationChevron.visibility = View.GONE
-            binding.ivWorkLocationClear.visibility = View.VISIBLE
-        } else {
-            binding.ivWorkLocationChevron.visibility = View.VISIBLE
-            binding.ivWorkLocationClear.visibility = View.GONE
-        }
-
         val hasIndustry = !settings.industryName.isNullOrBlank()
         binding.tvIndustryValue.text = settings.industryName ?: getString(NOT_SELECTED)
         binding.tvIndustryValue.visibility = if (hasIndustry) View.VISIBLE else View.GONE
 
-        // Обновляем видимость иконок для отрасли
-        if (hasIndustry) {
-            binding.ivIndustryChevron.visibility = View.GONE
-            binding.ivIndustryClear.visibility = View.VISIBLE
-        } else {
-            binding.ivIndustryChevron.visibility = View.VISIBLE
-            binding.ivIndustryClear.visibility = View.GONE
-        }
+        val hasLocation = !settings.countryName.isNullOrBlank() || !settings.regionName.isNullOrBlank()
+        updateWorkLocationIcon(hasLocation)
+        updateIndustryIcon(hasIndustry)
 
         updateButtonsVisibility(settings)
     }
 
+    private fun updateWorkLocationIcon(hasLocation: Boolean) {
+        binding.ivWorkLocationIcon.setImageResource(
+            if (hasLocation) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
+        )
+    }
+
+    private fun updateIndustryIcon(hasIndustry: Boolean) {
+        binding.ivIndustryIcon.setImageResource(
+            if (hasIndustry) R.drawable.close_24px else R.drawable.ic_arrow_forward_go
+        )
+    }
+
     private fun updateButtonsVisibility(settings: FilterSettings) {
-        val hasFilters = settings.salary != null ||
-            settings.onlyWithSalary ||
-            settings.industryId != null ||
-            settings.countryId != null ||
-            settings.regionId != null
-        binding.btnApply.parent.let { (it as View).visibility = if (hasFilters) View.VISIBLE else View.GONE }
+        val hasChanges = viewModel.isSettingsChanged()
+        binding.btnApply.parent.let { (it as View).visibility = if (hasChanges) View.VISIBLE else View.GONE }
     }
 
     override fun onDestroyView() {
