@@ -170,7 +170,7 @@ class SearchFragment : Fragment() {
         val iconRes = if (text.isNullOrEmpty()) {
             R.drawable.search_24px
         } else {
-            R.drawable.close_24px_for_edit_text
+            R.drawable.close_24px_for_edit_text //коммент для коммита
         }
         binding.editTextSearch.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, iconRes, 0)
     }
