@@ -76,7 +76,6 @@ class SearchFragment : Fragment() {
         shouldRestoreSearchState = true
     }
 
-
     private fun updateFilterIconState() {
         viewModel.refreshFilterState()
     }

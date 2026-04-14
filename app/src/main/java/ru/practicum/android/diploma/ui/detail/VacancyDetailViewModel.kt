@@ -10,7 +10,15 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import ru.practicum.android.diploma.data.dto.*
+import ru.practicum.android.diploma.data.database.VacancyEntity
+import ru.practicum.android.diploma.data.dto.ContactsDto
+import ru.practicum.android.diploma.data.dto.EmployerDto
+import ru.practicum.android.diploma.data.dto.EmploymentDto
+import ru.practicum.android.diploma.data.dto.ExperienceDto
+import ru.practicum.android.diploma.data.dto.FilterAreaDto
+import ru.practicum.android.diploma.data.dto.SalaryDto
+import ru.practicum.android.diploma.data.dto.ScheduleDto
+import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -64,44 +72,7 @@ class VacancyDetailViewModel(
             val favorite = favorites.find { it.id == vacancyId }
 
             if (favorite != null) {
-                // Восстанавливаем список навыков из JSON
-                val skills: List<String>? = favorite.skillsJson?.let {
-                    val type = object : TypeToken<List<String>>() {}.type
-                    gson.fromJson(it, type)
-                }
-
-                // Восстанавливаем контакты
-                val contacts = if (favorite.contactsName != null ||
-                    favorite.contactsEmail != null ||
-                    favorite.contactsPhone != null) {
-                    ContactsDto(
-                        id = null,
-                        name = favorite.contactsName,
-                        email = favorite.contactsEmail,
-                        phone = favorite.contactsPhone?.let { listOf(it) }
-                    )
-                } else null
-
-                // Создаем полный DTO из данных БД
-                val cachedVacancy = VacancyDetailDto(
-                    id = favorite.id,
-                    name = favorite.name,
-                    description = favorite.description,
-                    salary = if (favorite.salaryFrom != null || favorite.salaryTo != null) {
-                        SalaryDto(favorite.salaryFrom, favorite.salaryTo, favorite.salaryCurrency)
-                    } else null,
-                    address = null,
-                    experience = favorite.experienceName?.let { ExperienceDto("", it) },
-                    schedule = favorite.scheduleName?.let { ScheduleDto("", it) },
-                    employment = favorite.employmentName?.let { EmploymentDto("", it) },
-                    contacts = contacts,
-                    employer = EmployerDto("", favorite.employerName, favorite.employerLogo),
-                    area = FilterAreaDto(0, favorite.areaName, null, null),
-                    skills = skills,
-                    url = favorite.vacancyUrl,
-                    industry = null
-                )
-
+                val cachedVacancy = buildVacancyDetailDtoFromEntity(favorite)
                 currentVacancy = cachedVacancy
                 _vacancyState.value = VacancyDetailState.Success(cachedVacancy)
                 checkFavoriteStatus(vacancyId)
@@ -110,6 +81,61 @@ class VacancyDetailViewModel(
             }
         }
     }
+
+    private fun buildVacancyDetailDtoFromEntity(favorite: VacancyEntity): VacancyDetailDto {
+        val skills = restoreSkillsFromJson(favorite.skillsJson)
+        val contacts = buildContactsFromEntity(favorite)
+
+        return VacancyDetailDto(
+            id = favorite.id,
+            name = favorite.name,
+            description = favorite.description,
+            salary = buildSalaryFromEntity(favorite),
+            address = null,
+            experience = favorite.experienceName?.let { ExperienceDto("", it) },
+            schedule = favorite.scheduleName?.let { ScheduleDto("", it) },
+            employment = favorite.employmentName?.let { EmploymentDto("", it) },
+            contacts = contacts,
+            employer = EmployerDto("", favorite.employerName, favorite.employerLogo),
+            area = FilterAreaDto(0, favorite.areaName, null, null),
+            skills = skills,
+            url = favorite.vacancyUrl,
+            industry = null
+        )
+    }
+
+    private fun restoreSkillsFromJson(skillsJson: String?): List<String>? {
+        return skillsJson?.let {
+            val type = object : TypeToken<List<String>>() {}.type
+            gson.fromJson(it, type)
+        }
+    }
+
+    private fun buildSalaryFromEntity(favorite: VacancyEntity): SalaryDto? {
+        return if (favorite.salaryFrom != null || favorite.salaryTo != null) {
+            SalaryDto(favorite.salaryFrom, favorite.salaryTo, favorite.salaryCurrency)
+        } else {
+            null
+        }
+    }
+
+    private fun buildContactsFromEntity(favorite: VacancyEntity): ContactsDto? {
+        val hasContacts = favorite.contactsName != null ||
+            favorite.contactsEmail != null ||
+            favorite.contactsPhone != null
+
+        return if (hasContacts) {
+            ContactsDto(
+                id = null,
+                name = favorite.contactsName,
+                email = favorite.contactsEmail,
+                phone = favorite.contactsPhone?.let { listOf(it) }
+            )
+        } else {
+            null
+        }
+    }
+
 
     private fun classifyError(error: Throwable): VacancyDetailState.Error {
         return when (error) {

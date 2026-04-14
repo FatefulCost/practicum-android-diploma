@@ -81,14 +81,17 @@ class SearchViewModel(
     }
 
     fun loadNextPage() {
-        // Не загружаем следующую страницу, если:
-        // - уже идет загрузка
-        // - это последняя страница
-        // - нет поискового запроса
-        // - текущий список пуст (нет данных для продолжения)
-        if (isLoading || isLastPage || currentQuery.isBlank() || allVacancies.isEmpty()) {
-            return
-        }
+        // Проверка: уже идет загрузка
+        if (isLoading) return
+
+        // Проверка: это последняя страница
+        if (isLastPage) return
+
+        // Проверка: нет поискового запроса
+        if (currentQuery.isBlank()) return
+
+        // Проверка: текущий список пуст
+        if (allVacancies.isEmpty()) return
 
         val nextPage = currentPage + 1
         if (nextPage < totalPages) {

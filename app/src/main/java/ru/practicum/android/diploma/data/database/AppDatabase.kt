@@ -14,45 +14,57 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun vacancyDao(): VacancyDao
 
     companion object {
+        private const val TABLE_NAME = "favorite_vacancies"
+
         // Добавляем миграцию для обновления схемы БД
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Добавляем новые столбцы
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN description TEXT")
-                } catch (e: Exception) { /* column already exists */
-                }
+                addColumnIfNotExists(database, "description", "TEXT")
+                addColumnIfNotExists(database, "skillsJson", "TEXT")
+                addColumnIfNotExists(database, "contactsName", "TEXT")
+                addColumnIfNotExists(database, "contactsEmail", "TEXT")
+                addColumnIfNotExists(database, "contactsPhone", "TEXT")
+                addColumnIfNotExists(database, "vacancyUrl", "TEXT")
 
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN skillsJson TEXT")
-                } catch (e: Exception) { /* column already exists */
-                }
+                // Копируем данные из старого поля skills в skillsJson
+                copyColumnData(database, "skills", "skillsJson")
+            }
 
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN contactsName TEXT")
-                } catch (e: Exception) { /* column already exists */
-                }
+        }
 
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN contactsEmail TEXT")
-                } catch (e: Exception) { /* column already exists */
+        private fun addColumnIfNotExists(database: SupportSQLiteDatabase, columnName: String, columnType: String) {
+            val cursor = database.query("PRAGMA table_info($TABLE_NAME)")
+            var columnExists = false
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                if (name == columnName) {
+                    columnExists = true
+                    break
                 }
+            }
+            cursor.close()
 
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN contactsPhone TEXT")
-                } catch (e: Exception) { /* column already exists */
-                }
+            if (!columnExists) {
+                database.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $columnName $columnType")
+            }
+        }
 
-                try {
-                    database.execSQL("ALTER TABLE favorite_vacancies ADD COLUMN vacancyUrl TEXT")
-                } catch (e: Exception) { /* column already exists */
-                }
+        private fun copyColumnData(database: SupportSQLiteDatabase, fromColumn: String, toColumn: String) {
+            val cursor = database.query("PRAGMA table_info($TABLE_NAME)")
+            var fromExists = false
+            var toExists = false
 
-                // Если есть старое поле skills, копируем данные в skillsJson
-                try {
-                    database.execSQL("UPDATE favorite_vacancies SET skillsJson = skills WHERE skills IS NOT NULL")
-                } catch (e: Exception) { /* column skills doesn't exist */
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
+                when (name) {
+                    fromColumn -> fromExists = true
+                    toColumn -> toExists = true
                 }
+            }
+            cursor.close()
+
+            if (fromExists && toExists) {
+                database.execSQL("UPDATE $TABLE_NAME SET $toColumn = $fromColumn WHERE $fromColumn IS NOT NULL")
             }
         }
     }
