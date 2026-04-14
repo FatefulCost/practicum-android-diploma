@@ -136,7 +136,6 @@ class VacancyDetailViewModel(
         }
     }
 
-
     private fun classifyError(error: Throwable): VacancyDetailState.Error {
         return when (error) {
             is UnknownHostException,

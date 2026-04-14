@@ -15,9 +15,11 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         private const val TABLE_NAME = "favorite_vacancies"
+        private const val PREVIOUS_DATABASE = 3
+        private const val CURRENT_DATABASE = 4
 
         // Добавляем миграцию для обновления схемы БД
-        val MIGRATION_3_4 = object : Migration(3, 4) {
+        val MIGRATION_3_4 = object : Migration(PREVIOUS_DATABASE, CURRENT_DATABASE) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 addColumnIfNotExists(database, "description", "TEXT")
                 addColumnIfNotExists(database, "skillsJson", "TEXT")

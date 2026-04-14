@@ -27,6 +27,7 @@ class SearchFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModel()
 
     private var shouldRestoreSearchState = false
+
     // Флаг для предотвращения повторных Toast
     private var hasShownLoadMoreError = false
 
@@ -305,7 +306,6 @@ class SearchFragment : Fragment() {
             }
         }
     }
-
 
     private fun showEmptyState() {
         hideAllPlaceholders()

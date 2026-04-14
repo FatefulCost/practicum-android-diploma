@@ -240,7 +240,7 @@ sealed class SearchState {
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState()  // Только Toast, без плейсхолдера
+    data class LoadMoreError(val message: String) : SearchState() // Только Toast, без плейсхолдера
     data class Error(val error: ErrorType) : SearchState()
 }
 

@@ -20,7 +20,7 @@ data class VacancyEntity(
     val isFavorite: Boolean = true,
     val addedTimestamp: Long = System.currentTimeMillis(),
     val description: String? = null,
-    val skillsJson: String? = null,  // JSON строка со списком навыков
+    val skillsJson: String? = null, // JSON строка со списком навыков
     val contactsName: String? = null,
     val contactsEmail: String? = null,
     val contactsPhone: String? = null,
