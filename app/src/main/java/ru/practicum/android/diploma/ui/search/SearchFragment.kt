@@ -39,6 +39,8 @@ class SearchFragment : Fragment() {
 
     private var isLoadingMore = false // Флаг, чтобы не вызывать loadNextPage несколько раз
     companion object {
+        private const val TAG_SEARCH_FRAGMENT = "SearchFragment"
+        private const val LOG_NEED_SEARCH = "need_search triggered - perform search"
         private const val SCROLL_LAST = 3
     }
 
@@ -78,7 +80,7 @@ class SearchFragment : Fragment() {
 
         needSearchLiveData?.observe(viewLifecycleOwner) { needSearch ->
             if (needSearch == true) {
-                android.util.Log.d("SearchFragment", "need_search triggered - perform search")
+                android.util.Log.d(TAG_SEARCH_FRAGMENT, LOG_NEED_SEARCH)
                 val currentQuery = binding.editTextSearch.text.toString()
                 if (currentQuery.isNotBlank()) {
                     viewModel.searchWithAppliedFilters()
@@ -87,7 +89,6 @@ class SearchFragment : Fragment() {
             }
         }
     }
-
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {

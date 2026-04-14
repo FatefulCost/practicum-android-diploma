@@ -27,6 +27,12 @@ class FilterFragment : Fragment() {
 
     private val viewModel: FilterViewModel by viewModel()
 
+    companion object {
+        private const val TAG_FILTER_FRAGMENT = "FilterFragment"
+        private const val LOG_NAVIGATION_BACK = "Navigation back clicked - sending filters_changed"
+        private const val SALARY_INPUT_MAX_LENGTH = 10
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -92,12 +98,12 @@ class FilterFragment : Fragment() {
 
     private fun setupUI() {
         binding.toolbar.setNavigationOnClickListener {
-            android.util.Log.d("FilterFragment", "Navigation back clicked - sending filters_changed")
+            android.util.Log.d(TAG_FILTER_FRAGMENT, LOG_NAVIGATION_BACK)
             findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
             findNavController().popBackStack()
         }
 
-        binding.etSalary.filters = arrayOf(android.text.InputFilter.LengthFilter(10))
+        binding.etSalary.filters = arrayOf(android.text.InputFilter.LengthFilter(SALARY_INPUT_MAX_LENGTH))
         binding.etSalary.inputType = android.text.InputType.TYPE_CLASS_NUMBER
 
         binding.etSalary.addTextChangedListener { text ->
