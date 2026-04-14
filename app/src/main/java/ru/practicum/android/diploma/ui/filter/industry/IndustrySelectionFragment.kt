@@ -83,8 +83,6 @@ class IndustrySelectionFragment : Fragment() {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(query)
                 viewModel.filterIndustries(query)
-                // При поиске сбрасываем выбранную отрасль
-                adapter?.setSelectedIndustry(null)
             }
 
             override fun afterTextChanged(s: Editable?) = Unit
@@ -150,8 +148,21 @@ class IndustrySelectionFragment : Fragment() {
 
         if (state is IndustrySelectionState.Content) {
             adapter?.submitList(state.industries)
-            // При загрузке нового списка сбрасываем выбор и скрываем кнопку
-            adapter?.setSelectedIndustry(null)
+
+            // Восстанавливаем выбранную отрасль из ViewModel
+            val savedIndustryId = viewModel.getSelectedIndustryId()
+            if (savedIndustryId != null && savedIndustryId != -1) {
+                // Проверяем, есть ли эта отрасль в текущем списке
+                val industryExists = state.industries.any { it.id == savedIndustryId }
+                if (industryExists) {
+                    adapter?.setSelectedIndustry(savedIndustryId)
+                } else {
+                    adapter?.setSelectedIndustry(null)
+                }
+            } else {
+                adapter?.setSelectedIndustry(null)
+            }
+
             updateSelectButtonVisibility()
         }
     }

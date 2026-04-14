@@ -27,6 +27,10 @@ class FilterFragment : Fragment() {
 
     private val viewModel: FilterViewModel by viewModel()
 
+    companion object {
+        private const val SALARY_INPUT_MAX_LENGTH = 10
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -92,12 +96,17 @@ class FilterFragment : Fragment() {
 
     private fun setupUI() {
         binding.toolbar.setNavigationOnClickListener {
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
             findNavController().popBackStack()
         }
+
+        binding.etSalary.filters = arrayOf(android.text.InputFilter.LengthFilter(SALARY_INPUT_MAX_LENGTH))
+        binding.etSalary.inputType = android.text.InputType.TYPE_CLASS_NUMBER
 
         binding.etSalary.addTextChangedListener { text ->
             val salary = text?.toString()?.toIntOrNull()
             viewModel.updateSalary(salary)
+            binding.ivSalaryClear.isVisible = !text.isNullOrEmpty()
         }
 
         binding.etSalary.setOnEditorActionListener { _, actionId, _ ->
@@ -113,17 +122,20 @@ class FilterFragment : Fragment() {
             viewModel.updateOnlyWithSalary(isChecked)
         }
 
+        // сохраняем и вызываем поиск
         binding.btnApply.setOnClickListener {
-            viewModel.saveSettings()
-            Toast.makeText(requireContext(), R.string.filters_applied, Toast.LENGTH_SHORT).show()
-            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
+            android.util.Log.d("FilterFragment", "Apply button clicked - sending apply_filters")
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("apply_filters", true)
             findNavController().popBackStack()
         }
 
+        // сбрасывает и вызывает поиск
         binding.btnReset.setOnClickListener {
+            android.util.Log.d("FilterFragment", "Reset button clicked - resetting filters")
             viewModel.resetFilters()
             Toast.makeText(requireContext(), R.string.filters_reset, Toast.LENGTH_SHORT).show()
             findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
+            findNavController().popBackStack()
         }
 
         binding.layoutWorkLocation.setOnClickListener {

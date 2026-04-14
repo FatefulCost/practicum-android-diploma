@@ -64,29 +64,37 @@ class FilterViewModel(
         }
     }
 
+    // При изменении сразу сохраняем
     fun updateSalary(salary: Int?) {
-        _filterSettings.value = _filterSettings.value.copy(salary = salary)
+        val newSettings = _filterSettings.value.copy(salary = salary)
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
-        _filterSettings.value = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        val newSettings = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
     fun updateIndustry(industryId: Int?, industryName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
+        val newSettings = _filterSettings.value.copy(
             industryId = industryId,
             industryName = industryName
         )
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
+        val newSettings = _filterSettings.value.copy(
             countryId = countryId,
             countryName = countryName,
             regionId = regionId,
             regionName = regionName
         )
-        // Сохраняем локацию сразу, так как этого требует текущая логика репозитория
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
         filterRepository.saveLocation(countryId, countryName, regionId, regionName)
     }
 

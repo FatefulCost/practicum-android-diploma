@@ -75,6 +75,16 @@ class WorkLocationFragment : Fragment() {
 
     private fun setupUI() {
         binding.toolbar.setNavigationOnClickListener {
+            // Только обновляем иконку фильтра
+            parentFragmentManager.setFragmentResult(
+                "work_location_selection",
+                Bundle().apply {
+                    putInt("country_id", selectedCountryId)
+                    putString("country_name", selectedCountryName)
+                    putInt("region_id", selectedRegionId)
+                    putString("region_name", selectedRegionName)
+                }
+            )
             findNavController().popBackStack()
         }
 
