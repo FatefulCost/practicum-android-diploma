@@ -1,174 +1,264 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/filter_settings"
+        app:titleTextAppearance="@style/TopBarTitleStyleFilter" />
 
     <!-- Место работы -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutWorkLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        app:cardElevation="2dp">
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="16dp">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/layoutWorkLocation"
-            android:layout_width="match_parent"
+        <!-- Контейнер для текстов -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iconContainerWorkLocation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/work_location"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/text_hint"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:fontFamily="@font/ys_display_regular"/>
 
             <TextView
                 android:id="@+id/tvWorkLocationValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/not_selected"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:fontFamily="@font/ys_display_regular"
+                android:visibility="gone"/>
+        </LinearLayout>
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
+        <FrameLayout
+            android:id="@+id/iconContainerWorkLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </com.google.android.material.card.MaterialCardView>
+            <!-- Стрелка (видна когда ничего не выбрано) -->
+            <ImageView
+                android:id="@+id/ivWorkLocationChevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_forward_go"
+                app:tint="@color/filter_icon"
+                android:visibility="visible" />
+
+            <!-- Крестик (виден когда выбрано место работы) -->
+            <ImageView
+                android:id="@+id/ivWorkLocationClear"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/close_24px"
+                app:tint="@color/filter_icon"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Отрасль -->
-    <com.google.android.material.card.MaterialCardView
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutIndustry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        app:cardElevation="2dp">
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="16dp">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/layoutIndustry"
-            android:layout_width="match_parent"
+        <!-- Контейнер для текстов -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iconContainerIndustry"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/industry"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/text_hint"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:fontFamily="@font/ys_display_regular"/>
 
             <TextView
                 android:id="@+id/tvIndustryValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/not_selected"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:fontFamily="@font/ys_display_regular"
+                android:visibility="gone"/>
+        </LinearLayout>
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
+        <FrameLayout
+            android:id="@+id/iconContainerIndustry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </com.google.android.material.card.MaterialCardView>
+            <!-- Стрелка (видна когда ничего не выбрано) -->
+            <ImageView
+                android:id="@+id/ivIndustryChevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_forward_go"
+                app:tint="@color/filter_icon"
+                android:visibility="visible" />
+
+            <!-- Крестик (виден когда выбрана отрасль) -->
+            <ImageView
+                android:id="@+id/ivIndustryClear"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/close_24px"
+                app:tint="@color/filter_icon"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Ожидаемая зарплата -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        app:cardElevation="2dp">
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_input_salary"
+        android:orientation="vertical"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="12dp">
 
-        <LinearLayout
+        <!-- Заголовок сверху -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ожидаемая зарплата"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
+            android:fontFamily="@font/ys_display_regular"/>
+
+        <!-- Поле ввода без стандартной линии снизу -->
+        <EditText
+            android:id="@+id/etSalary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:background="@null"
+            android:hint="Введите сумму"
+            android:inputType="number"
+            android:textColor="@color/black"
+            android:textColorHint="@color/text_hint"
+            android:textSize="16sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/expected_salary"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:endIconMode="clear_text">
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSalary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/enter_salary"
-                    android:inputType="number"
-                    android:textSize="14sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
 
     <!-- Не показывать без зарплаты -->
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardElevation="2dp">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:layout_weight="1"
+            android:text="@string/hide_without_salary"
+            android:textColor="@color/text_vacancy_detail"
+            android:textSize="16sp"
+            android:fontFamily="@font/ys_display_regular"/>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/hide_without_salary"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp" />
+        <CheckBox
+            android:id="@+id/cbHideWithoutSalary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/blue" />
 
-            <CheckBox
-                android:id="@+id/cbHideWithoutSalary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+    </LinearLayout>
 
-        </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <!-- Кнопки -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="16dp">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <Button
-            android:id="@+id/btnReset"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:text="@string/reset" />
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApply"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
             android:layout_weight="1"
-            android:text="@string/apply" />
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/apply"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/blue"
+            app:cornerRadius="12dp" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReset"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/reset"
+            android:textColor="@color/red" />
 
     </LinearLayout>
 

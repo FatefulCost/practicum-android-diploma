@@ -9,11 +9,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.data.dto.VacancyResponseDto
+import ru.practicum.android.diploma.domain.models.hasActiveFilters
+import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
 
 class SearchViewModel(
     private val repository: VacancyRepository,
+    private val filterRepository: FilterRepository,
     private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
@@ -31,6 +34,8 @@ class SearchViewModel(
 
     // Список всех загруженных вакансий
     private var allVacancies = mutableListOf<VacancyDetailDto>()
+    private val _hasActiveFilters = MutableLiveData(false)
+    val hasActiveFilters: LiveData<Boolean> = _hasActiveFilters
 
     companion object {
         private const val DEBOUNCE_DELAY = 2000L
@@ -38,6 +43,18 @@ class SearchViewModel(
 
     init {
         _searchState.value = SearchState.Empty
+        loadFilterState()
+    }
+
+    private fun loadFilterState() {
+        viewModelScope.launch {
+            val settings = filterRepository.getFilterSettings()
+            _hasActiveFilters.value = settings?.hasActiveFilters() ?: false
+        }
+    }
+
+    fun refreshFilterState() {
+        loadFilterState()
     }
 
     fun updateSearchQuery(query: String) {
@@ -84,14 +101,25 @@ class SearchViewModel(
             return
         }
 
+        val filterSettings = filterRepository.getFilterSettings()
+
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
             _searchState.value = SearchState.LoadingMore
         }
 
+        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
+
         viewModelScope.launch {
-            val result = repository.searchVacancies(text = query, page = page)
+            val result = repository.searchVacancies(
+                text = query,
+                page = page,
+                area = areaId,
+                salary = filterSettings?.salary,
+                industry = filterSettings?.industryId,
+                onlyWithSalary = filterSettings?.onlyWithSalary ?: false
+            )
             result.fold(
                 onSuccess = { response ->
                     handleSearchSuccess(response, query, page, isLoadMore)
