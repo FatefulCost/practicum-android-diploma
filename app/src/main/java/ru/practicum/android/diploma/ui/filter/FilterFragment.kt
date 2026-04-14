@@ -92,6 +92,8 @@ class FilterFragment : Fragment() {
 
     private fun setupUI() {
         binding.toolbar.setNavigationOnClickListener {
+            android.util.Log.d("FilterFragment", "Navigation back clicked - sending filters_changed")
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
             findNavController().popBackStack()
         }
 
@@ -119,17 +121,17 @@ class FilterFragment : Fragment() {
 
         // сохраняем и вызываем поиск
         binding.btnApply.setOnClickListener {
-            // Отправляем сигнал, что нужно выполнить поиск с новыми фильтрами
+            android.util.Log.d("FilterFragment", "Apply button clicked - sending apply_filters")
             findNavController().previousBackStackEntry?.savedStateHandle?.set("apply_filters", true)
             findNavController().popBackStack()
         }
 
         // сбрасывает и вызывает поиск
         binding.btnReset.setOnClickListener {
+            android.util.Log.d("FilterFragment", "Reset button clicked - resetting filters")
             viewModel.resetFilters()
             Toast.makeText(requireContext(), R.string.filters_reset, Toast.LENGTH_SHORT).show()
-            // Отправляем сигнал, что нужно выполнить поиск без фильтров
-            findNavController().previousBackStackEntry?.savedStateHandle?.set("apply_filters", true)
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
             findNavController().popBackStack()
         }
 

@@ -57,7 +57,37 @@ class SearchFragment : Fragment() {
         observeViewModel()
         observeFilterState()
         observeFilterChanges()
+        observeSearchRequest()
     }
+
+    override fun onResume() {
+        super.onResume()
+        updateFilterIconState()
+    }
+
+    private fun updateFilterIconState() {
+        viewModel.refreshFilterState()
+    }
+
+    /**
+     * Наблюдаем за запросом на поиск после нажатия "Применить"
+     */
+    private fun observeSearchRequest() {
+        val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
+        val needSearchLiveData = savedStateHandle?.getLiveData<Boolean>("need_search")
+
+        needSearchLiveData?.observe(viewLifecycleOwner) { needSearch ->
+            if (needSearch == true) {
+                android.util.Log.d("SearchFragment", "need_search triggered - perform search")
+                val currentQuery = binding.editTextSearch.text.toString()
+                if (currentQuery.isNotBlank()) {
+                    viewModel.searchWithAppliedFilters()
+                }
+                savedStateHandle?.set("need_search", false)
+            }
+        }
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
@@ -133,26 +163,28 @@ class SearchFragment : Fragment() {
     private fun observeFilterChanges() {
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
-        // выполняем поиск
+        // Обработка нажатия "Применить" — выполняем поиск
         val applyFiltersLiveData = savedStateHandle?.getLiveData<Boolean>("apply_filters")
         applyFiltersLiveData?.observe(viewLifecycleOwner) { shouldApply ->
             if (shouldApply == true) {
-                viewModel.refreshFilterState()  // Обновляем иконку
+                android.util.Log.d("SearchFragment", "apply_filters triggered - perform search")
+                viewModel.refreshFilterState()
                 val currentQuery = binding.editTextSearch.text.toString()
                 if (currentQuery.isNotBlank()) {
-                    // Выполняем поиск с новыми фильтрами
-                    viewModel.updateSearchQuery(currentQuery)
+                    viewModel.searchWithAppliedFilters()
                 }
-                // Сбрасываем флаг
                 savedStateHandle.set("apply_filters", false)
             }
         }
 
-        // только обновляем иконку
+        // Обработка возврата через "Назад" — отменяем поиск и обновляем иконку
         val filtersChangedLiveData = savedStateHandle?.getLiveData<Boolean>("filters_changed")
         filtersChangedLiveData?.observe(viewLifecycleOwner) { changed ->
             if (changed == true) {
-                viewModel.refreshFilterState()  // Только обновляем иконку
+                android.util.Log.d("SearchFragment", "filters_changed triggered - cancel search and update icon")
+                // Отменяем текущий поиск
+                viewModel.cancelSearch()
+                viewModel.refreshFilterState()
                 savedStateHandle.set("filters_changed", false)
             }
         }
@@ -163,15 +195,14 @@ class SearchFragment : Fragment() {
      */
     private fun setupSearchTextListener() {
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Необходим для реализации интерфейса
-            }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Необходим для реализации интерфейса
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
             override fun afterTextChanged(s: Editable?) {
-                viewModel.updateSearchQuery(s?.toString() ?: "")
+                val query = s?.toString() ?: ""
                 updateSearchIcon(s)
+                viewModel.updateSearchQuery(query)
             }
         })
     }

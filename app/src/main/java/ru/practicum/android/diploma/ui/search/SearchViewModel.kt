@@ -34,6 +34,8 @@ class SearchViewModel(
 
     // Список всех загруженных вакансий
     private var allVacancies = mutableListOf<VacancyDetailDto>()
+
+    // Состояние активных фильтров
     private val _hasActiveFilters = MutableLiveData(false)
     val hasActiveFilters: LiveData<Boolean> = _hasActiveFilters
 
@@ -43,16 +45,23 @@ class SearchViewModel(
 
     init {
         _searchState.value = SearchState.Empty
-        loadFilterState()
+        refreshFilterState()
     }
 
-    private fun loadFilterState() {
-        viewModelScope.launch {
-            val settings = filterRepository.getFilterSettings()
-            _hasActiveFilters.value = settings?.hasActiveFilters() ?: false
-        }
+    /**
+     * Отменяет текущий поиск и очищает debounce
+     */
+    fun cancelSearch() {
+        android.util.Log.d("SearchViewModel", "cancelSearch called - cancelling current search")
+        searchJob?.cancel()
+        searchJob = null
+        isLoading = false
+        // Не очищаем currentQuery, чтобы сохранить текст в поле поиска
     }
 
+    /**
+     * Обновляет состояние активных фильтров
+     */
     fun refreshFilterState() {
         viewModelScope.launch {
             val settings = filterRepository.getFilterSettings()
@@ -61,19 +70,21 @@ class SearchViewModel(
     }
 
     fun updateSearchQuery(query: String) {
+        android.util.Log.d("SearchViewModel", "updateSearchQuery: query='$query'")
+
         searchJob?.cancel()
+
         if (query.isBlank()) {
             clearSearch()
             return
         }
 
-        // При новом запросе сбрасываем пагинацию
         resetPagination()
         currentQuery = query
 
         searchJob = viewModelScope.launch {
             delay(DEBOUNCE_DELAY)
-            performSearch(query, 1, isLoadMore = false)
+            performSearchWithFilters(query, 1, isLoadMore = false)
         }
     }
 
@@ -85,12 +96,26 @@ class SearchViewModel(
 
         val nextPage = currentPage + 1
         if (nextPage < totalPages) {
-            performSearch(currentQuery, nextPage, isLoadMore = true)
+            performSearchWithFilters(currentQuery, nextPage, isLoadMore = true)
         }
     }
 
-    private fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
-        // Проверяем все условия в начале
+    /**
+     * Поиск с учетом текущих фильтров (для кнопки "Применить")
+     */
+    fun searchWithAppliedFilters() {
+        val query = currentQuery
+        if (query.isNotBlank()) {
+            searchJob?.cancel()
+            resetPagination()
+            performSearchWithFilters(query, 1, isLoadMore = false)
+        }
+    }
+
+    /**
+     * Основной метод поиска с учетом фильтров
+     */
+    private fun performSearchWithFilters(query: String, page: Int, isLoadMore: Boolean = false) {
         val isValidQuery = query.isNotBlank()
         val canPerformSearch = isValidQuery && !isLoading
 
@@ -105,14 +130,13 @@ class SearchViewModel(
         }
 
         val filterSettings = filterRepository.getFilterSettings()
+        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
 
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
             _searchState.value = SearchState.LoadingMore
         }
-
-        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
 
         viewModelScope.launch {
             val result = repository.searchVacancies(
@@ -179,7 +203,6 @@ class SearchViewModel(
         isLoading = false
 
         if (isLoadMore) {
-            // При ошибке дозагрузки показываем сообщение, но не меняем список
             _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
         } else {
             _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
@@ -206,14 +229,14 @@ class SearchViewModel(
 sealed class SearchState {
     object Empty : SearchState()
     object Loading : SearchState()
-    object LoadingMore : SearchState() // Дозагрузка
+    object LoadingMore : SearchState()
     object EmptyResult : SearchState()
     data class Success(
         val vacancies: List<VacancyDetailDto>,
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState() // Ошибка при дозагрузке
+    data class LoadMoreError(val message: String) : SearchState()
     data class Error(val error: ErrorType) : SearchState()
 }
 
