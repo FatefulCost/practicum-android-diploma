@@ -65,16 +65,23 @@ class VacancyDetailFragment : Fragment() {
         viewModel.vacancyState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is VacancyDetailState.Loading -> showLoading()
-                is VacancyDetailState.Success -> showContent(state.vacancy)
+                is VacancyDetailState.Success -> {
+                    android.util.Log.d("VacancyDetail", "Success: ${state.vacancy.name}")
+                    showContent(state.vacancy)
+                }
                 is VacancyDetailState.Error -> showError(state.errorType)
             }
         }
+
         viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
+            android.util.Log.d("VacancyDetail", "isFavorite: $isFavorite")
             val icon = if (isFavorite) R.drawable.ic_favorites_filled else R.drawable.ic_favorites_outline
             binding.toolbar.menu.findItem(R.id.action_favorite)?.setIcon(icon)
         }
+
         viewModel.favoriteErrorEvent.observe(viewLifecycleOwner) { event ->
             if (event != null) {
+                android.util.Log.e("VacancyDetail", "FavoriteErrorEvent: $event")
                 val message = when (event) {
                     is FavoriteErrorEvent.AddError -> getString(R.string.error_add_to_favorites)
                     is FavoriteErrorEvent.RemoveError -> getString(R.string.error_remove_from_favorites)
@@ -82,9 +89,6 @@ class VacancyDetailFragment : Fragment() {
                 Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 viewModel.clearFavoriteErrorEvent()
             }
-        }
-        viewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
-            if (event != null) handleNavigationEvent(event)
         }
     }
 
