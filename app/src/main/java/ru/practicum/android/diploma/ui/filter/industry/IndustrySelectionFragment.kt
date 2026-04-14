@@ -164,6 +164,9 @@ class IndustrySelectionFragment : Fragment() {
             }
 
             updateSelectButtonVisibility()
+        } else {
+            // В состоянии ошибки или загрузки - скрываем кнопку "Выбрать"
+            binding.btnSelect.visibility = View.GONE
         }
     }
 
