@@ -210,7 +210,7 @@ class SearchFragment : Fragment() {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(s)
 
-                // ✅ Если возвращаемся на экран - не запускаем поиск
+                // Если возвращаемся на экран - не запускаем поиск
                 if (shouldRestoreSearchState) {
                     shouldRestoreSearchState = false
                     return
@@ -266,7 +266,13 @@ class SearchFragment : Fragment() {
                 is SearchState.LoadingMore -> showLoadingMoreState()
                 is SearchState.EmptyResult -> showEmptyResultState()
                 is SearchState.Success -> showContentState(state.vacancies, state.totalFound)
-                is SearchState.LoadMoreError -> showLoadMoreError(state.message)
+                is SearchState.LoadMoreError -> {
+                    // Показываем Toast и скрываем индикатор загрузки
+                    showLoadMoreError(state.message)
+                    // Скрываем индикатор загрузки внизу списка
+                    binding.progressBarBottom.visibility = View.GONE
+                    isLoadingMore = false
+                }
                 is SearchState.Error -> showErrorState(state.error)
             }
             // Сбрасываем флаг, когда загрузка закончена
@@ -275,6 +281,7 @@ class SearchFragment : Fragment() {
             }
         }
     }
+
 
     private fun showEmptyState() {
         hideAllPlaceholders()

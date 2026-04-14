@@ -13,6 +13,8 @@ import ru.practicum.android.diploma.domain.models.hasActiveFilters
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class SearchViewModel(
     private val repository: VacancyRepository,
@@ -203,7 +205,12 @@ class SearchViewModel(
         isLoading = false
 
         if (isLoadMore) {
-            _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
+            // Для ошибок подгрузки отправляем специальное состояние
+            val errorMessage = when (exception) {
+                is UnknownHostException, is SocketTimeoutException -> "Проверьте подключение к интернету"
+                else -> "Произошла ошибка при загрузке"
+            }
+            _searchState.value = SearchState.LoadMoreError(errorMessage)
         } else {
             _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
         }
