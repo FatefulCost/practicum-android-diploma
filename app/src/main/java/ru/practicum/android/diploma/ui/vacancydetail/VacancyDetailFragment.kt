@@ -65,14 +65,18 @@ class VacancyDetailFragment : Fragment() {
         viewModel.vacancyState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is VacancyDetailState.Loading -> showLoading()
-                is VacancyDetailState.Success -> showContent(state.vacancy)
+                is VacancyDetailState.Success -> {
+                    showContent(state.vacancy)
+                }
                 is VacancyDetailState.Error -> showError(state.errorType)
             }
         }
+
         viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
             val icon = if (isFavorite) R.drawable.ic_favorites_filled else R.drawable.ic_favorites_outline
             binding.toolbar.menu.findItem(R.id.action_favorite)?.setIcon(icon)
         }
+
         viewModel.favoriteErrorEvent.observe(viewLifecycleOwner) { event ->
             if (event != null) {
                 val message = when (event) {
@@ -82,9 +86,6 @@ class VacancyDetailFragment : Fragment() {
                 Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 viewModel.clearFavoriteErrorEvent()
             }
-        }
-        viewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
-            if (event != null) handleNavigationEvent(event)
         }
     }
 
@@ -194,20 +195,54 @@ class VacancyDetailFragment : Fragment() {
             binding.layoutContacts.visibility = View.GONE
             return
         }
-        val hasName = setContactField(binding.tvContactPerson, contacts.name)
-        val hasEmail = setContactField(binding.tvEmail, contacts.email) { viewModel.openEmail() }
-        val hasPhone = setContactField(binding.tvPhone, contacts.phone?.firstOrNull()) { viewModel.openPhone() }
-        binding.layoutContacts.visibility = if (hasName || hasEmail || hasPhone) View.VISIBLE else View.GONE
-    }
 
-    private fun setContactField(textView: TextView, value: String?, onClick: (() -> Unit)? = null): Boolean {
-        val hasValue = !value.isNullOrEmpty()
-        textView.visibility = if (hasValue) View.VISIBLE else View.GONE
-        if (hasValue) {
-            textView.text = value
-            onClick?.let { listener -> textView.setOnClickListener { listener() } }
+        // Проверяем каждое поле
+        val hasName = !contacts.name.isNullOrEmpty()
+        val hasEmail = !contacts.email.isNullOrEmpty()
+        val hasPhone = !contacts.phone.isNullOrEmpty()
+
+        // Если нет ни одного контакта, то скрываем весь раздел
+        if (!hasName && !hasEmail && !hasPhone) {
+            binding.layoutContacts.visibility = View.GONE
+            return
         }
-        return hasValue
+
+        // Показываем раздел контактов
+        binding.layoutContacts.visibility = View.VISIBLE
+
+        // Контактное лицо
+        if (hasName) {
+            binding.tvContactPerson.text = contacts.name
+            binding.tvContactPerson.visibility = View.VISIBLE
+            // Показываем родительский LinearLayout (контейнер с заголовком и значением)
+            (binding.tvContactPerson.parent as? View)?.visibility = View.VISIBLE
+        } else {
+            binding.tvContactPerson.visibility = View.GONE
+            (binding.tvContactPerson.parent as? View)?.visibility = View.GONE
+        }
+
+        // Email
+        if (hasEmail) {
+            binding.tvEmail.text = contacts.email
+            binding.tvEmail.visibility = View.VISIBLE
+            (binding.tvEmail.parent as? View)?.visibility = View.VISIBLE
+            binding.tvEmail.setOnClickListener { viewModel.openEmail() }
+        } else {
+            binding.tvEmail.visibility = View.GONE
+            (binding.tvEmail.parent as? View)?.visibility = View.GONE
+        }
+
+        // Телефон
+        if (hasPhone) {
+            val phone = contacts.phone?.firstOrNull() ?: ""
+            binding.tvPhone.text = phone
+            binding.tvPhone.visibility = View.VISIBLE
+            (binding.tvPhone.parent as? View)?.visibility = View.VISIBLE
+            binding.tvPhone.setOnClickListener { viewModel.openPhone() }
+        } else {
+            binding.tvPhone.visibility = View.GONE
+            (binding.tvPhone.parent as? View)?.visibility = View.GONE
+        }
     }
 
     private fun shareLink(url: String) {

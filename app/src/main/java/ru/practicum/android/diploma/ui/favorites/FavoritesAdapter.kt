@@ -57,8 +57,8 @@ class FavoritesAdapter(
 
             Glide.with(binding.ivLogo.context)
                 .load(vacancy.employerLogo)
-                .placeholder(R.drawable.ic_placeholder_company)
-                .error(R.drawable.ic_placeholder_company)
+                .placeholder(R.drawable.placeholder_32px)
+                .error(R.drawable.placeholder_32px)
                 .apply(RequestOptions.bitmapTransform(RoundedCorners(cornerRadiusPx)))
                 .into(binding.ivLogo)
 

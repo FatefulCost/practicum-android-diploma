@@ -13,6 +13,8 @@ import ru.practicum.android.diploma.domain.models.hasActiveFilters
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class SearchViewModel(
     private val repository: VacancyRepository,
@@ -48,20 +50,12 @@ class SearchViewModel(
         refreshFilterState()
     }
 
-    /**
-     * Отменяет текущий поиск и очищает debounce
-     */
     fun cancelSearch() {
-        android.util.Log.d("SearchViewModel", "cancelSearch called - cancelling current search")
         searchJob?.cancel()
         searchJob = null
         isLoading = false
-        // Не очищаем currentQuery, чтобы сохранить текст в поле поиска
     }
 
-    /**
-     * Обновляет состояние активных фильтров
-     */
     fun refreshFilterState() {
         viewModelScope.launch {
             val settings = filterRepository.getFilterSettings()
@@ -70,8 +64,6 @@ class SearchViewModel(
     }
 
     fun updateSearchQuery(query: String) {
-        android.util.Log.d("SearchViewModel", "updateSearchQuery: query='$query'")
-
         searchJob?.cancel()
 
         if (query.isBlank()) {
@@ -88,11 +80,18 @@ class SearchViewModel(
         }
     }
 
-    /**
-     * Загрузить следующую страницу (вызывается из фрагмента при скролле)
-     */
     fun loadNextPage() {
-        if (isLoading || isLastPage || currentQuery.isBlank()) return
+        // Проверка: уже идет загрузка
+        if (isLoading) return
+
+        // Проверка: это последняя страница
+        if (isLastPage) return
+
+        // Проверка: нет поискового запроса
+        if (currentQuery.isBlank()) return
+
+        // Проверка: текущий список пуст
+        if (allVacancies.isEmpty()) return
 
         val nextPage = currentPage + 1
         if (nextPage < totalPages) {
@@ -100,9 +99,6 @@ class SearchViewModel(
         }
     }
 
-    /**
-     * Поиск с учетом текущих фильтров (для кнопки "Применить")
-     */
     fun searchWithAppliedFilters() {
         val query = currentQuery
         if (query.isNotBlank()) {
@@ -112,9 +108,6 @@ class SearchViewModel(
         }
     }
 
-    /**
-     * Основной метод поиска с учетом фильтров
-     */
     private fun performSearchWithFilters(query: String, page: Int, isLoadMore: Boolean = false) {
         val isValidQuery = query.isNotBlank()
         val canPerformSearch = isValidQuery && !isLoading
@@ -123,7 +116,9 @@ class SearchViewModel(
 
         isLoading = true
 
-        if (!networkUtils.isNetworkAvailable()) {
+        // Проверяем интернет только для первого поиска
+        // Для подгрузки страниц - пробуем загрузить, если нет интернета - показываем Toast
+        if (!isLoadMore && !networkUtils.isNetworkAvailable()) {
             _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
             isLoading = false
             return
@@ -135,6 +130,7 @@ class SearchViewModel(
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
+            // Показываем индикатор загрузки внизу списка
             _searchState.value = SearchState.LoadingMore
         }
 
@@ -203,7 +199,15 @@ class SearchViewModel(
         isLoading = false
 
         if (isLoadMore) {
-            _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
+            // При ошибке подгрузки:
+            // 1. Скрываем индикатор загрузки
+            // 2. Показываем Toast с сообщением
+            // 3. Оставляем уже загруженный список
+            val errorMessage = when (exception) {
+                is UnknownHostException, is SocketTimeoutException -> "Нет подключения к интернету"
+                else -> "Ошибка загрузки данных"
+            }
+            _searchState.value = SearchState.LoadMoreError(errorMessage)
         } else {
             _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
         }
@@ -236,7 +240,7 @@ sealed class SearchState {
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState()
+    data class LoadMoreError(val message: String) : SearchState() // Только Toast, без плейсхолдера
     data class Error(val error: ErrorType) : SearchState()
 }
 

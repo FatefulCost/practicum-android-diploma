@@ -26,6 +26,11 @@ class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModel()
 
+    private var shouldRestoreSearchState = false
+
+    // Флаг для предотвращения повторных Toast
+    private var hasShownLoadMoreError = false
+
     private val adapter: VacancyAdapter by lazy {
         VacancyAdapter { vacancy ->
             val bundle = Bundle()
@@ -63,6 +68,13 @@ class SearchFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         updateFilterIconState()
+        shouldRestoreSearchState = false
+        hasShownLoadMoreError = false
+    }
+
+    override fun onPause() {
+        super.onPause()
+        shouldRestoreSearchState = true
     }
 
     private fun updateFilterIconState() {
@@ -200,6 +212,13 @@ class SearchFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(s)
+
+                // Если возвращаемся на экран - не запускаем поиск
+                if (shouldRestoreSearchState) {
+                    shouldRestoreSearchState = false
+                    return
+                }
+
                 viewModel.updateSearchQuery(query)
             }
         })
@@ -246,14 +265,42 @@ class SearchFragment : Fragment() {
         viewModel.searchState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is SearchState.Empty -> showEmptyState()
-                is SearchState.Loading -> showLoadingState()
+                is SearchState.Loading -> {
+                    showLoadingState()
+                    // При новом поиске сбрасываем флаг ошибки
+                    hasShownLoadMoreError = false
+                }
                 is SearchState.LoadingMore -> showLoadingMoreState()
                 is SearchState.EmptyResult -> showEmptyResultState()
-                is SearchState.Success -> showContentState(state.vacancies, state.totalFound)
-                is SearchState.LoadMoreError -> showLoadMoreError(state.message)
-                is SearchState.Error -> showErrorState(state.error)
+                is SearchState.Success -> {
+                    showContentState(state.vacancies, state.totalFound)
+                    // При успешной загрузке сбрасываем флаг ошибки
+                    hasShownLoadMoreError = false
+                }
+                is SearchState.LoadMoreError -> {
+                    // Показываем Toast только один раз
+                    if (!hasShownLoadMoreError) {
+                        showLoadMoreError(state.message)
+                        hasShownLoadMoreError = true
+                    }
+                    binding.progressBarBottom.visibility = View.GONE
+                    isLoadingMore = false
+                }
+                is SearchState.Error -> {
+                    if (adapter.itemCount == 0) {
+                        showErrorState(state.error)
+                    } else if (!hasShownLoadMoreError) {
+                        val message = if (state.error == ErrorType.NO_INTERNET) {
+                            R.string.error_no_internet
+                        } else {
+                            R.string.error_loading_data
+                        }
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        hasShownLoadMoreError = true
+                    }
+                    isLoadingMore = false
+                }
             }
-            // Сбрасываем флаг, когда загрузка закончена
             if (state !is SearchState.Loading && state !is SearchState.LoadingMore) {
                 isLoadingMore = false
             }
@@ -304,24 +351,32 @@ class SearchFragment : Fragment() {
 
     // Ошибка при дозагрузке
     private fun showLoadMoreError(message: String) {
-        Toast.makeText(requireContext(), "Не удалось загрузить следующие вакансии", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showErrorState(errorType: ErrorType) {
-        hideAllPlaceholders()
-        binding.tvFoundCount.visibility = View.GONE
-        when (errorType) {
-            ErrorType.NO_INTERNET -> {
-                binding.placeholderNoInternet.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), R.string.error_no_internet, Toast.LENGTH_SHORT).show()
+        // Показываем плейсхолдер только если список пуст
+        if (adapter.itemCount == 0) {
+            hideAllPlaceholders()
+            binding.tvFoundCount.visibility = View.GONE
+            when (errorType) {
+                ErrorType.NO_INTERNET -> {
+                    binding.placeholderNoInternet.visibility = View.VISIBLE
+                }
+                ErrorType.SERVER_ERROR -> {
+                    binding.placeholderError.visibility = View.VISIBLE
+                }
             }
-
-            ErrorType.SERVER_ERROR -> {
-                binding.placeholderError.visibility = View.VISIBLE
-                Toast.makeText(requireContext(), R.string.error_loading_data, Toast.LENGTH_SHORT).show()
+            binding.recyclerView.visibility = View.GONE
+        } else {
+            // Если уже есть данные - просто показываем Toast
+            val message = if (errorType == ErrorType.NO_INTERNET) {
+                R.string.error_no_internet
+            } else {
+                R.string.error_loading_data
             }
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
-        binding.recyclerView.visibility = View.GONE
     }
 
     private fun hideAllPlaceholders() {

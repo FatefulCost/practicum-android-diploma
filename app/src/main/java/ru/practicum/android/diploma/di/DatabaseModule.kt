@@ -8,7 +8,6 @@ import ru.practicum.android.diploma.data.database.VacancyDao
 
 val databaseModule = module {
     single { provideAppDatabase(androidApplication()) }
-
     single { provideVacancyDao(get()) }
 }
 
@@ -17,7 +16,9 @@ private fun provideAppDatabase(app: android.app.Application): AppDatabase {
         app,
         AppDatabase::class.java,
         "vacancy_database"
-    ).build()
+    )
+        .addMigrations(AppDatabase.MIGRATION_3_4)
+        .build()
 }
 
 private fun provideVacancyDao(database: AppDatabase): VacancyDao {
