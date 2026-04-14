@@ -132,15 +132,28 @@ class SearchFragment : Fragment() {
      */
     private fun observeFilterChanges() {
         val savedStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
-        val liveData = savedStateHandle?.getLiveData<Boolean>("filters_changed")
 
-        liveData?.observe(viewLifecycleOwner) { changed ->
-            if (changed == true) {
-                viewModel.refreshFilterState()
+        // выполняем поиск
+        val applyFiltersLiveData = savedStateHandle?.getLiveData<Boolean>("apply_filters")
+        applyFiltersLiveData?.observe(viewLifecycleOwner) { shouldApply ->
+            if (shouldApply == true) {
+                viewModel.refreshFilterState()  // Обновляем иконку
                 val currentQuery = binding.editTextSearch.text.toString()
                 if (currentQuery.isNotBlank()) {
+                    // Выполняем поиск с новыми фильтрами
                     viewModel.updateSearchQuery(currentQuery)
                 }
+                // Сбрасываем флаг
+                savedStateHandle.set("apply_filters", false)
+            }
+        }
+
+        // только обновляем иконку
+        val filtersChangedLiveData = savedStateHandle?.getLiveData<Boolean>("filters_changed")
+        filtersChangedLiveData?.observe(viewLifecycleOwner) { changed ->
+            if (changed == true) {
+                viewModel.refreshFilterState()  // Только обновляем иконку
+                savedStateHandle.set("filters_changed", false)
             }
         }
     }

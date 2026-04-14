@@ -54,7 +54,10 @@ class SearchViewModel(
     }
 
     fun refreshFilterState() {
-        loadFilterState()
+        viewModelScope.launch {
+            val settings = filterRepository.getFilterSettings()
+            _hasActiveFilters.value = settings?.hasActiveFilters() ?: false
+        }
     }
 
     fun updateSearchQuery(query: String) {

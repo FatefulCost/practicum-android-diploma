@@ -117,17 +117,20 @@ class FilterFragment : Fragment() {
             viewModel.updateOnlyWithSalary(isChecked)
         }
 
+        // сохраняем и вызываем поиск
         binding.btnApply.setOnClickListener {
-            viewModel.saveSettings()
-            Toast.makeText(requireContext(), R.string.filters_applied, Toast.LENGTH_SHORT).show()
-            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
+            // Отправляем сигнал, что нужно выполнить поиск с новыми фильтрами
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("apply_filters", true)
             findNavController().popBackStack()
         }
 
+        // сбрасывает и вызывает поиск
         binding.btnReset.setOnClickListener {
             viewModel.resetFilters()
             Toast.makeText(requireContext(), R.string.filters_reset, Toast.LENGTH_SHORT).show()
-            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_changed", true)
+            // Отправляем сигнал, что нужно выполнить поиск без фильтров
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("apply_filters", true)
+            findNavController().popBackStack()
         }
 
         binding.layoutWorkLocation.setOnClickListener {
