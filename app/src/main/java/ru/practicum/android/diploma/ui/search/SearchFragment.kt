@@ -26,6 +26,8 @@ class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModel()
 
+    private var shouldRestoreSearchState = false
+
     private val adapter: VacancyAdapter by lazy {
         VacancyAdapter { vacancy ->
             val bundle = Bundle()
@@ -63,7 +65,14 @@ class SearchFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         updateFilterIconState()
+        shouldRestoreSearchState = false
     }
+
+    override fun onPause() {
+        super.onPause()
+        shouldRestoreSearchState = true
+    }
+
 
     private fun updateFilterIconState() {
         viewModel.refreshFilterState()
@@ -200,6 +209,13 @@ class SearchFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString() ?: ""
                 updateSearchIcon(s)
+
+                // ✅ Если возвращаемся на экран - не запускаем поиск
+                if (shouldRestoreSearchState) {
+                    shouldRestoreSearchState = false
+                    return
+                }
+
                 viewModel.updateSearchQuery(query)
             }
         })
