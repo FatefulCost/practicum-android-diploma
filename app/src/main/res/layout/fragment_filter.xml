@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/backgroundColor">
 
+    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="64dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,21 +21,23 @@
     <!-- Место работы -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutWorkLocation"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
         android:background="?attr/selectableItemBackground"
-        android:padding="16dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-        <!-- Контейнер для текстов -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/iconContainerWorkLocation"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivWorkLocationIcon">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -54,59 +57,41 @@
                 android:textSize="14sp"
                 android:fontFamily="@font/ys_display_regular"
                 android:visibility="gone"/>
+
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/iconContainerWorkLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/ivWorkLocationIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_forward_go"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Стрелка (видна когда ничего не выбрано) -->
-            <ImageView
-                android:id="@+id/ivWorkLocationChevron"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_arrow_forward_go"
-                app:tint="@color/filter_icon"
-                android:visibility="visible" />
-
-            <!-- Крестик (виден когда выбрано место работы) -->
-            <ImageView
-                android:id="@+id/ivWorkLocationClear"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/close_24px"
-                app:tint="@color/filter_icon"
-                android:visibility="gone"
-                android:clickable="true"
-                android:focusable="true" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/filter_icon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Отрасль -->
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutIndustry"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
         android:background="?attr/selectableItemBackground"
-        android:padding="16dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutWorkLocation">
 
-        <!-- Контейнер для текстов -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/iconContainerIndustry"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivIndustryIcon">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -126,135 +111,148 @@
                 android:textSize="14sp"
                 android:fontFamily="@font/ys_display_regular"
                 android:visibility="gone"/>
+
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/iconContainerIndustry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/ivIndustryIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_forward_go"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Стрелка (видна когда ничего не выбрано) -->
-            <ImageView
-                android:id="@+id/ivIndustryChevron"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_arrow_forward_go"
-                app:tint="@color/filter_icon"
-                android:visibility="visible" />
-
-            <!-- Крестик (виден когда выбрана отрасль) -->
-            <ImageView
-                android:id="@+id/ivIndustryClear"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/close_24px"
-                app:tint="@color/filter_icon"
-                android:visibility="gone"
-                android:clickable="true"
-                android:focusable="true" />
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/filter_icon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Ожидаемая зарплата -->
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutSalary"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:layout_marginBottom="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginHorizontal="16dp"
         android:background="@drawable/bg_input_salary"
-        android:orientation="vertical"
-        android:paddingVertical="12dp"
-        android:paddingHorizontal="12dp">
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutIndustry">
 
-        <!-- Заголовок сверху -->
         <TextView
+            android:id="@+id/tvSalaryHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ожидаемая зарплата"
             android:textColor="@color/text_hint"
             android:textSize="12sp"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:fontFamily="@font/ys_display_regular"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Поле ввода без стандартной линии снизу -->
         <EditText
             android:id="@+id/etSalary"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@null"
             android:hint="Введите сумму"
             android:inputType="number"
             android:textColor="@color/black"
             android:textColorHint="@color/text_hint"
             android:textSize="16sp"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:fontFamily="@font/ys_display_regular"
+            app:layout_constraintEnd_toStartOf="@+id/ivSalaryClear"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSalaryHeader" />
 
+        <ImageView
+            android:id="@+id/ivSalaryClear"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/close_24px_for_edit_text"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/layoutSalary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/layoutSalary" />
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Не показывать без зарплаты -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutHideWithoutSalary"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutSalary">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/hide_without_salary"
             android:textColor="@color/text_vacancy_detail"
             android:textSize="16sp"
-            android:fontFamily="@font/ys_display_regular"/>
+            android:fontFamily="@font/ys_display_regular"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cbHideWithoutSalary" />
 
         <CheckBox
             android:id="@+id/cbHideWithoutSalary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="@color/blue" />
+            android:button="@drawable/checkbox_blue"
+            app:buttonTint="@null"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+    <!-- Отступ для кнопок (занимает все свободное место) -->
     <View
-        android:layout_width="match_parent"
+        android:id="@+id/spacer"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        app:layout_constraintBottom_toTopOf="@+id/buttonsContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutHideWithoutSalary" />
 
-    <!-- Кнопки -->
+    <!-- Контейнер для кнопок -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/buttonsContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApply"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:layout_weight="1"
             android:fontFamily="@font/ys_display_medium"
             android:text="@string/apply"
             android:textColor="@color/white"
             app:backgroundTint="@color/blue"
             app:cornerRadius="12dp" />
 
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReset"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:layout_weight="1"
+            android:layout_marginTop="8dp"
             android:background="@android:color/transparent"
             android:fontFamily="@font/ys_display_medium"
             android:text="@string/reset"
@@ -262,4 +260,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

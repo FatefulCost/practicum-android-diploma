@@ -11,43 +11,48 @@ import ru.practicum.android.diploma.domain.models.FilterSettings
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.util.Resource
 
-/**
- * ViewModel для экрана фильтров
- *
- * Хранит настройки фильтра
- * Умеет сбрасывать настройки
- * Умеет загружать отрасли и регионы
- * Сохраняет настройки в SharedPreferences
- * Применяет фильтры к поиску
- */
-
 class FilterViewModel(
     private val filterRepository: FilterRepository
 ) : ViewModel() {
 
-    // Настройки фильтра (сохраняются в памяти, не теряются при повороте)
+    // Эталонное состояние настроек из SharedPreferences на момент загрузки/сохранения
+    private var initialSettings: FilterSettings? = null
+
+    // Текущее состояние (черновик), с которым взаимодействует пользователь в UI
     private val _filterSettings = MutableStateFlow(FilterSettings())
     val filterSettings: StateFlow<FilterSettings> = _filterSettings.asStateFlow()
 
-    // Список отраслей (загружается из репозитория)
     private val _industries = MutableStateFlow<Resource<List<FilterIndustryDto>>>(Resource.Loading())
     val industries: StateFlow<Resource<List<FilterIndustryDto>>> = _industries.asStateFlow()
 
     init {
-        loadSavedSettings()
+        loadAllSettings()
         loadIndustries()
-        loadSavedLocation()
-    }
-
-    private fun loadSavedSettings() {
-        filterRepository.getFilterSettings()?.let { settings ->
-            _filterSettings.value = settings
-        }
     }
 
     /**
-     * Загрузить список отраслей
+     * Загружает настройки и локацию, формируя "начальное состояние" для сравнения
      */
+    private fun loadAllSettings() {
+        val settings = filterRepository.getFilterSettings() ?: FilterSettings()
+
+        // Дозагружаем локацию, так как она может храниться отдельно
+        val countryId = filterRepository.loadSavedCountryId()
+        val countryName = filterRepository.loadSavedCountryName()
+        val regionId = filterRepository.loadSavedRegionId()
+        val regionName = filterRepository.loadSavedRegionName()
+
+        val fullSettings = settings.copy(
+            countryId = countryId,
+            countryName = countryName,
+            regionId = regionId,
+            regionName = regionName
+        )
+
+        initialSettings = fullSettings
+        _filterSettings.value = fullSettings
+    }
+
     private fun loadIndustries() {
         viewModelScope.launch {
             _industries.value = Resource.Loading()
@@ -59,78 +64,70 @@ class FilterViewModel(
         }
     }
 
-    /**
-     * Обновить зарплату
-     */
+    // При изменении сразу сохраняем
     fun updateSalary(salary: Int?) {
-        _filterSettings.value = _filterSettings.value.copy(salary = salary)
+        val newSettings = _filterSettings.value.copy(salary = salary)
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
-    /**
-     * Обновить чекбокс "Не показывать без зарплаты"
-     */
     fun updateOnlyWithSalary(onlyWithSalary: Boolean) {
-        _filterSettings.value = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        val newSettings = _filterSettings.value.copy(onlyWithSalary = onlyWithSalary)
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
-    /**
-     * Обновить отрасль
-     */
     fun updateIndustry(industryId: Int?, industryName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
+        val newSettings = _filterSettings.value.copy(
             industryId = industryId,
             industryName = industryName
         )
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
     }
 
-    /**
-     * Загрузить сохранённое место работы из SharedPreferences
-     */
-    private fun loadSavedLocation() {
-        val countryId = filterRepository.loadSavedCountryId()
-        val countryName = filterRepository.loadSavedCountryName()
-        val regionId = filterRepository.loadSavedRegionId()
-        val regionName = filterRepository.loadSavedRegionName()
-        if (countryId != null || regionId != null) {
-            _filterSettings.value = _filterSettings.value.copy(
-                countryId = countryId,
-                countryName = countryName,
-                regionId = regionId,
-                regionName = regionName
-            )
-        }
-    }
-
-    /**
-     * Обновить местоположение и сохранить в SharedPreferences
-     */
     fun updateLocation(countryId: Int?, countryName: String?, regionId: Int?, regionName: String?) {
-        _filterSettings.value = _filterSettings.value.copy(
+        val newSettings = _filterSettings.value.copy(
             countryId = countryId,
             countryName = countryName,
             regionId = regionId,
             regionName = regionName
         )
+        _filterSettings.value = newSettings
+        filterRepository.saveFilterSettings(newSettings)
         filterRepository.saveLocation(countryId, countryName, regionId, regionName)
     }
 
     /**
-     * Сбросить все настройки фильтра
+     * Сбросить все настройки фильтра.
+     * Мы перезаписываем SharedPreferences пустым объектом.
      */
     fun resetFilters() {
-        _filterSettings.value = FilterSettings()
-        filterRepository.saveFilterSettings(FilterSettings())
+        val emptySettings = FilterSettings()
+        _filterSettings.value = emptySettings
+        filterRepository.saveFilterSettings(emptySettings)
+        filterRepository.saveLocation(null, null, null, null)
+        initialSettings = emptySettings // Теперь "пустота" — наше новое эталонное состояние
     }
 
     /**
-     * Сохранить настройки в SharedPreferences
+     * Сохранить текущий черновик настроек в SharedPreferences
      */
     fun saveSettings() {
-        filterRepository.saveFilterSettings(_filterSettings.value)
+        val current = _filterSettings.value
+        filterRepository.saveFilterSettings(current)
+        initialSettings = current // После сохранения черновик становится эталоном
     }
 
     /**
-     * Проверить, есть ли активные фильтры
+     * Проверка: отличается ли то, что ввел пользователь, от того, что было сохранено?
+     */
+    fun isSettingsChanged(): Boolean {
+        return _filterSettings.value != initialSettings
+    }
+
+    /**
+     * Проверить, есть ли активные фильтры (для показа кнопки "Сбросить")
      */
     fun hasActiveFilters(): Boolean {
         val settings = _filterSettings.value
@@ -141,4 +138,3 @@ class FilterViewModel(
             settings.regionId != null
     }
 }
-

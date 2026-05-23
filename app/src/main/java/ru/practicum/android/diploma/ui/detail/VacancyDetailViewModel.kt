@@ -6,8 +6,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import ru.practicum.android.diploma.data.database.VacancyEntity
+import ru.practicum.android.diploma.data.dto.ContactsDto
+import ru.practicum.android.diploma.data.dto.EmployerDto
+import ru.practicum.android.diploma.data.dto.EmploymentDto
+import ru.practicum.android.diploma.data.dto.ExperienceDto
+import ru.practicum.android.diploma.data.dto.FilterAreaDto
+import ru.practicum.android.diploma.data.dto.SalaryDto
+import ru.practicum.android.diploma.data.dto.ScheduleDto
 import ru.practicum.android.diploma.data.dto.VacancyDetailDto
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import java.net.SocketTimeoutException
@@ -31,6 +41,7 @@ class VacancyDetailViewModel(
 
     private var currentVacancy: VacancyDetailDto? = null
     private var currentVacancyId: String? = null
+    private val gson = Gson()
 
     fun loadVacancy(vacancyId: String) {
         currentVacancyId = vacancyId
@@ -44,8 +55,84 @@ class VacancyDetailViewModel(
                     checkFavoriteStatus(vacancyId)
                 }
                 .onFailure { error ->
-                    _vacancyState.value = classifyError(error)
+                    // Если сеть недоступна, загружаем из БД
+                    if (error is UnknownHostException || error is SocketTimeoutException) {
+                        loadVacancyFromDatabase(vacancyId)
+                    } else {
+                        _vacancyState.value = classifyError(error)
+                    }
                 }
+        }
+    }
+
+    // Загружаем вакансию из БД со всеми данными
+    private fun loadVacancyFromDatabase(vacancyId: String) {
+        viewModelScope.launch {
+            val favorites = repository.getFavoriteVacancies()
+            val favorite = favorites.find { it.id == vacancyId }
+
+            if (favorite != null) {
+                val cachedVacancy = buildVacancyDetailDtoFromEntity(favorite)
+                currentVacancy = cachedVacancy
+                _vacancyState.value = VacancyDetailState.Success(cachedVacancy)
+                checkFavoriteStatus(vacancyId)
+            } else {
+                _vacancyState.value = VacancyDetailState.Error(VacancyDetailErrorType.NO_INTERNET)
+            }
+        }
+    }
+
+    private fun buildVacancyDetailDtoFromEntity(favorite: VacancyEntity): VacancyDetailDto {
+        val skills = restoreSkillsFromJson(favorite.skillsJson)
+        val contacts = buildContactsFromEntity(favorite)
+
+        return VacancyDetailDto(
+            id = favorite.id,
+            name = favorite.name,
+            description = favorite.description,
+            salary = buildSalaryFromEntity(favorite),
+            address = null,
+            experience = favorite.experienceName?.let { ExperienceDto("", it) },
+            schedule = favorite.scheduleName?.let { ScheduleDto("", it) },
+            employment = favorite.employmentName?.let { EmploymentDto("", it) },
+            contacts = contacts,
+            employer = EmployerDto("", favorite.employerName, favorite.employerLogo),
+            area = FilterAreaDto(0, favorite.areaName, null, null),
+            skills = skills,
+            url = favorite.vacancyUrl,
+            industry = null
+        )
+    }
+
+    private fun restoreSkillsFromJson(skillsJson: String?): List<String>? {
+        return skillsJson?.let {
+            val type = object : TypeToken<List<String>>() {}.type
+            gson.fromJson(it, type)
+        }
+    }
+
+    private fun buildSalaryFromEntity(favorite: VacancyEntity): SalaryDto? {
+        return if (favorite.salaryFrom != null || favorite.salaryTo != null) {
+            SalaryDto(favorite.salaryFrom, favorite.salaryTo, favorite.salaryCurrency)
+        } else {
+            null
+        }
+    }
+
+    private fun buildContactsFromEntity(favorite: VacancyEntity): ContactsDto? {
+        val hasContacts = favorite.contactsName != null ||
+            favorite.contactsEmail != null ||
+            favorite.contactsPhone != null
+
+        return if (hasContacts) {
+            ContactsDto(
+                id = null,
+                name = favorite.contactsName,
+                email = favorite.contactsEmail,
+                phone = favorite.contactsPhone?.let { listOf(it) }
+            )
+        } else {
+            null
         }
     }
 
@@ -61,7 +148,6 @@ class VacancyDetailViewModel(
         }
     }
 
-    // suspend, чтобы вызываться в контексте уже запущенной корутины
     private suspend fun checkFavoriteStatus(vacancyId: String) {
         _isFavorite.value = repository.isFavorite(vacancyId)
     }

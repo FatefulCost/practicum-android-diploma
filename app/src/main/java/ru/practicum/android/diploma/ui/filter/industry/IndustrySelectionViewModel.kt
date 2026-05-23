@@ -25,8 +25,20 @@ class IndustrySelectionViewModel(
 
     private var allIndustries: List<FilterIndustryDto> = emptyList()
 
+    private var selectedIndustryId: Int? = null
+
     init {
         loadIndustries()
+        loadSelectedIndustry()
+    }
+
+    /**
+     * Загружает сохраненную отрасль из FilterRepository
+     */
+    private fun loadSelectedIndustry() {
+        val settings = filterRepository.getFilterSettings()
+        selectedIndustryId = settings?.industryId
+        android.util.Log.d("IndustrySelectionVM", "Loaded selected industry: $selectedIndustryId")
     }
 
     fun loadIndustries() {
@@ -68,4 +80,9 @@ class IndustrySelectionViewModel(
             IndustrySelectionState.Content(filtered)
         }
     }
+
+    /**
+     * Возвращает ID выбранной отрасли
+     */
+    fun getSelectedIndustryId(): Int? = selectedIndustryId
 }

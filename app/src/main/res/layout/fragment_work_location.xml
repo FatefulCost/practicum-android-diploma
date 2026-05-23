@@ -171,7 +171,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSelect"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="65dp"
         android:layout_margin="16dp"
         android:text="@string/select"
         android:textColor="@color/white"

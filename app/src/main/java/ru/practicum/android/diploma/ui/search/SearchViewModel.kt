@@ -13,6 +13,8 @@ import ru.practicum.android.diploma.domain.models.hasActiveFilters
 import ru.practicum.android.diploma.domain.repository.FilterRepository
 import ru.practicum.android.diploma.domain.repository.VacancyRepository
 import ru.practicum.android.diploma.util.NetworkUtils
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class SearchViewModel(
     private val repository: VacancyRepository,
@@ -34,6 +36,8 @@ class SearchViewModel(
 
     // Список всех загруженных вакансий
     private var allVacancies = mutableListOf<VacancyDetailDto>()
+
+    // Состояние активных фильтров
     private val _hasActiveFilters = MutableLiveData(false)
     val hasActiveFilters: LiveData<Boolean> = _hasActiveFilters
 
@@ -43,51 +47,68 @@ class SearchViewModel(
 
     init {
         _searchState.value = SearchState.Empty
-        loadFilterState()
+        refreshFilterState()
     }
 
-    private fun loadFilterState() {
+    fun cancelSearch() {
+        searchJob?.cancel()
+        searchJob = null
+        isLoading = false
+    }
+
+    fun refreshFilterState() {
         viewModelScope.launch {
             val settings = filterRepository.getFilterSettings()
             _hasActiveFilters.value = settings?.hasActiveFilters() ?: false
         }
     }
 
-    fun refreshFilterState() {
-        loadFilterState()
-    }
-
     fun updateSearchQuery(query: String) {
         searchJob?.cancel()
+
         if (query.isBlank()) {
             clearSearch()
             return
         }
 
-        // При новом запросе сбрасываем пагинацию
         resetPagination()
         currentQuery = query
 
         searchJob = viewModelScope.launch {
             delay(DEBOUNCE_DELAY)
-            performSearch(query, 1, isLoadMore = false)
+            performSearchWithFilters(query, 1, isLoadMore = false)
         }
     }
 
-    /**
-     * Загрузить следующую страницу (вызывается из фрагмента при скролле)
-     */
     fun loadNextPage() {
-        if (isLoading || isLastPage || currentQuery.isBlank()) return
+        // Проверка: уже идет загрузка
+        if (isLoading) return
+
+        // Проверка: это последняя страница
+        if (isLastPage) return
+
+        // Проверка: нет поискового запроса
+        if (currentQuery.isBlank()) return
+
+        // Проверка: текущий список пуст
+        if (allVacancies.isEmpty()) return
 
         val nextPage = currentPage + 1
         if (nextPage < totalPages) {
-            performSearch(currentQuery, nextPage, isLoadMore = true)
+            performSearchWithFilters(currentQuery, nextPage, isLoadMore = true)
         }
     }
 
-    private fun performSearch(query: String, page: Int, isLoadMore: Boolean = false) {
-        // Проверяем все условия в начале
+    fun searchWithAppliedFilters() {
+        val query = currentQuery
+        if (query.isNotBlank()) {
+            searchJob?.cancel()
+            resetPagination()
+            performSearchWithFilters(query, 1, isLoadMore = false)
+        }
+    }
+
+    private fun performSearchWithFilters(query: String, page: Int, isLoadMore: Boolean = false) {
         val isValidQuery = query.isNotBlank()
         val canPerformSearch = isValidQuery && !isLoading
 
@@ -95,21 +116,23 @@ class SearchViewModel(
 
         isLoading = true
 
-        if (!networkUtils.isNetworkAvailable()) {
+        // Проверяем интернет только для первого поиска
+        // Для подгрузки страниц - пробуем загрузить, если нет интернета - показываем Toast
+        if (!isLoadMore && !networkUtils.isNetworkAvailable()) {
             _searchState.value = SearchState.Error(ErrorType.NO_INTERNET)
             isLoading = false
             return
         }
 
         val filterSettings = filterRepository.getFilterSettings()
+        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
 
         if (!isLoadMore) {
             _searchState.value = SearchState.Loading
         } else {
+            // Показываем индикатор загрузки внизу списка
             _searchState.value = SearchState.LoadingMore
         }
-
-        val areaId = filterRepository.loadSavedRegionId() ?: filterRepository.loadSavedCountryId()
 
         viewModelScope.launch {
             val result = repository.searchVacancies(
@@ -176,8 +199,15 @@ class SearchViewModel(
         isLoading = false
 
         if (isLoadMore) {
-            // При ошибке дозагрузки показываем сообщение, но не меняем список
-            _searchState.value = SearchState.LoadMoreError(exception.message ?: "Ошибка загрузки")
+            // При ошибке подгрузки:
+            // 1. Скрываем индикатор загрузки
+            // 2. Показываем Toast с сообщением
+            // 3. Оставляем уже загруженный список
+            val errorMessage = when (exception) {
+                is UnknownHostException, is SocketTimeoutException -> "Нет подключения к интернету"
+                else -> "Ошибка загрузки данных"
+            }
+            _searchState.value = SearchState.LoadMoreError(errorMessage)
         } else {
             _searchState.value = SearchState.Error(ErrorType.SERVER_ERROR)
         }
@@ -203,14 +233,14 @@ class SearchViewModel(
 sealed class SearchState {
     object Empty : SearchState()
     object Loading : SearchState()
-    object LoadingMore : SearchState() // Дозагрузка
+    object LoadingMore : SearchState()
     object EmptyResult : SearchState()
     data class Success(
         val vacancies: List<VacancyDetailDto>,
         val totalFound: Int,
         val isLoadingMore: Boolean = false
     ) : SearchState()
-    data class LoadMoreError(val message: String) : SearchState() // Ошибка при дозагрузке
+    data class LoadMoreError(val message: String) : SearchState() // Только Toast, без плейсхолдера
     data class Error(val error: ErrorType) : SearchState()
 }
 
